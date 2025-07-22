@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= product.name %> - HASHTAG BOT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .header-title {
+            text-align: center;
+            flex: 1;
+        }
+
+        .header-title h1 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .header-title span {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .banner {
+            background: #e74c3c;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            font-size: 12px;
+            letter-spacing: 1px;
+            margin-top: 70px;
+        }
+
+        .logo-section {
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+        }
+
+        .media-container {
+            position: relative;
+            margin: 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+            aspect-ratio: 16/9;
+        }
+
+        .media-container img,
+        .media-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .media-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .play-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-name {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .product-type {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .product-description {
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .price-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .price-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #e74c3c;
+        }
+
+        .price-list {
+            list-style: none;
+        }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .price-item:last-child {
+            border-bottom: none;
+        }
+
+        .quantity {
+            font-weight: bold;
+        }
+
+        .price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2ecc71;
+        }
+
+        .action-buttons {
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            padding: 10px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px 5px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nav-item.active {
+            color: #3498db;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .content {
+            padding-bottom: 80px;
+        }
+
+        @media (max-width: 480px) {
+            .product-name {
+                font-size: 28px;
+            }
+            
+            .media-container {
+                margin: 10px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-btn" onclick="history.back()">← Retour</button>
+        <div class="header-title">
+            <h1>HASHTAG BOT <span style="color: #3498db;">#</span><span style="color: #f39c12;">🔧</span></h1>
+            <span>mini-application</span>
+        </div>
+        <button class="menu-btn">⋯</button>
+    </div>
+
+    <div class="banner">
+        NUMERO 1 DANS LE NORD PAS DE CALAIS
+    </div>
+
+    <div class="content">
+        <div class="logo-section">
+            <div class="logo">
+                <span style="color: #3498db;">#</span>
+                <span style="color: white;">#</span>
+            </div>
+        </div>
+
+        <div class="media-container">
+            <% if (product.media) { %>
+                <% if (product.media.endsWith('.mp4') || product.media.endsWith('.mov')) { %>
+                    <video id="productVideo" muted>
+                        <source src="<%= product.media %>" type="video/mp4">
+                    </video>
+                <% } else { %>
+                    <img src="<%= product.media %>" alt="<%= product.name %>">
+                <% } %>
+            <% } %>
+            
+            <div class="media-controls">
+                <button class="control-btn" onclick="skipVideo(-10)">⏪</button>
+                <button class="control-btn play-btn" onclick="togglePlay()">▶</button>
+                <button class="control-btn" onclick="skipVideo(10)">⏩</button>
+            </div>
+        </div>
+
+        <div class="product-info">
+            <h2 class="product-name"><%= product.name %></h2>
+            <span class="product-type">PREMIUM QUALITY</span>
+            
+            <div class="product-description">
+                <%= product.description %>
+            </div>
+
+            <div class="price-section">
+                <h3 class="price-title">💰 Tarifs disponibles</h3>
+                <ul class="price-list">
+                    <% if (product.prices) { %>
+                        <% 
+                        const priceLines = product.prices.split('\n');
+                        priceLines.forEach(line => {
+                            const [quantity, price] = line.split(':');
+                            if (quantity && price) {
+                        %>
+                            <li class="price-item">
+                                <span class="quantity"><%= quantity.trim() %></span>
+                                <span class="price"><%= price.trim() %>€</span>
+                            </li>
+                        <% 
+                            }
+                        });
+                        %>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary">🛒 Commander</button>
+            <button class="btn btn-secondary">💬 Contact</button>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="/" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>Menu</span>
+        </a>
+        <a href="/promos" class="nav-item">
+            <span class="nav-icon">⭐</span>
+            <span>Pack Promo</span>
+        </a>
+        <a href="/info" class="nav-item active">
+            <span class="nav-icon">ℹ️</span>
+            <span>Infos</span>
+        </a>
+        <a href="/canal" class="nav-item">
+            <span class="nav-icon">📱</span>
+            <span>Canal</span>
+        </a>
+        <a href="/contact" class="nav-item">
+            <span class="nav-icon">✉️</span>
+            <span>Contact</span>
+        </a>
+    </nav>
+
+    <script>
+        const video = document.getElementById('productVideo');
+        const playBtn = document.querySelector('.play-btn');
+        let isPlaying = false;
+
+        function togglePlay() {
+            if (video) {
+                if (isPlaying) {
+                    video.pause();
+                    playBtn.innerHTML = '▶';
+                } else {
+                    video.play();
+                    playBtn.innerHTML = '⏸';
+                }
+                isPlaying = !isPlaying;
+            }
+        }
+
+        function skipVideo(seconds) {
+            if (video) {
+                video.currentTime += seconds;
+            }
+        }
+
+        // Auto-pause when video ends
+        if (video) {
+            video.addEventListener('ended', function() {
+                isPlaying = false;
+                playBtn.innerHTML = '▶';
+            });
+        }
+
+        // Handle video click to toggle play/pause
+        if (video) {
+            video.addEventListener('click', togglePlay);
+        }
+    </script>
+</body>
+</html>
