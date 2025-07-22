@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pack Promo - HASHTAG BOT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1b1f 50%, #1a1a1a 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(220, 53, 69, 0.9);
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        .promo-banner {
+            background: #dc3545;
+            text-align: center;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 18px;
+            letter-spacing: 1px;
+        }
+        
+        .logo-container {
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+        
+        .logo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #333, #555);
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #dc3545;
+            box-shadow: 0 0 30px rgba(220, 53, 69, 0.3);
+        }
+        
+        .logo::before {
+            content: "#";
+            font-size: 80px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .background-text {
+            position: absolute;
+            font-size: 120px;
+            font-weight: bold;
+            color: rgba(220, 53, 69, 0.1);
+            z-index: -1;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%) rotate(-15deg);
+            pointer-events: none;
+        }
+        
+        .promo-content {
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .promo-card {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 2px solid #dc3545;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .promo-title {
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #dc3545;
+        }
+        
+        .promo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .promo-item:last-child {
+            border-bottom: none;
+        }
+        
+        .promo-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .promo-price {
+            background: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .promo-description {
+            font-size: 14px;
+            color: #ccc;
+            margin-top: 5px;
+        }
+        
+        .special-offer {
+            background: linear-gradient(45deg, #dc3545, #ff6b7a);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 30px 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+        }
+        
+        .special-offer h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .special-offer p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-top: 1px solid #333;
+        }
+        
+        .nav-item {
+            text-align: center;
+            color: #999;
+            text-decoration: none;
+            font-size: 12px;
+            padding: 5px;
+            transition: color 0.3s;
+        }
+        
+        .nav-item.active {
+            color: #dc3545;
+        }
+        
+        .nav-item:hover {
+            color: #dc3545;
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>HASHTAG BOT #🔧</h1>
+        <p>mini-application</p>
+    </div>
+    
+    <div class="promo-banner">
+        OFFRES SPÉCIALES PACK PROMO
+    </div>
+    
+    <div class="logo-container">
+        <div class="logo"></div>
+        <div class="background-text">PROMO</div>
+    </div>
+    
+    <div class="promo-content">
+        <div class="promo-card">
+            <div class="promo-title">🎁 Packs Promotion</div>
+            
+            <div class="promo-item">
+                <div>
+                    <div class="promo-name">Pack Découverte</div>
+                    <div class="promo-description">3 variétés au choix</div>
+                </div>
+                <div class="promo-price">150€</div>
+            </div>
+            
+            <div class="promo-item">
+                <div>
+                    <div class="promo-name">Pack Premium</div>
+                    <div class="promo-description">5 variétés + bonus</div>
+                </div>
+                <div class="promo-price">240€</div>
+            </div>
+            
+            <div class="promo-item">
+                <div>
+                    <div class="promo-name">Pack VIP</div>
+                    <div class="promo-description">10 variétés + cadeaux</div>
+                </div>
+                <div class="promo-price">450€</div>
+            </div>
+            
+            <div class="promo-item">
+                <div>
+                    <div class="promo-name">Pack Ultimate</div>
+                    <div class="promo-description">Toutes variétés + extras</div>
+                </div>
+                <div class="promo-price">800€</div>
+            </div>
+        </div>
+        
+        <div class="special-offer">
+            <h3>🚀 OFFRE LIMITÉE</h3>
+            <p>-20% sur tous les packs avec le code HASHTAG20</p>
+            <p>Valable jusqu'à la fin du mois !</p>
+        </div>
+    </div>
+    
+    <div style="height: 80px;"></div>
+    
+    <div class="navigation">
+        <a href="/" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            Menu
+        </a>
+        <a href="/promo" class="nav-item active">
+            <span class="nav-icon">⭐</span>
+            Pack Promo
+        </a>
+        <a href="/info" class="nav-item">
+            <span class="nav-icon">ℹ️</span>
+            Infos
+        </a>
+        <a href="/contact" class="nav-item">
+            <span class="nav-icon">✈️</span>
+            Contact
+        </a>
+        <a href="/social" class="nav-item">
+            <span class="nav-icon">📧</span>
+            Réseaux
+        </a>
+    </div>
+</body>
+</html>

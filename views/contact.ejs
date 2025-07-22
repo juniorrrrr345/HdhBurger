@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - HASHTAG BOT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1b1f 50%, #1a1a1a 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(220, 53, 69, 0.9);
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        .contact-banner {
+            background: #dc3545;
+            text-align: center;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 18px;
+            letter-spacing: 1px;
+        }
+        
+        .logo-container {
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+        
+        .logo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #333, #555);
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #dc3545;
+            box-shadow: 0 0 30px rgba(220, 53, 69, 0.3);
+        }
+        
+        .logo::before {
+            content: "#";
+            font-size: 80px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .background-text {
+            position: absolute;
+            font-size: 120px;
+            font-weight: bold;
+            color: rgba(220, 53, 69, 0.1);
+            z-index: -1;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%) rotate(-15deg);
+            pointer-events: none;
+        }
+        
+        .contact-content {
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .contact-card {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 2px solid #dc3545;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .contact-title {
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #dc3545;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .contact-item:last-child {
+            border-bottom: none;
+        }
+        
+        .contact-icon {
+            font-size: 24px;
+            width: 50px;
+            text-align: center;
+            margin-right: 15px;
+        }
+        
+        .contact-info {
+            flex: 1;
+        }
+        
+        .contact-label {
+            font-size: 14px;
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        .contact-value {
+            font-size: 16px;
+            margin-top: 2px;
+        }
+        
+        .contact-form {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 2px solid #dc3545;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #dc3545;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #dc3545;
+            box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #dc3545, #ff6b7a);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+        
+        .emergency-contact {
+            background: linear-gradient(45deg, #dc3545, #ff6b7a);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 30px 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+        }
+        
+        .emergency-contact h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .emergency-contact p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-top: 1px solid #333;
+        }
+        
+        .nav-item {
+            text-align: center;
+            color: #999;
+            text-decoration: none;
+            font-size: 12px;
+            padding: 5px;
+            transition: color 0.3s;
+        }
+        
+        .nav-item.active {
+            color: #dc3545;
+        }
+        
+        .nav-item:hover {
+            color: #dc3545;
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>HASHTAG BOT #🔧</h1>
+        <p>mini-application</p>
+    </div>
+    
+    <div class="contact-banner">
+        CONTACTEZ-NOUS
+    </div>
+    
+    <div class="logo-container">
+        <div class="logo"></div>
+        <div class="background-text">CONTACT</div>
+    </div>
+    
+    <div class="contact-content">
+        <div class="contact-card">
+            <div class="contact-title">📞 Nos Coordonnées</div>
+            
+            <div class="contact-item">
+                <div class="contact-icon">📱</div>
+                <div class="contact-info">
+                    <div class="contact-label">Téléphone</div>
+                    <div class="contact-value">+33 6 XX XX XX XX</div>
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <div class="contact-icon">📧</div>
+                <div class="contact-info">
+                    <div class="contact-label">Email</div>
+                    <div class="contact-value">contact@hashtagbot.fr</div>
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <div class="contact-icon">💬</div>
+                <div class="contact-info">
+                    <div class="contact-label">Telegram</div>
+                    <div class="contact-value">@HashtagBot_Official</div>
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <div class="contact-icon">🌐</div>
+                <div class="contact-info">
+                    <div class="contact-label">Site Web</div>
+                    <div class="contact-value">www.hashtagbot.fr</div>
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <div class="contact-icon">🕒</div>
+                <div class="contact-info">
+                    <div class="contact-label">Horaires</div>
+                    <div class="contact-value">7j/7 - 24h/24</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="contact-form">
+            <div class="contact-title">✉️ Nous Écrire</div>
+            <form>
+                <div class="form-group">
+                    <label class="form-label">Nom *</label>
+                    <input type="text" class="form-input" placeholder="Votre nom" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email *</label>
+                    <input type="email" class="form-input" placeholder="votre@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Sujet</label>
+                    <input type="text" class="form-input" placeholder="Sujet de votre message">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Message *</label>
+                    <textarea class="form-textarea" placeholder="Votre message..." required></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    Envoyer le Message
+                </button>
+            </form>
+        </div>
+        
+        <div class="emergency-contact">
+            <h3>🚨 CONTACT URGENT</h3>
+            <p>Pour toute urgence, contactez-nous directement sur Telegram</p>
+            <p><strong>@HashtagBot_Urgent</strong></p>
+        </div>
+    </div>
+    
+    <div style="height: 80px;"></div>
+    
+    <div class="navigation">
+        <a href="/" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            Menu
+        </a>
+        <a href="/promo" class="nav-item">
+            <span class="nav-icon">⭐</span>
+            Pack Promo
+        </a>
+        <a href="/info" class="nav-item">
+            <span class="nav-icon">ℹ️</span>
+            Infos
+        </a>
+        <a href="/contact" class="nav-item active">
+            <span class="nav-icon">✈️</span>
+            Contact
+        </a>
+        <a href="/social" class="nav-item">
+            <span class="nav-icon">📧</span>
+            Réseaux
+        </a>
+    </div>
+</body>
+</html>
