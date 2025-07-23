@@ -8,38 +8,11 @@ interface InfoPageProps {
 }
 
 export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChange }: InfoPageProps) {
-  const content = `
-À propos de HashBurger
-
-HashBurger est la référence absolue pour les concentrés premium à Bordeaux et dans toute la France. 
-Depuis notre création, nous nous sommes imposés comme le #1 incontournable pour tous les connaisseurs 
-à la recherche de qualité exceptionnelle.
-
-Nos Spécialités
-
-🇲🇦 Hash Marocain - 120U++, 105U, 90U Premium - Qualité artisanale traditionnelle
-❄️ Frozen Sift - Extraction à froid pour préserver tous les terpènes  
-🇳🇱 Weed NL - Variétés néerlandaises premium indoor
-🇮🇹 Cali Italienne - Génétiques californiennes cultivées en Italie
-
-Nos Services
-
-✅ Livraison Bordeaux - Livraison rapide et discrète sur Bordeaux métropole
-✅ Envoi Postal France - Expédition sécurisée partout en France  
-✅ Qualité Garantie - Tous nos produits sont testés et certifiés
-✅ Support 24/7 - Équipe disponible via Telegram
-
-Notre Engagement
-
-Cure au top, terpènes de fou ! 🤩 Notre motto n'est pas qu'un slogan. 
-Nous nous engageons à vous fournir uniquement des produits d'exception, avec un process de 
-curing optimal pour préserver tous les arômes et garantir une expérience sensorielle unique.
-  `;
-
+  
   return (
     <div className="fixed inset-0 bg-black z-50 overflow-y-auto">
       {/* Header avec bouton retour */}
-      <div className="sticky top-0 bg-black p-4 flex items-center justify-between border-b border-white/20 z-10">
+      <div className="sticky top-0 bg-black/80 backdrop-blur-sm p-4 flex items-center justify-between border-b border-white/20 z-10">
         <button
           onClick={onClose}
           className="text-white hover:text-gray-300 transition-colors"
@@ -61,102 +34,98 @@ curing optimal pour préserver tous les arômes et garantir une expérience sens
           </p>
         </div>
 
-        {/* Contenu */}
-        <div className="bg-gray-900 border border-white/20 rounded-xl p-6 mb-8">
-          <div className="space-y-6">
-            {content.split('\n\n').map((section, index) => {
-              const lines = section.trim().split('\n');
-              const title = lines[0];
-              const body = lines.slice(1).join('\n');
+        {/* À propos */}
+        <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-6 shadow-lg hover:bg-black/50 transition-all duration-300">
+          <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+            <span className="mr-3 text-2xl">🍃</span>
+            À propos de HashBurger
+          </h3>
+          <p className="text-gray-200 leading-relaxed">
+            <strong>HashBurger</strong> est la référence absolue pour les concentrés premium à Bordeaux et dans toute la France.
+          </p>
+        </div>
 
-              if (title === 'À propos de HashBurger') {
-                return (
-                  <div key={index}>
-                    <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-                      <span className="mr-2">🍃</span>
-                      {title}
-                    </h3>
-                    <p className="text-gray-300 leading-relaxed">{body}</p>
-                  </div>
-                );
-              }
-
-              if (title === 'Nos Spécialités') {
-                return (
-                  <div key={index}>
-                    <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-                      <span className="mr-2">⭐</span>
-                      {title}
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {body.split('\n').filter(line => line.trim()).map((line, i) => {
-                        const [emoji, ...rest] = line.split(' ');
-                        const [type, ...desc] = rest.join(' ').split(' - ');
-                        return (
-                          <div key={i} className="bg-gray-800 rounded-lg p-4">
-                            <h4 className="font-bold text-white mb-2">{emoji} {type}</h4>
-                            <p className="text-sm text-gray-400">{desc.join(' - ')}</p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              }
-
-              if (title === 'Nos Services') {
-                return (
-                  <div key={index}>
-                    <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-                      <span className="mr-2">🚚</span>
-                      {title}
-                    </h3>
-                    <div className="space-y-4">
-                      {body.split('\n').filter(line => line.trim()).map((line, i) => {
-                        const [check, title, desc] = line.split(' - ');
-                        return (
-                          <div key={i} className="flex items-start space-x-3">
-                            <div className="bg-white rounded-full p-2 mt-1">
-                              <svg className="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-white">{title}</h4>
-                              <p className="text-gray-400 text-sm">{desc}</p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              }
-
-              if (title === 'Notre Engagement') {
-                return (
-                  <div key={index}>
-                    <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-                      <span className="mr-2">🔥</span>
-                      {title}
-                    </h3>
-                    <div className="bg-gradient-to-r from-gray-800 to-gray-700 rounded-lg p-4 border border-white/10">
-                      <p className="text-white leading-relaxed">{body}</p>
-                    </div>
-                  </div>
-                );
-              }
-
-              return null;
-            })}
+        {/* Nos Spécialités */}
+        <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-6 shadow-lg hover:bg-black/50 transition-all duration-300">
+          <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+            <span className="mr-3 text-2xl">⭐</span>
+            Nos Spécialités
+          </h3>
+          <div className="space-y-3 text-gray-200">
+            <div className="flex items-start">
+              <span className="text-white mr-2">•</span>
+              <span><strong>🇲🇦 Hash Marocain</strong> (120U++, 105U, 90U Premium)</span>
+            </div>
+            <div className="flex items-start">
+              <span className="text-white mr-2">•</span>
+              <span><strong>❄️ Frozen Sift</strong> (Extraction à froid)</span>
+            </div>
+            <div className="flex items-start">
+              <span className="text-white mr-2">•</span>
+              <span><strong>🇳🇱 Weed NL</strong> (Variétés néerlandaises premium)</span>
+            </div>
+            <div className="flex items-start">
+              <span className="text-white mr-2">•</span>
+              <span><strong>🇮🇹 Cali Italienne</strong> (Génétiques californiennes)</span>
+            </div>
           </div>
         </div>
 
-        {/* Avertissement légal */}
-        <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-4 text-center mb-8">
-          <p className="text-red-300 text-xs">
-            ⚠️ Réservé à un usage adulte responsable • Respect de la législation en vigueur
+        {/* Nos Services */}
+        <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-6 shadow-lg hover:bg-black/50 transition-all duration-300">
+          <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+            <span className="mr-3 text-2xl">🚚</span>
+            Nos Services
+          </h3>
+          <div className="space-y-3 text-gray-200">
+            <div className="flex items-start">
+              <span className="text-white mr-2">•</span>
+              <span><strong>✅ Livraison Bordeaux</strong> - Rapide et discrète</span>
+            </div>
+            <div className="flex items-start">
+              <span className="text-white mr-2">•</span>
+              <span><strong>✅ Envoi Postal France</strong> - Sécurisé 24-48h</span>
+            </div>
+            <div className="flex items-start">
+              <span className="text-white mr-2">•</span>
+              <span><strong>✅ Qualité Garantie</strong> - Produits testés</span>
+            </div>
+            <div className="flex items-start">
+              <span className="text-white mr-2">•</span>
+              <span><strong>✅ Support 24/7</strong> - Assistance continue</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Notre Engagement */}
+        <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-6 shadow-lg hover:bg-black/50 transition-all duration-300">
+          <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+            <span className="mr-3 text-2xl">🔥</span>
+            Notre Engagement
+          </h3>
+          <p className="text-gray-200 leading-relaxed">
+            Nous nous engageons à fournir uniquement des concentrés de qualité premium, 
+            testés et approuvés. Notre équipe experte sélectionne rigoureusement chaque produit 
+            pour garantir une expérience exceptionnelle à nos clients.
           </p>
+        </div>
+
+        {/* Contact Rapide */}
+        <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-8 shadow-lg">
+          <h3 className="text-lg font-bold text-white mb-4">📞 Contact Direct</h3>
+          <a
+            href="https://t.me/hashburgerchannel"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block text-center bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+          >
+            <div className="flex items-center justify-center">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+              </svg>
+              Nous contacter sur Telegram
+            </div>
+          </a>
         </div>
       </div>
 

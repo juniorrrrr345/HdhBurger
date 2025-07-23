@@ -41,7 +41,7 @@ export default function ContactPageFixed({ onClose, activeTab = 'contact', onTab
         </div>
 
         {/* Informations de contact */}
-        <div className="bg-gray-900 border border-white/20 rounded-xl p-6 mb-8">
+        <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-8 shadow-lg hover:bg-black/50 transition-all duration-300">
           <h3 className="text-xl font-bold text-white mb-6 flex items-center">
             <span className="mr-2">📞</span>
             Informations de Contact
@@ -87,7 +87,7 @@ export default function ContactPageFixed({ onClose, activeTab = 'contact', onTab
         </div>
 
         {/* Livraison */}
-        <div className="bg-gray-900 border border-white/20 rounded-xl p-6 mb-8">
+        <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-8 shadow-lg hover:bg-black/50 transition-all duration-300">
           <h3 className="text-xl font-bold text-white mb-6 flex items-center">
             <span className="mr-2">🚚</span>
             Livraison
@@ -109,7 +109,7 @@ export default function ContactPageFixed({ onClose, activeTab = 'contact', onTab
         </div>
 
         {/* Réseaux sociaux */}
-        <div className="bg-gray-900 border border-white/20 rounded-xl p-6 mb-8">
+        <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-8 shadow-lg hover:bg-black/50 transition-all duration-300">
           <h3 className="text-xl font-bold text-white mb-6 text-center">
             🌐 Suivez-nous
           </h3>
@@ -138,7 +138,7 @@ export default function ContactPageFixed({ onClose, activeTab = 'contact', onTab
         </div>
 
         {/* Support Client */}
-        <div className="bg-gray-900 border border-white/20 rounded-xl p-6 mb-8">
+        <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-8 shadow-lg hover:bg-black/50 transition-all duration-300">
           <h3 className="text-xl font-bold text-white mb-4 flex items-center">
             <span className="mr-2">💬</span>
             Support Client

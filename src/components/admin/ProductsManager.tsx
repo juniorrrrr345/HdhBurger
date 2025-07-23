@@ -129,10 +129,28 @@ export default function ProductsManager() {
       });
 
       if (response.ok) {
+        // Afficher un message de succès
+        const successMsg = document.createElement('div');
+        successMsg.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999] transition-all duration-300';
+        successMsg.textContent = editingProduct ? '✅ Produit modifié avec succès!' : '✅ Produit ajouté avec succès!';
+        document.body.appendChild(successMsg);
+        
+        setTimeout(() => {
+          successMsg.remove();
+        }, 3000);
+        
         setShowModal(false);
-        loadData();
+        loadData(); // Recharger les données pour synchroniser
       } else {
-        alert('Erreur lors de la sauvegarde');
+        // Afficher un message d'erreur
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'fixed top-4 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999]';
+        errorMsg.textContent = '❌ Erreur lors de la sauvegarde';
+        document.body.appendChild(errorMsg);
+        
+        setTimeout(() => {
+          errorMsg.remove();
+        }, 3000);
       }
     } catch (error) {
       console.error('Erreur:', error);
@@ -418,10 +436,10 @@ export default function ProductsManager() {
               </div>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex gap-4 pt-4 border-t border-white/20 bg-gray-900 sticky bottom-0 rounded-b-xl">
               <button
                 onClick={handleSave}
-                className="flex-1 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300"
+                className="flex-1 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg"
               >
                 💾 Sauvegarder
               </button>
