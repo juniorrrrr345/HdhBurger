@@ -179,7 +179,7 @@ export default function HomePage() {
               <div className="fixed inset-0 bg-black flex items-center justify-center z-[9999] overflow-hidden">
                 <div className="text-center px-4 w-full max-w-2xl">
                   <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white animate-pulse leading-tight">
-                    Bienvenu(e)s sur Notre Mini App 📲
+                    Bienvenu(e)s chez HashBurger 📲
                   </h1>
                 </div>
               </div>
