@@ -409,7 +409,7 @@ export default function ProductsManager() {
     );
   }, [quantityInputs]);
 
-  // Fonction pour obtenir tous les prix à afficher (formData + priceInputs)
+  // Fonction pour obtenir tous les prix à afficher (TOUJOURS garder les lignes)
   const getAllPriceEntries = () => {
     const allPrices: { [key: string]: number } = {};
     
@@ -418,8 +418,14 @@ export default function ProductsManager() {
       allPrices[key] = value;
     });
     
-    // Ajouter TOUS les prix en cours de saisie (même vides) qui ne sont pas encore dans formData
+    // Ajouter TOUS les prix/quantités des états locaux (même complètement vides)
     Object.keys(priceInputs).forEach((key) => {
+      if (!(key in allPrices)) {
+        allPrices[key] = 0; // Valeur temporaire pour l'affichage
+      }
+    });
+    
+    Object.keys(quantityInputs).forEach((key) => {
       if (!(key in allPrices)) {
         allPrices[key] = 0; // Valeur temporaire pour l'affichage
       }
@@ -459,6 +465,11 @@ export default function ProductsManager() {
       return { ...prev, prices: newPrices };
     });
     setPriceInputs(prev => {
+      const newInputs = { ...prev };
+      delete newInputs[priceKey];
+      return newInputs;
+    });
+    setQuantityInputs(prev => {
       const newInputs = { ...prev };
       delete newInputs[priceKey];
       return newInputs;
