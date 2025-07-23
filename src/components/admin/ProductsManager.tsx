@@ -121,23 +121,23 @@ export default function ProductsManager() {
 
   const handleAdd = () => {
     setEditingProduct(null);
-    const defaultPrices: { [key: string]: number } = {};
-    const defaultPriceStrings: { [key: string]: string } = {};
-    defaultPriceKeys.forEach(key => {
-      defaultPrices[key] = 0;
-      defaultPriceStrings[key] = '0';
-    });
+    // Ne pas créer de prix par défaut - permettre aux utilisateurs de les saisir
     setFormData({
       name: '',
       farm: '',
       category: '',
       image: '',
       video: '',
-      prices: defaultPrices,
+      prices: {},
       description: '',
       isActive: true
     });
-    setPriceInputs(defaultPriceStrings);
+    // Initialiser avec des champs vides pour les prix courants
+    const emptyPriceInputs: { [key: string]: string } = {};
+    defaultPriceKeys.forEach(key => {
+      emptyPriceInputs[key] = '';
+    });
+    setPriceInputs(emptyPriceInputs);
     setActiveTab('infos'); // Reset tab to infos
     setShowModal(true);
   };
@@ -307,39 +307,39 @@ export default function ProductsManager() {
   };
 
   const updatePrice = useCallback((priceKey: string, value: string) => {
-    // Mettre à jour l'état local immédiatement
+    // Mettre à jour l'état local immédiatement - PERMETTRE LES VALEURS VIDES
     setPriceInputs(prev => ({
       ...prev,
       [priceKey]: value
     }));
     
-    // Mettre à jour formData sans causer de re-render
-    const numericValue = value === '' ? 0 : (parseFloat(value) || 0);
-    setFormData(prev => ({
-      ...prev,
-      prices: {
-        ...prev.prices,
-        [priceKey]: numericValue
+    // Pour formData, on stocke la valeur numérique SEULEMENT si elle n'est pas vide
+    setFormData(prev => {
+      const newPrices = { ...prev.prices };
+      if (value === '') {
+        // Si le champ est vide, on supprime la clé au lieu de mettre 0
+        delete newPrices[priceKey];
+      } else {
+        const numericValue = parseFloat(value) || 0;
+        newPrices[priceKey] = numericValue;
       }
-    }));
+      return {
+        ...prev,
+        prices: newPrices
+      };
+    });
   }, []);
 
   // Composant de champ de prix isolé pour éviter les re-renders
-  const PriceInput = useCallback(({ priceKey, value }: { priceKey: string; value: number }) => {
-    const localValue = priceInputs[priceKey] !== undefined ? priceInputs[priceKey] : value.toString();
+  const PriceInput = useCallback(({ priceKey, value }: { priceKey: string; value?: number }) => {
+    // Utiliser l'état local s'il existe, sinon la valeur passée, sinon chaîne vide
+    const localValue = priceInputs[priceKey] !== undefined 
+      ? priceInputs[priceKey] 
+      : (value !== undefined ? value.toString() : '');
     
     const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      const inputElement = e.target;
-      const cursorPosition = inputElement.selectionStart;
-      
-      updatePrice(priceKey, e.target.value);
-      
-      // Restaurer la position du curseur après le changement
-      setTimeout(() => {
-        if (inputElement && cursorPosition !== null) {
-          inputElement.setSelectionRange(cursorPosition, cursorPosition);
-        }
-      }, 0);
+      const newValue = e.target.value;
+      updatePrice(priceKey, newValue);
     }, [priceKey]);
     
     return (
@@ -349,21 +349,44 @@ export default function ProductsManager() {
         value={localValue}
         onChange={handleChange}
         className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
-        placeholder="0"
+        placeholder="Prix en €"
         step="0.01"
         inputMode="decimal"
+        min="0"
         onFocus={(e) => {
-          // Empêcher la sélection automatique du texte sur mobile
-          e.target.setSelectionRange(e.target.value.length, e.target.value.length);
+          // Placer le curseur à la fin sans sélectionner
+          const input = e.target;
+          setTimeout(() => {
+            input.setSelectionRange(input.value.length, input.value.length);
+          }, 0);
         }}
       />
     );
   }, [priceInputs, updatePrice]);
 
+  // Fonction pour obtenir tous les prix (existants + par défaut avec champs vides)
+  const getAllPriceEntries = () => {
+    const allPrices: { [key: string]: number } = {};
+    
+    // Ajouter les prix par défaut comme vides s'ils n'existent pas
+    defaultPriceKeys.forEach(key => {
+      if (!(key in (formData.prices || {}))) {
+        allPrices[key] = 0; // Valeur fictive, l'input local sera vide
+      }
+    });
+    
+    // Ajouter les prix existants
+    Object.entries(formData.prices || {}).forEach(([key, value]) => {
+      allPrices[key] = value;
+    });
+    
+    return Object.entries(allPrices);
+  };
+
   const addCustomPrice = () => {
     const customKey = prompt('Entrez la quantité (ex: 1kg, 250g, etc.):');
     if (customKey && customKey.trim()) {
-      updatePrice(customKey.trim(), '0');
+      updatePrice(customKey.trim(), '');
     }
   };
 
@@ -876,7 +899,7 @@ export default function ProductsManager() {
                 </div>
                 
                 <div className="space-y-3 max-h-80 overflow-y-auto">
-                  {Object.entries(formData.prices || {}).map(([priceKey, value]) => (
+                  {getAllPriceEntries().map(([priceKey, value]) => (
                     <div key={priceKey} className="flex items-center gap-3">
                       <div className="flex-1">
                         <label className="block text-xs text-gray-400 mb-1">Quantité</label>
@@ -1048,7 +1071,7 @@ export default function ProductsManager() {
                     </div>
                     
                     <div className="space-y-3 max-h-80 overflow-y-auto">
-                      {Object.entries(formData.prices || {}).map(([priceKey, value]) => (
+                      {getAllPriceEntries().map(([priceKey, value]) => (
                         <div key={priceKey} className="bg-gray-800/50 border border-white/10 rounded-lg p-3">
                           <div className="space-y-2">
                             <div>
