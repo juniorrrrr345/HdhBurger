@@ -132,6 +132,12 @@ export default function ProductsManager() {
       return;
     }
 
+    console.log('🔍 Debug handleSave:', {
+      editingProduct: editingProduct,
+      editingProductId: editingProduct?._id,
+      formDataSnapshot: { ...formData }
+    });
+
     try {
       // Nettoyer les prix avant sauvegarde - enlever les valeurs undefined/null/0
       const cleanedPrices: { [key: string]: number } = {};
@@ -172,7 +178,12 @@ export default function ProductsManager() {
       console.log('💾 Sauvegarde produit:', {
         url,
         method,
-        dataSizeMB: Math.round(requestSizeMB * 100) / 100
+        dataSizeMB: Math.round(requestSizeMB * 100) / 100,
+        editingProduct: editingProduct ? { 
+          id: editingProduct._id, 
+          name: editingProduct.name 
+        } : null,
+        isUpdate: !!editingProduct
       });
 
       const response = await fetch(url, {
