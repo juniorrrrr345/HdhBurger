@@ -7,6 +7,7 @@ import ProductDetail from '../components/ProductDetail';
 import BottomNav from '../components/BottomNav';
 import InfoPageFixed from '../components/InfoPageFixed';
 import ContactPageFixed from '../components/ContactPageFixed';
+import { instantContent } from '../lib/contentCache';
 
 
 // Données statiques des produits
@@ -157,11 +158,21 @@ export default function HomePage() {
     }
   };
 
-  // Charger les données depuis l'API
+  // Charger les données depuis l'API avec cache instantané
   useEffect(() => {
     async function loadData() {
       setLoading(true);
       try {
+        // Initialiser le cache et charger les settings immédiatement
+        await instantContent.initialize();
+        const settings = instantContent.getSettings();
+        
+        setBackgroundSettings({
+          backgroundImage: settings?.backgroundImage || '',
+          backgroundOpacity: settings?.backgroundOpacity || 20,
+          backgroundBlur: settings?.backgroundBlur || 5
+        });
+
         // Charger les produits
         const productsRes = await fetch('/api/products');
         if (productsRes.ok) {
@@ -186,17 +197,6 @@ export default function HomePage() {
           const farmsData = await farmsRes.json();
           const farmNames = ['Toutes les farms', ...farmsData.map((f: { name: string }) => f.name)];
           setFarms(farmNames);
-        }
-
-        // Charger les paramètres d'arrière-plan
-        const settingsRes = await fetch('/api/settings');
-        if (settingsRes.ok) {
-          const settingsData = await settingsRes.json();
-          setBackgroundSettings({
-            backgroundImage: settingsData.backgroundImage || '',
-            backgroundOpacity: settingsData.backgroundOpacity || 20,
-            backgroundBlur: settingsData.backgroundBlur || 5
-          });
         }
       } catch (error) {
         console.error('Erreur lors du chargement:', error);
