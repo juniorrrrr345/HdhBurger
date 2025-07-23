@@ -90,23 +90,6 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
             <p className="text-xs text-gray-500">
               Accès réservé aux administrateurs autorisés
             </p>
-            <p className="text-xs text-gray-600 mt-1">
-              Mot de passe par défaut : admin123
-            </p>
-          </div>
-        </div>
-
-        {/* Informations */}
-        <div className="mt-8 text-center">
-          <div className="bg-gray-900 border border-white/20 rounded-lg p-4">
-            <h3 className="text-white font-bold mb-2">🛠️ Fonctionnalités Admin</h3>
-            <div className="text-xs text-gray-400 space-y-1">
-              <p>• Gestion des produits (CRUD)</p>
-              <p>• Configuration de la boutique</p>
-              <p>• Gestion des catégories et farms</p>
-              <p>• Modification pages Info/Contact</p>
-              <p>• Gestion des réseaux sociaux</p>
-            </div>
           </div>
         </div>
       </div>
