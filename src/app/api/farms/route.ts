@@ -9,17 +9,7 @@ export async function GET() {
     return NextResponse.json(farms);
   } catch (error) {
     console.error('Error fetching farms:', error);
-    
-    // Données fictives en cas d'erreur de connexion MongoDB
-    const mockFarms = [
-      { _id: '1', name: 'REAL FARMZ', country: 'Maroc', isActive: true },
-      { _id: '2', name: 'GREEN HOUSE', country: 'Pays-Bas', isActive: true },
-      { _id: '3', name: 'ROYAL SEEDS', country: 'Maroc', isActive: true },
-      { _id: '4', name: 'BLUE DREAM FARM', country: 'Maroc', isActive: true },
-      { _id: '5', name: 'GOLDEN LEAF', country: 'Pays-Bas', isActive: true }
-    ];
-    
-    return NextResponse.json(mockFarms);
+    return NextResponse.json({ error: 'Failed to fetch farms' }, { status: 500 });
   }
 }
 
