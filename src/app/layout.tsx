@@ -3,8 +3,8 @@ import './globals.css'
 import CachePreloader from '@/components/CachePreloader'
 
 export const metadata: Metadata = {
-  title: 'HashBurger - #1 Concentrés Bordeaux',
-  description: 'HashBurger - La meilleure boutique de concentrés, hash et rosin. Livraison Bordeaux et envoi postal.',
+  title: 'HashBurger',
+  description: 'HashBurger - Premium Concentrés',
 }
 
 export default function RootLayout({
