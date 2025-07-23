@@ -17,6 +17,10 @@ const SettingsSchema = new mongoose.Schema({
     type: String,
     default: 'https://t.me/hashburgerchannel'
   },
+  canalLink: {
+    type: String,
+    default: 'https://t.me/hashburgerchannel'
+  },
   deliveryInfo: {
     type: String,
     default: '🚚 Livraison Bordeaux • 📦 Envoi postal France'
