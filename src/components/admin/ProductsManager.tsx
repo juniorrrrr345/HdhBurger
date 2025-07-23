@@ -442,14 +442,14 @@ export default function ProductsManager() {
                     <label className="block text-sm font-medium text-gray-300 mb-2">Image du produit</label>
                     
                     {/* Upload d'image */}
-                                         <MediaUploader
+                                                              <MediaUploader
                        onMediaSelected={(url, type) => {
                          if (type === 'image') {
                            updateField('image', url);
                          }
                        }}
                        acceptedTypes="image/*"
-                       maxSize={5}
+                       maxSize={20}
                        className="mb-3"
                      />
                     
@@ -483,14 +483,14 @@ export default function ProductsManager() {
                     <label className="block text-sm font-medium text-gray-300 mb-2">Vidéo du produit (optionnel)</label>
                     
                     {/* Upload de vidéo */}
-                                         <MediaUploader
+                                                              <MediaUploader
                        onMediaSelected={(url, type) => {
                          if (type === 'video') {
                            updateField('video', url);
                          }
                        }}
                        acceptedTypes="video/*"
-                       maxSize={5}
+                       maxSize={100}
                        className="mb-3"
                      />
                     

@@ -11,7 +11,7 @@ interface MediaUploaderProps {
 export default function MediaUploader({ 
   onMediaSelected, 
   acceptedTypes = "image/*,video/*",
-  maxSize = 15,
+  maxSize = 100,
   className = ""
 }: MediaUploaderProps) {
   const [uploading, setUploading] = useState(false);
@@ -100,7 +100,12 @@ export default function MediaUploader({
         </label>
         
         <span className="text-sm text-gray-400">
-          Images & Vidéos (max {maxSize}MB)
+          {acceptedTypes.includes('video') && acceptedTypes.includes('image') 
+            ? 'Images (20MB) & Vidéos (100MB)'
+            : acceptedTypes.includes('video')
+            ? 'Vidéos (max 100MB)'
+            : 'Images (max 20MB)'
+          }
         </span>
       </div>
       

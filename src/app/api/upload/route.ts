@@ -28,12 +28,15 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Limiter la taille (15MB max - plus généreux)
-    const maxSize = 15 * 1024 * 1024; // 15MB
+    // Limites différentes pour images et vidéos
+    const isVideo = file.type.startsWith('video/');
+    const maxSize = isVideo ? 100 * 1024 * 1024 : 20 * 1024 * 1024; // 100MB pour vidéos, 20MB pour images
+    const maxSizeText = isVideo ? '100MB' : '20MB';
+    
     if (file.size > maxSize) {
       console.log('❌ Fichier trop gros:', file.size);
       return NextResponse.json({ 
-        error: `Fichier trop volumineux: ${Math.round(file.size / 1024 / 1024)}MB. Maximum 15MB` 
+        error: `Fichier trop volumineux: ${Math.round(file.size / 1024 / 1024)}MB. Maximum ${maxSizeText} pour ${isVideo ? 'les vidéos' : 'les images'}` 
       }, { status: 400 });
     }
 
