@@ -3,7 +3,7 @@ import Layout from '@/components/Layout';
 import { useState } from 'react';
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const contactInfo = [
     { icon: "📱", label: "Téléphone", value: "+33 6 XX XX XX XX" },
     { icon: "📧", label: "Email", value: "contact@hashtagbot.fr" },
