@@ -264,6 +264,8 @@ export default function SettingsManager() {
                 <option value="glow">Lueur</option>
                 <option value="shadow">Ombre portée</option>
                 <option value="bounce">Animation rebond</option>
+                <option value="gothic">Style gothique/metal</option>
+                <option value="metal">Effet métal chromé</option>
               </select>
             </div>
 

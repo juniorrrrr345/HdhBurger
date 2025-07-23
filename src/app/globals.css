@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
 
 * {
   box-sizing: border-box;
@@ -35,6 +36,84 @@ body {
   width: 80%;
   height: 3px;
   background: linear-gradient(90deg, transparent, white, transparent);
+}
+
+/* Styles pour effets gothiques/metal */
+.gothic-title {
+  font-family: 'Black Ops One', 'Inter', serif;
+  font-weight: 400;
+  font-size: 2rem;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  transform: perspective(500px) rotateX(5deg) skewY(-2deg);
+  text-shadow: 
+    1px 1px 0px #000000,
+    2px 2px 0px #000000,
+    3px 3px 0px #333333,
+    4px 4px 0px #333333,
+    5px 5px 0px #666666,
+    6px 6px 8px rgba(0,0,0,0.8),
+    0px 0px 15px rgba(255,255,255,0.2);
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.9));
+  position: relative;
+}
+
+.gothic-title::before {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  color: #444444;
+  text-shadow: none;
+  transform: translate(2px, 2px);
+}
+
+.metal-title {
+  font-family: 'Black Ops One', 'Inter', serif;
+  font-weight: 400;
+  font-size: 2rem;
+  background: linear-gradient(135deg, 
+    #ffffff 0%, 
+    #e5e5e5 15%, 
+    #cccccc 30%, 
+    #999999 45%, 
+    #666666 60%, 
+    #333333 75%, 
+    #1a1a1a 90%, 
+    #000000 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  text-shadow: 
+    1px 1px 2px rgba(0,0,0,0.8),
+    2px 2px 4px rgba(0,0,0,0.6),
+    0px 0px 8px rgba(255,255,255,0.1);
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.9));
+  position: relative;
+}
+
+.metal-title::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, 
+    transparent 30%, 
+    rgba(255,255,255,0.1) 50%, 
+    transparent 70%);
+  animation: metalShine 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes metalShine {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
 }
 
 /* Animation pour le texte défilant */
