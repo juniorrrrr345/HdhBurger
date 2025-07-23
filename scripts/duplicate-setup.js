@@ -19,6 +19,23 @@ function question(prompt) {
 
 async function main() {
   try {
+    // VÉRIFICATION DE PROTECTION HASHBURGER
+    console.log('🔒 Vérification de protection HashBurger...\n');
+    
+    // Vérifier si on est sur la branche principale HashBurger
+    const currentBranch = process.env.GIT_BRANCH || 'main';
+    if (currentBranch === 'main' || currentBranch === 'hashburger-original') {
+      console.log('⚠️  ATTENTION: Vous êtes sur la branche principale HashBurger !');
+      console.log('❌ La duplication ne peut pas être effectuée ici pour protéger HashBurger.');
+      console.log('\n📋 Pour créer une nouvelle boutique :');
+      console.log('1. Créez un FORK de ce repository sur GitHub');
+      console.log('2. Clonez votre fork');
+      console.log('3. Lancez la duplication sur votre fork');
+      console.log('\n🛡️  HashBurger reste protégé !');
+      rl.close();
+      return;
+    }
+
     // Collecte des informations
     console.log('📝 Configuration de votre nouvelle boutique :\n');
     
@@ -110,7 +127,7 @@ NEXTAUTH_SECRET=${nextAuthSecret}
     // 3. Mise à jour du message de bienvenue
     const pagePath = 'src/app/page.tsx';
     let pageContent = fs.readFileSync(pagePath, 'utf8');
-    pageContent = pageContent.replace(/Bienvenu\(e\)s sur Notre Mini App 📲/, `Bienvenu(e)s chez ${shopTitle} 📲`);
+    pageContent = pageContent.replace(/Bienvenu\(e\)s chez HashBurger 📲/, `Bienvenu(e)s chez ${shopTitle} 📲`);
     fs.writeFileSync(pagePath, pageContent);
     console.log('✅ Message de bienvenue personnalisé');
     

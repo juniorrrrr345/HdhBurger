@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "setup-new-shop": "node scripts/duplicate-setup.js"
+    "setup-new-shop": "node scripts/duplicate-setup.js",
+    "restore-hashburger": "node scripts/restore-hashburger.js"
   },
   "dependencies": {
     "cloudinary": "^2.7.0",

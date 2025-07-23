@@ -68,6 +68,9 @@ npm run dev
 
 ## 🔄 Duplication pour Nouvelle Boutique
 
+### ⚠️ IMPORTANT : Protection HashBurger
+**NE JAMAIS lancer la duplication directement sur HashBurger !**
+
 ### Méthode Automatique (Recommandée)
 ```bash
 # 1. Fork ce repository sur GitHub
@@ -83,6 +86,9 @@ npm run setup-new-shop
 
 # 5. Suivre les instructions à l'écran
 ```
+
+### 🛡️ Protection Automatique
+Le script vérifie automatiquement que vous êtes sur un fork et bloque la duplication sur HashBurger pour éviter les modifications accidentelles.
 
 ### Méthode Manuelle
 Consultez [DUPLICATION_GUIDE.md](DUPLICATION_GUIDE.md) pour le guide complet.
