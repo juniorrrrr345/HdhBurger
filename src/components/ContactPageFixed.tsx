@@ -26,23 +26,7 @@ export default function ContactPageFixed({ onClose, activeTab = 'contact', onTab
   const pageContent = instantContent.getContactContent();
   const socialLinks = instantContent.getSocialLinks();
   
-  const [backgroundSettings, setBackgroundSettings] = useState({
-    backgroundImage: settings.backgroundImage || '',
-    backgroundOpacity: settings.backgroundOpacity || 20,
-    backgroundBlur: settings.backgroundBlur || 5
-  });
-
-  useEffect(() => {
-    // Rafraîchir en arrière-plan si nécessaire
-    instantContent.refresh().then(() => {
-      const freshSettings = instantContent.getSettings();
-      setBackgroundSettings({
-        backgroundImage: freshSettings.backgroundImage || '',
-        backgroundOpacity: freshSettings.backgroundOpacity || 20,
-        backgroundBlur: freshSettings.backgroundBlur || 5
-      });
-    });
-  }, []);
+  // Background géré par useGlobalBackground() - plus d'état local nécessaire
 
   const getBackgroundStyle = () => {
     const baseStyle = {

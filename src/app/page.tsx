@@ -105,27 +105,7 @@ export default function HomePage() {
     }
     return true;
   });
-  // Utiliser EXACTEMENT la même méthode que InfoPageFixed
-  const settings = instantContent.getSettings();
-
-  const [backgroundSettings, setBackgroundSettings] = useState({
-    backgroundImage: settings?.backgroundImage || '',
-    backgroundOpacity: settings?.backgroundOpacity || 20,
-    backgroundBlur: settings?.backgroundBlur || 5
-  });
-
-  // Rafraîchir en arrière-plan comme InfoPageFixed
-  useEffect(() => {
-    instantContent.refresh().then(() => {
-      const freshSettings = instantContent.getSettings();
-      console.log('🔄 Background settings rafraîchis:', freshSettings);
-      setBackgroundSettings({
-        backgroundImage: freshSettings.backgroundImage || '',
-        backgroundOpacity: freshSettings.backgroundOpacity || 20,
-        backgroundBlur: freshSettings.backgroundBlur || 5
-      });
-    });
-  }, []);
+  // Le background est géré par useGlobalBackground() - plus besoin d'état local
 
   // Fonction pour recharger les settings uniquement
   const reloadSettings = async () => {
@@ -226,37 +206,7 @@ export default function HomePage() {
     return <ContactPageFixed onClose={() => setActiveTab('menu')} activeTab={activeTab} onTabChange={handleTabChange} />;
   }
 
-  const getBackgroundStyle = () => {
-    if (!backgroundSettings.backgroundImage) {
-      return { backgroundColor: 'black' };
-    }
-    
-    return {
-      backgroundColor: 'black',
-      backgroundImage: `url(${backgroundSettings.backgroundImage})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundAttachment: 'fixed',
-      position: 'relative' as const
-    };
-  };
-
-  const getOverlayStyle = () => {
-    if (!backgroundSettings.backgroundImage) {
-      return {};
-    }
-    
-    return {
-      backgroundColor: `rgba(0, 0, 0, ${(100 - backgroundSettings.backgroundOpacity) / 100})`,
-      backdropFilter: `blur(${backgroundSettings.backgroundBlur}px)`,
-      position: 'absolute' as const,
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      zIndex: 1
-    };
-  };
+  // Background géré par useGlobalBackground() - plus de fonctions locales nécessaires
 
   return (
     <div className="main-container">
