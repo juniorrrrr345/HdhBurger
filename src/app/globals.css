@@ -16,9 +16,30 @@ body {
 
 .graffiti-text {
   font-weight: 900;
-  text-shadow: 3px 3px 0px #8b5cf6, 6px 6px 0px #3b82f6;
-  background: linear-gradient(135deg, #fbbf24, #8b5cf6, #3b82f6);
+  text-shadow: 3px 3px 0px #059669, 6px 6px 0px #dc2626;
+  background: linear-gradient(135deg, #10b981, #f59e0b, #dc2626);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #059669 100%);
+}
+
+.card-gradient {
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.accent-green {
+  color: #10b981;
+}
+
+.accent-orange {
+  color: #f59e0b;
+}
+
+.accent-red {
+  color: #dc2626;
 }

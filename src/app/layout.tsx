@@ -13,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body className="bg-gray-900 text-white min-h-screen">{children}</body>
+      <body className="gradient-bg text-white min-h-screen">{children}</body>
     </html>
   )
 }
