@@ -21,20 +21,19 @@ export default function ContactPageFixed({ onClose, activeTab = 'contact', onTab
     backgroundOpacity: 20,
     backgroundBlur: 5
   });
-  const [pageContent, setPageContent] = useState('');
+  const [pageContent, setPageContent] = useState(defaultContent); // Contenu par défaut immédiat
   const [settings, setSettings] = useState({
     shopTitle: 'HashBurger',
     shopSubtitle: 'Premium Concentrés',
     telegramLink: 'https://t.me/hashburgerchannel'
   });
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Plus de chargement initial
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Charger les paramètres globaux
-        console.log('🔍 Chargement paramètres globaux...');
+        // Charger les paramètres globaux en arrière-plan
         const settingsResponse = await fetch('/api/settings');
         if (settingsResponse.ok) {
           const settingsData = await settingsResponse.json();
@@ -50,29 +49,25 @@ export default function ContactPageFixed({ onClose, activeTab = 'contact', onTab
           });
         }
 
-        // Charger le contenu de la page Contact
-        console.log('🔍 Chargement contenu page Contact...');
+        // Charger le contenu de la page Contact en arrière-plan
         const pageResponse = await fetch('/api/pages/contact');
         if (pageResponse.ok) {
           const pageData = await pageResponse.json();
-          console.log('✅ Contenu page Contact chargé:', pageData);
-          setPageContent(pageData.content || defaultContent);
-        } else {
-          console.warn('⚠️ API page Contact non accessible, contenu par défaut');
-          setPageContent(defaultContent);
+          if (pageData.content && pageData.content.trim() !== '') {
+            setPageContent(pageData.content);
+          }
+          // Sinon on garde le contenu par défaut déjà affiché
         }
 
-        // Charger les réseaux sociaux
+        // Charger les liens sociaux en arrière-plan
         const socialResponse = await fetch('/api/social-links');
         if (socialResponse.ok) {
           const socialData = await socialResponse.json();
           setSocialLinks(socialData);
         }
       } catch (error) {
-        console.error('❌ Erreur lors du chargement:', error);
-        setPageContent(defaultContent);
-      } finally {
-        setLoading(false);
+        console.log('📱 Mode hors ligne - contenu par défaut affiché');
+        // En cas d'erreur, on garde le contenu par défaut déjà affiché
       }
     };
 
@@ -152,22 +147,16 @@ Notre équipe est disponible 24h/24 via Telegram pour répondre à toutes vos qu
         </div>
 
         <div className="p-6 max-w-4xl mx-auto pb-32">
-          {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="text-white text-lg">Chargement...</div>
-            </div>
-          ) : (
-            <>
-              {/* Logo et titre dynamiques */}
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-black text-white mb-2">{settings.shopTitle}</h2>
-                <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
-                  {settings.shopSubtitle} • Contact
-                </p>
-              </div>
+          {/* Logo et titre dynamiques */}
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-black text-white mb-2">{settings.shopTitle}</h2>
+            <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
+              {settings.shopSubtitle} • Contact
+            </p>
+          </div>
 
-              {/* Contenu dynamique de la page */}
-              <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-6 shadow-lg hover:bg-black/50 transition-all duration-300">
+          {/* Contenu dynamique de la page */}
+          <div className="bg-black/60 backdrop-blur-sm border border-white/20 rounded-xl p-6 mb-6 shadow-2xl hover:bg-black/70 transition-all duration-300">
                 <div className="prose prose-invert max-w-none">
                   {pageContent.split('\n').map((line, index) => {
                     // Titres H1
@@ -257,8 +246,6 @@ Notre équipe est disponible 24h/24 via Telegram pour répondre à toutes vos qu
                   </div>
                 </div>
               )}
-            </>
-          )}
         </div>
       </div>
 

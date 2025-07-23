@@ -13,36 +13,33 @@ interface SocialLink {
 }
 
 export default function ContactPage({ onClose }: ContactPageProps) {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(defaultContent); // Contenu par défaut immédiat
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Plus de chargement initial
 
   useEffect(() => {
     async function loadData() {
       try {
-        // Charger le contenu de la page contact
-        console.log('🔍 Chargement du contenu de la page contact...');
+        // Charger le contenu de la page contact en arrière-plan
         const pageRes = await fetch('/api/pages/contact');
         if (pageRes.ok) {
           const pageData = await pageRes.json();
-          console.log('✅ Données page contact reçues:', pageData);
-          setContent(pageData.content || defaultContent);
-        } else {
-          console.warn('⚠️ API page contact non accessible, utilisation du contenu par défaut');
-          setContent(defaultContent);
+          if (pageData.content && pageData.content.trim() !== '') {
+            setContent(pageData.content);
+          }
+          // Sinon on garde le contenu par défaut déjà affiché
         }
 
-        // Charger les réseaux sociaux
+        // Charger les réseaux sociaux en arrière-plan
         const socialRes = await fetch('/api/social-links');
         if (socialRes.ok) {
           const socialData = await socialRes.json();
           setSocialLinks(socialData);
         }
       } catch (error) {
-        console.error('Erreur lors du chargement:', error);
-        setContent(defaultContent);
+        console.log('📱 Mode hors ligne - contenu par défaut affiché');
+        // En cas d'erreur, on garde le contenu par défaut déjà affiché
       }
-      setLoading(false);
     }
 
     loadData();
@@ -84,18 +81,12 @@ Notre équipe est disponible 24h/24 via Telegram pour répondre à toutes vos qu
       </div>
 
       <div className="p-6 max-w-2xl mx-auto">
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400">Chargement...</div>
-          </div>
-        ) : (
-          <>
-            {/* Logo et titre */}
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-black text-white mb-2">HashBurger</h2>
-              <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
-                Nous Contacter
-              </p>
+        {/* Logo et titre */}
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-black text-white mb-2">HashBurger</h2>
+          <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
+            Nous Contacter
+          </p>
             </div>
 
             {/* Contenu de la page */}
@@ -163,8 +154,6 @@ Notre équipe est disponible 24h/24 via Telegram pour répondre à toutes vos qu
                 </div>
               </a>
             </div>
-          </>
-        )}
       </div>
     </div>
   );
