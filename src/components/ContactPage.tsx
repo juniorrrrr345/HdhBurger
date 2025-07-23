@@ -13,6 +13,26 @@ interface SocialLink {
 }
 
 export default function ContactPage({ onClose }: ContactPageProps) {
+  // Contenu par défaut défini en premier
+  const defaultContent = `
+# Contactez HashBurger
+
+## 📞 Informations de Contact
+
+**Telegram Principal :** @hashburgerchannel  
+**Email :** contact@hashburger.fr  
+**Horaires :** 24h/24 - 7j/7
+
+## 🚚 Livraison
+
+**Bordeaux Métropole :** Livraison rapide et discrète  
+**France entière :** Envoi postal sécurisé
+
+## 💬 Support Client
+
+Notre équipe est disponible 24h/24 via Telegram pour répondre à toutes vos questions.
+  `;
+
   const [content, setContent] = useState(defaultContent); // Contenu par défaut immédiat
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [loading, setLoading] = useState(false); // Plus de chargement initial
@@ -44,25 +64,6 @@ export default function ContactPage({ onClose }: ContactPageProps) {
 
     loadData();
   }, []);
-
-  const defaultContent = `
-# Contactez HashBurger
-
-## 📞 Informations de Contact
-
-**Telegram Principal :** @hashburgerchannel  
-**Email :** contact@hashburger.fr  
-**Horaires :** 24h/24 - 7j/7
-
-## 🚚 Livraison
-
-**Bordeaux Métropole :** Livraison rapide et discrète  
-**France entière :** Envoi postal sécurisé
-
-## 💬 Support Client
-
-Notre équipe est disponible 24h/24 via Telegram pour répondre à toutes vos questions.
-  `;
 
   return (
     <div className="fixed inset-0 bg-black z-50 overflow-y-auto">

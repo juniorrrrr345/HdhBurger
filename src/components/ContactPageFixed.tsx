@@ -16,6 +16,26 @@ interface SocialLink {
 }
 
 export default function ContactPageFixed({ onClose, activeTab = 'contact', onTabChange }: ContactPageProps) {
+  // Contenu par défaut défini en premier
+  const defaultContent = `
+# Contactez HashBurger
+
+## 📞 Informations de Contact
+
+**Telegram Principal :** @hashburgerchannel  
+**Email :** contact@hashburger.fr  
+**Horaires :** 24h/24 - 7j/7
+
+## 🚚 Livraison
+
+**Bordeaux Métropole :** Livraison rapide et discrète  
+**France entière :** Envoi postal sécurisé
+
+## 💬 Support Client
+
+Notre équipe est disponible 24h/24 via Telegram pour répondre à toutes vos questions.
+  `;
+
   const [backgroundSettings, setBackgroundSettings] = useState({
     backgroundImage: '',
     backgroundOpacity: 20,
@@ -74,31 +94,22 @@ export default function ContactPageFixed({ onClose, activeTab = 'contact', onTab
     loadData();
   }, []);
 
-  const defaultContent = `
-# Contactez HashBurger
-
-## 📞 Informations de Contact
-
-**Telegram Principal :** @hashburgerchannel  
-**Email :** contact@hashburger.fr  
-**Horaires :** 24h/24 - 7j/7
-
-## 🚚 Livraison
-
-**Bordeaux Métropole :** Livraison rapide et discrète  
-**France entière :** Envoi postal sécurisé
-
-## 💬 Support Client
-
-Notre équipe est disponible 24h/24 via Telegram pour répondre à toutes vos questions.
-  `;
-
   const getBackgroundStyle = () => {
+    const baseStyle = {
+      minHeight: '100vh',
+      minWidth: '100vw'
+    };
+    
     if (!backgroundSettings.backgroundImage) {
-      return { backgroundColor: 'black' };
+      return { 
+        ...baseStyle,
+        backgroundColor: 'rgb(15, 23, 42)', // slate-900 pour un fond plus approprié
+        backgroundImage: 'linear-gradient(135deg, rgb(15, 23, 42) 0%, rgb(30, 41, 59) 100%)' // gradient subtil
+      };
     }
     
     return {
+      ...baseStyle,
       backgroundColor: 'black',
       backgroundImage: `url(${backgroundSettings.backgroundImage})`,
       backgroundSize: 'cover',
@@ -110,7 +121,7 @@ Notre équipe est disponible 24h/24 via Telegram pour répondre à toutes vos qu
 
   const getOverlayStyle = () => {
     if (!backgroundSettings.backgroundImage) {
-      return { display: 'none' };
+      return { display: 'none' }; // Pas d'overlay si pas d'image
     }
     
     return {
@@ -126,12 +137,12 @@ Notre équipe est disponible 24h/24 via Telegram pour répondre à toutes vos qu
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto" style={getBackgroundStyle()}>
+    <div className="fixed inset-0 z-50 overflow-y-auto min-h-screen" style={getBackgroundStyle()}>
       {/* Overlay pour background */}
       <div style={getOverlayStyle()}></div>
       
       {/* Contenu */}
-      <div className="relative z-10">
+      <div className="relative z-10 min-h-screen">
         {/* Header */}
         <div className="sticky top-0 bg-black/95 backdrop-blur-sm p-4 flex items-center justify-between border-b border-white/20 z-20">
           <button
