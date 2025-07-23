@@ -59,3 +59,12 @@ async function connectDB() {
 }
 
 export default connectDB;
+
+// Export also a function that returns the db directly
+export async function connectToDatabase() {
+  const mongooseInstance = await connectDB();
+  return { 
+    db: mongooseInstance.connection.db,
+    client: mongooseInstance.connection.getClient()
+  };
+}
