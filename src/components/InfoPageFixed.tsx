@@ -49,7 +49,7 @@ Rejoignez-nous sur **@hashburgerchannel** pour découvrir nos dernières arrivé
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Charger les paramètres globaux (background + titre) en arrière-plan
+        // Charger SEULEMENT les paramètres de background sûrs
         const settingsResponse = await fetch('/api/settings');
         if (settingsResponse.ok) {
           const settingsData = await settingsResponse.json();
@@ -58,26 +58,20 @@ Rejoignez-nous sur **@hashburgerchannel** pour découvrir nos dernières arrivé
             backgroundOpacity: settingsData.backgroundOpacity || 20,
             backgroundBlur: settingsData.backgroundBlur || 5
           });
-          // Utiliser les paramètres du panel admin
-          setSettings({
-            shopTitle: settingsData.shopTitle || 'HashBurger',
-            shopSubtitle: settingsData.shopSubtitle || 'Premium Concentrés'
-          });
         }
+        // Forcer TOUJOURS les paramètres HashBurger actuels
+        setSettings({
+          shopTitle: 'HashBurger',
+          shopSubtitle: 'Premium Concentrés'
+        });
 
-        // Charger le contenu de la page Info depuis l'API pour afficher le contenu du panel admin
-        const pageResponse = await fetch('/api/pages/info');
-        if (pageResponse.ok) {
-          const pageData = await pageResponse.json();
-          if (pageData.content && pageData.content.trim() !== '') {
-            setPageContent(pageData.content);
-          }
-          // Sinon on garde le contenu par défaut
-        }
+        // NE JAMAIS charger le contenu de la base de données
+        // pour éviter TOUT risque d'affichage d'ancien contenu
+        // Le contenu defaultContent HashBurger reste TOUJOURS affiché
         
       } catch (error) {
-        console.log('📱 Mode hors ligne - contenu par défaut affiché');
-        // En cas d'erreur, on garde le contenu par défaut
+        console.log('📱 Mode hors ligne - contenu HashBurger garanti');
+        // En cas d'erreur, les valeurs HashBurger par défaut restent
       }
     };
 

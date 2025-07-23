@@ -12,8 +12,8 @@ interface Settings {
 export default function Header() {
   const [settings, setSettings] = useState({
     shopTitle: 'HashBurger',
-    shopSubtitle: 'Premium Cannabis',
-    titleStyle: 'glow',
+    shopSubtitle: 'Premium Concentrés',
+    titleStyle: 'graffiti',
     bannerText: '',
     scrollingText: '',
     backgroundImage: '',
@@ -27,10 +27,11 @@ export default function Header() {
         const response = await fetch('/api/settings');
         if (response.ok) {
           const data = await response.json();
+          // Forcer les valeurs HashBurger actuelles, charger seulement les paramètres sûrs
           setSettings({
-            shopTitle: data.shopTitle || 'HashBurger',
-            shopSubtitle: data.shopSubtitle || 'Premium Cannabis',
-            titleStyle: data.titleStyle || 'glow',
+            shopTitle: 'HashBurger', // Forcé
+            shopSubtitle: 'Premium Concentrés', // Forcé
+            titleStyle: 'graffiti', // Forcé
             bannerText: data.bannerText || '',
             scrollingText: data.scrollingText || '',
             backgroundImage: data.backgroundImage || '',
@@ -40,7 +41,7 @@ export default function Header() {
         }
       } catch (error) {
         console.error('Erreur lors du chargement des paramètres:', error);
-        // Garder les valeurs par défaut en cas d'erreur
+        // Garder les valeurs HashBurger par défaut en cas d'erreur
       }
     };
 

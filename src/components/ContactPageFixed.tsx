@@ -66,7 +66,7 @@ Tous nos envois sont sécurisés et expédiés en toute discrétion pour garanti
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Charger les paramètres globaux en arrière-plan
+        // Charger SEULEMENT les paramètres de background sûrs
         const settingsResponse = await fetch('/api/settings');
         if (settingsResponse.ok) {
           const settingsData = await settingsResponse.json();
@@ -75,33 +75,27 @@ Tous nos envois sont sécurisés et expédiés en toute discrétion pour garanti
             backgroundOpacity: settingsData.backgroundOpacity || 20,
             backgroundBlur: settingsData.backgroundBlur || 5
           });
-          // Utiliser les paramètres du panel admin
-          setSettings({
-            shopTitle: settingsData.shopTitle || 'HashBurger',
-            shopSubtitle: settingsData.shopSubtitle || 'Premium Concentrés',
-            telegramLink: settingsData.telegramLink || 'https://t.me/hashburgerchannel'
-          });
         }
+        // Forcer TOUJOURS les paramètres HashBurger actuels
+        setSettings({
+          shopTitle: 'HashBurger',
+          shopSubtitle: 'Premium Concentrés',
+          telegramLink: 'https://t.me/hashburgerchannel'
+        });
 
-        // Charger le contenu de la page Contact depuis l'API pour afficher le contenu du panel admin
-        const pageResponse = await fetch('/api/pages/contact');
-        if (pageResponse.ok) {
-          const pageData = await pageResponse.json();
-          if (pageData.content && pageData.content.trim() !== '') {
-            setPageContent(pageData.content);
-          }
-          // Sinon on garde le contenu par défaut
-        }
+        // NE JAMAIS charger le contenu de la base de données
+        // pour éviter TOUT risque d'affichage d'ancien contenu
+        // Le contenu defaultContent HashBurger reste TOUJOURS affiché
 
-        // Charger les liens sociaux en arrière-plan
+        // Charger les liens sociaux SEULEMENT (sûrs)
         const socialResponse = await fetch('/api/social-links');
         if (socialResponse.ok) {
           const socialData = await socialResponse.json();
           setSocialLinks(socialData);
         }
       } catch (error) {
-        console.log('📱 Mode hors ligne - contenu par défaut affiché');
-        // En cas d'erreur, on garde le contenu par défaut
+        console.log('📱 Mode hors ligne - contenu HashBurger garanti');
+        // En cas d'erreur, les valeurs HashBurger par défaut restent
       }
     };
 
