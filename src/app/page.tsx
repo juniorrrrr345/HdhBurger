@@ -119,11 +119,14 @@ export default function HomePage() {
   const [categories, setCategories] = useState<string[]>(['Toutes les catégories']);
   const [farms, setFarms] = useState<string[]>(['Toutes les farms']);
   const [loading, setLoading] = useState(true);
-  // Charger le background de manière absolument synchrone
+  // Charger le background de manière absolument synchrone - FORCER le background de la boutique
   const getInitialBackground = () => {
     // Essayer d'abord le cache instantané
     const cachedSettings = instantContent.getSettings();
+    console.log('🔍 Cache settings:', cachedSettings);
+    
     if (cachedSettings?.backgroundImage) {
+      console.log('✅ Background trouvé dans cache:', cachedSettings.backgroundImage);
       return {
         backgroundImage: cachedSettings.backgroundImage,
         backgroundOpacity: cachedSettings.backgroundOpacity || 20,
@@ -137,7 +140,9 @@ export default function HomePage() {
         const stored = localStorage.getItem('instantContentCache');
         if (stored) {
           const cache = JSON.parse(stored);
+          console.log('🔍 Cache localStorage:', cache);
           if (cache.settings?.backgroundImage) {
+            console.log('✅ Background trouvé dans localStorage:', cache.settings.backgroundImage);
             return {
               backgroundImage: cache.settings.backgroundImage,
               backgroundOpacity: cache.settings.backgroundOpacity || 20,
@@ -145,14 +150,25 @@ export default function HomePage() {
             };
           }
         }
+        
+        // Essayer aussi l'ancien localStorage
+        const oldBackground = localStorage.getItem('lastKnownBackground');
+        if (oldBackground) {
+          const parsed = JSON.parse(oldBackground);
+          if (parsed.backgroundImage) {
+            console.log('✅ Background trouvé dans ancien localStorage:', parsed.backgroundImage);
+            return parsed;
+          }
+        }
       } catch (e) {
         console.log('Erreur lecture localStorage direct');
       }
     }
     
-    // Dernier fallback - gradient par défaut au lieu de noir
+    console.log('⚠️ Aucun background trouvé - utilisation gradient');
+    // Dernier fallback - un joli gradient au lieu de noir
     return {
-      backgroundImage: 'linear-gradient(135deg, #1a1a1a, #2d2d2d)',
+      backgroundImage: 'linear-gradient(135deg, #0f172a, #1e293b, #334155)',
       backgroundOpacity: 100,
       backgroundBlur: 0
     };
@@ -160,25 +176,50 @@ export default function HomePage() {
 
   const [backgroundSettings, setBackgroundSettings] = useState(getInitialBackground());
 
-  // Rafraîchir le cache en arrière-plan
+  // Forcer le chargement du background immédiatement
   useEffect(() => {
-    const refreshCache = async () => {
+    const loadBackgroundImmediately = async () => {
       try {
-        await instantContent.initialize();
-        const settings = instantContent.getSettings();
+        // Si on n'a pas encore de vraie image, forcer le chargement depuis l'API
+        if (!backgroundSettings.backgroundImage || backgroundSettings.backgroundImage.startsWith('linear-gradient')) {
+          console.log('🚀 Chargement forcé background depuis API...');
+          const response = await fetch('/api/settings');
+          if (response.ok) {
+            const settings = await response.json();
+            if (settings.backgroundImage) {
+              console.log('✅ Background API trouvé:', settings.backgroundImage);
+              const newSettings = {
+                backgroundImage: settings.backgroundImage,
+                backgroundOpacity: settings.backgroundOpacity || 20,
+                backgroundBlur: settings.backgroundBlur || 5
+              };
+              setBackgroundSettings(newSettings);
+              // Sauvegarder pour la prochaine fois
+              localStorage.setItem('lastKnownBackground', JSON.stringify(newSettings));
+              // Mettre à jour le cache
+              instantContent.updateSettings(settings);
+            }
+          }
+        }
         
-        // Mettre à jour si les données ont changé
-        setBackgroundSettings({
-          backgroundImage: settings?.backgroundImage || '',
-          backgroundOpacity: settings?.backgroundOpacity || 20,
-          backgroundBlur: settings?.backgroundBlur || 5
-        });
+        // Rafraîchir le cache en arrière-plan
+        await instantContent.initialize();
+        const cachedSettings = instantContent.getSettings();
+        
+        if (cachedSettings?.backgroundImage && cachedSettings.backgroundImage !== backgroundSettings.backgroundImage) {
+          console.log('🔄 Mise à jour background depuis cache:', cachedSettings.backgroundImage);
+          setBackgroundSettings({
+            backgroundImage: cachedSettings.backgroundImage,
+            backgroundOpacity: cachedSettings.backgroundOpacity || 20,
+            backgroundBlur: cachedSettings.backgroundBlur || 5
+          });
+        }
       } catch (error) {
-        console.error('Erreur rafraîchissement cache:', error);
+        console.error('Erreur chargement background:', error);
       }
     };
     
-    refreshCache();
+    loadBackgroundImmediately();
   }, []);
 
   // Fonction pour recharger les settings uniquement
