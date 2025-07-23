@@ -49,16 +49,16 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
 
       <div className="p-4">
         {/* Vidéo/Image */}
-        <div className="relative mb-6">
+        <div className="relative mb-6 flex justify-center">
           {product.video ? (
-            <div className="relative overflow-hidden rounded-xl shadow-2xl">
+            <div className="relative overflow-hidden rounded-xl shadow-2xl max-w-md w-full">
               <video 
                 controls 
                 autoPlay
                 muted
                 loop
                 playsInline
-                className="w-full rounded-xl transition-transform duration-300 hover:scale-105"
+                className="w-full h-auto max-h-80 rounded-xl object-cover"
                 poster={product.image}
               >
                 <source src={product.video} type="video/mp4" />
@@ -68,11 +68,13 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none rounded-xl"></div>
             </div>
           ) : (
-            <img 
-              src={product.image}
-              alt={product.name}
-              className="w-full rounded-xl shadow-lg object-cover max-h-80"
-            />
+            <div className="max-w-md w-full">
+              <img 
+                src={product.image}
+                alt={product.name}
+                className="w-full rounded-xl shadow-lg object-cover max-h-80"
+              />
+            </div>
           )}
           
           {/* Badge catégorie sur la vidéo */}
