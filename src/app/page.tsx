@@ -9,106 +9,7 @@ import InfoPageFixed from '../components/InfoPageFixed';
 import ContactPageFixed from '../components/ContactPageFixed';
 import { instantContent } from '../lib/contentCache';
 
-
-// Données statiques des produits
-const sampleProducts: Product[] = [
-  {
-    id: '1',
-    name: 'COOKIES GELATO',
-    farm: 'REAL FARMZ',
-    category: '120U ++ 🇲🇦',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&crop=center',
-    video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    prices: {
-      '5g': 40,
-      '10g': 70,
-      '25g': 120,
-      '50g': 230,
-      '100g': 440,
-      '200g': 840
-    }
-  },
-  {
-    id: '2',
-    name: 'PURPLE HAZE',
-    farm: 'GREEN HOUSE',
-    category: 'FROZEN SIFT ❄️',
-    image: 'https://images.unsplash.com/photo-1544966503-7e27b987d116?w=400&h=300&fit=crop&crop=center',
-    video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-    prices: {
-      '5g': 45,
-      '10g': 80,
-      '25g': 140,
-      '50g': 260,
-      '100g': 490,
-      '200g': 920
-    }
-  },
-  {
-    id: '3',
-    name: 'OG KUSH',
-    farm: 'ROYAL SEEDS',
-    category: '105U 🇲🇦',
-    image: 'https://images.unsplash.com/photo-1536925264286-a5e0d2a46085?w=400&h=300&fit=crop&crop=center',
-    video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-    prices: {
-      '5g': 35,
-      '10g': 65,
-      '25g': 110,
-      '50g': 210,
-      '100g': 400,
-      '200g': 760
-    }
-  },
-  {
-    id: '4',
-    name: 'BLUE DREAM',
-    farm: 'BLUE DREAM FARM',
-    category: '90U PREMIUM 🇲🇦',
-    image: 'https://images.unsplash.com/photo-1583423230902-b653abc541eb?w=400&h=300&fit=crop&crop=center',
-    video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-    prices: {
-      '5g': 38,
-      '10g': 68,
-      '25g': 115,
-      '50g': 220,
-      '100g': 420,
-      '200g': 800
-    }
-  },
-  {
-    id: '5',
-    name: 'AMNESIA HAZE',
-    farm: 'GOLDEN LEAF',
-    category: 'WEED NL 🇳🇱',
-    image: 'https://images.unsplash.com/photo-1615332579937-23970a67e2a9?w=400&h=300&fit=crop&crop=center',
-    video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
-    prices: {
-      '5g': 42,
-      '10g': 75,
-      '25g': 125,
-      '50g': 240,
-      '100g': 460,
-      '200g': 880
-    }
-  },
-  {
-    id: '6',
-    name: 'GELATO 41',
-    farm: 'REAL FARMZ',
-    category: 'CALI ITALIENNE 🇮🇹',
-    image: 'https://images.unsplash.com/photo-1581982073427-757e541a0f67?w=400&h=300&fit=crop&crop=center',
-    video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
-    prices: {
-      '5g': 50,
-      '10g': 90,
-      '25g': 160,
-      '50g': 300,
-      '100g': 580,
-      '200g': 1100
-    }
-  }
-];
+// PLUS de produits par défaut - SEULEMENT ceux du panel admin
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('Toutes les catégories');
@@ -123,9 +24,9 @@ export default function HomePage() {
   const settings = instantContent.getSettings();
 
   const [backgroundSettings, setBackgroundSettings] = useState({
-    backgroundImage: settings.backgroundImage || '',
-    backgroundOpacity: settings.backgroundOpacity || 20,
-    backgroundBlur: settings.backgroundBlur || 5
+    backgroundImage: settings?.backgroundImage || '',
+    backgroundOpacity: settings?.backgroundOpacity || 20,
+    backgroundBlur: settings?.backgroundBlur || 5
   });
 
   // Rafraîchir en arrière-plan comme InfoPageFixed
@@ -174,21 +75,21 @@ export default function HomePage() {
     }
   };
 
-  // Charger les données depuis l'API - JAMAIS d'affichage de l'ancien contenu
+  // Charger les données depuis l'API - SEULEMENT panel admin
   useEffect(() => {
     async function loadData() {
       try {
-        console.log('🚀 Chargement produits pour menu...');
+        console.log('🚀 Chargement EXCLUSIF depuis panel admin...');
         
-        // Charger SEULEMENT les vrais produits du panel admin - PAS de produits d'exemple
+        // Charger SEULEMENT les produits du panel admin
         const productsRes = await fetch('/api/products');
         if (productsRes.ok) {
           const productsData = await productsRes.json();
-          console.log('📦 Produits API reçus:', productsData.length);
-          setProducts(productsData); // Même si vide, on affiche ce qu'il y a dans l'admin
+          console.log('📦 Produits panel admin:', productsData.length);
+          setProducts(productsData); // SEULEMENT les produits du panel admin
         } else {
-          console.log('⚠️ Pas de produits API, affichage vide');
-          setProducts([]); // Affichage vide plutôt que les anciens produits
+          console.log('⚠️ Aucun produit dans panel admin');
+          setProducts([]); // Vide si pas de produits dans l'admin
         }
 
         // Charger les catégories du panel admin
@@ -207,8 +108,8 @@ export default function HomePage() {
           setFarms(farmNames);
         }
       } catch (error) {
-        console.error('Erreur lors du chargement:', error);
-        // En cas d'erreur, affichage vide plutôt que les anciens produits
+        console.error('❌ Erreur chargement panel admin:', error);
+        // En cas d'erreur, affichage vide - JAMAIS les anciens produits
         setProducts([]);
       }
     }
@@ -223,59 +124,20 @@ export default function HomePage() {
     return categoryMatch && farmMatch;
   });
 
-  const handleProductClick = (product: Product) => {
-    setSelectedProduct(product);
-  };
-
-  const handleCloseDetail = () => {
-    setSelectedProduct(null);
-  };
-
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
-    setSelectedProduct(null); // Fermer le détail produit si ouvert
-    
-    // Recharger les settings si on revient au menu principal
+    setSelectedProduct(null);
     if (tabId === 'menu') {
       reloadSettings();
     }
   };
 
-  // Rendu conditionnel des pages
   if (activeTab === 'infos') {
     return <InfoPageFixed onClose={() => setActiveTab('menu')} activeTab={activeTab} onTabChange={handleTabChange} />;
   }
 
   if (activeTab === 'contact') {
     return <ContactPageFixed onClose={() => setActiveTab('menu')} activeTab={activeTab} onTabChange={handleTabChange} />;
-  }
-
-  // Écran de chargement
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center relative">
-        <div className="text-center z-10">
-          {/* Cercle avec background image */}
-          <div className="relative w-24 h-24 mx-auto mb-4">
-            {/* Background dans le cercle */}
-            <div 
-              className="absolute inset-0 rounded-full bg-cover bg-center"
-              style={{
-                backgroundImage: `url(${backgroundSettings.backgroundImage})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              }}
-            ></div>
-            {/* Overlay sombre pour contraste */}
-            <div className="absolute inset-0 bg-black/40 rounded-full"></div>
-            {/* Spinner blanc par dessus */}
-            <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-white border-r-white"></div>
-          </div>
-          <h1 className="text-2xl font-black text-white tracking-wider mb-2">HashBurger</h1>
-          <p className="text-gray-400 text-sm">Chargement...</p>
-        </div>
-      </div>
-    );
   }
 
   const getBackgroundStyle = () => {
@@ -319,54 +181,67 @@ export default function HomePage() {
       
       {/* Contenu principal */}
       <div className="relative z-10">
-      {/* Header fixe */}
-      <Header />
-      
-      {/* Espacement pour le header fixe - ajusté pour le texte défilant */}
-      <div className="pt-20">
-        {/* Filtres */}
-        <CategoryFilter
-          selectedCategory={selectedCategory}
-          selectedFarm={selectedFarm}
-          onCategoryChange={setSelectedCategory}
-          onFarmChange={setSelectedFarm}
-          categories={categories}
-          farms={farms}
-        />
+        <Header />
         
-        {/* Grille de produits */}
-        <div className="p-4 pb-20">
-          <div className="grid grid-cols-2 gap-4">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onClick={handleProductClick}
-              />
-            ))}
-          </div>
-          
-          {/* Message si aucun produit */}
-          {filteredProducts.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-lg mb-2">🔍</div>
-              <p className="text-gray-400">Aucun produit trouvé</p>
-              <p className="text-gray-500 text-sm">Essayez de modifier vos filtres</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-        {/* Bottom Navigation */}
-        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
-        
-        {/* Modal détail produit */}
-        {selectedProduct && (
-          <ProductDetail
-            product={selectedProduct}
-            onClose={handleCloseDetail}
+        {selectedProduct ? (
+          <ProductDetail 
+            product={selectedProduct} 
+            onClose={() => setSelectedProduct(null)} 
           />
+        ) : (
+          <main className="pt-20 pb-20 px-4">
+            <CategoryFilter
+              categories={categories}
+              farms={farms}
+              selectedCategory={selectedCategory}
+              selectedFarm={selectedFarm}
+              onCategoryChange={setSelectedCategory}
+              onFarmChange={setSelectedFarm}
+            />
+
+            {/* Message si aucun produit dans le panel admin */}
+            {products.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="bg-gray-900/80 border border-white/20 rounded-xl p-8 max-w-md mx-auto backdrop-blur-sm">
+                  <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2M4 13h2m0 0V9a2 2 0 012-2h2m0 0V6a2 2 0 012-2h2.586a1 1 0 01.707.293l2.414 2.414A1 1 0 0016 7.414V9a2 2 0 012 2v2m0 0v2a2 2 0 01-2 2h-2m0 0H9a2 2 0 01-2-2v-2m0 0V9a2 2 0 012-2h2" />
+                  </svg>
+                  <h3 className="text-lg font-bold text-white mb-2">Aucun produit disponible</h3>
+                  <p className="text-gray-400 mb-4">
+                    Ajoutez des produits depuis le panel admin pour qu'ils apparaissent ici.
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Panel Admin → Produits → Ajouter un produit
+                  </p>
+                </div>
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="bg-gray-900/80 border border-white/20 rounded-xl p-8 max-w-md mx-auto backdrop-blur-sm">
+                  <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <h3 className="text-lg font-bold text-white mb-2">Aucun produit trouvé</h3>
+                  <p className="text-gray-400">
+                    Aucun produit ne correspond aux filtres sélectionnés.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onClick={() => setSelectedProduct(product)}
+                  />
+                ))}
+              </div>
+            )}
+          </main>
         )}
+
+        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
       </div>
     </div>
   );

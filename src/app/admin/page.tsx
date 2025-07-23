@@ -26,11 +26,10 @@ export default function AdminPage() {
           backgroundBlur: settings?.backgroundBlur || 5
         });
         
-        // Vérifier si l'utilisateur est déjà connecté
-        const adminToken = localStorage.getItem('adminToken');
-        if (adminToken) {
-          setIsAuthenticated(true);
-        }
+        // NE PAS auto-connecter - toujours demander le mot de passe
+        // Supprimer l'ancien token pour forcer la reconnexion
+        localStorage.removeItem('adminToken');
+        setIsAuthenticated(false);
         
         setLoading(false);
       } catch (error) {
