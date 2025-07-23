@@ -69,9 +69,9 @@ export default function Header() {
     <header className="fixed top-0 w-full z-40 bg-black/95 backdrop-blur-sm">
       {/* Texte défilant si configuré */}
       {settings.scrollingText && settings.scrollingText.trim() && (
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-1 overflow-hidden relative">
+        <div className="bg-black/80 backdrop-blur-sm text-white py-1 overflow-hidden relative border-b border-white/10">
           <div className="animate-marquee whitespace-nowrap inline-block">
-            <span className="text-xs font-bold tracking-wide px-4">
+            <span className="text-xs font-bold tracking-wide px-4 text-white">
               {settings.scrollingText} • {settings.scrollingText} • {settings.scrollingText}
             </span>
           </div>

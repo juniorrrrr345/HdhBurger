@@ -9,113 +9,51 @@ import InfoPageFixed from '../components/InfoPageFixed';
 import ContactPageFixed from '../components/ContactPageFixed';
 import { instantContent } from '../lib/contentCache';
 
-// PLUS de produits par défaut - SEULEMENT ceux du panel admin
-
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('Toutes les catégories');
   const [selectedFarm, setSelectedFarm] = useState('Toutes les farms');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState('menu');
-  // Chargement ULTRA-IMMÉDIAT - éviter même un micro-délai
-  const [products, setProducts] = useState<Product[]>(() => {
-    // Essayer localStorage en premier
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem('instantContentCache');
-        if (stored) {
-          const cacheData = JSON.parse(stored);
-          const cachedProducts = cacheData.products || [];
-          if (cachedProducts.length > 0) {
-            console.log('🔍 Produits INSTANTANÉS localStorage:', cachedProducts.length);
-            return cachedProducts;
-          }
-        }
-      } catch (e) {
-        console.log('Cache localStorage indisponible');
-      }
-    }
-    
-    // Si pas de localStorage, essayer le cache instantané  
-    const cached = instantContent.getProducts();
-    if (cached.length > 0) {
-      console.log('🔍 Produits cache instantané:', cached.length);
-      return cached;
-    }
-    
-    // Dernier fallback - marquer comme "en chargement" plutôt que vide
-    console.log('🔍 Pas de produits en cache - marquage chargement');
-    return [];
-  });
   
+  // AFFICHAGE DIRECT - pas de chargement, utilise ce qui est disponible IMMÉDIATEMENT
+  const [products, setProducts] = useState<Product[]>(instantContent.getProducts());
   const [categories, setCategories] = useState<string[]>(() => {
     const cached = instantContent.getCategories();
     return ['Toutes les catégories', ...cached.map((c: { name: string }) => c.name)];
   });
-  
   const [farms, setFarms] = useState<string[]>(() => {
     const cached = instantContent.getFarms();
     return ['Toutes les farms', ...cached.map((f: { name: string }) => f.name)];
   });
 
-  // État pour différencier le chargement initial de l'absence de produits
-  const [isInitialLoad, setIsInitialLoad] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem('instantContentCache');
-        if (stored) {
-          const cacheData = JSON.parse(stored);
-          const cachedProducts = cacheData.products || [];
-          return cachedProducts.length === 0; // True si pas de produits en cache
-        }
-      } catch (e) {
-        return true; // Pas de cache = chargement initial
-      }
-    }
-    return true;
-  });
-
-  // Mise à jour en arrière-plan SANS affecter l'affichage initial
+  // Mise à jour en arrière-plan pour synchroniser avec le panel admin
   useEffect(() => {
-    // Délai pour éviter de perturber l'affichage initial
-    const timer = setTimeout(() => {
-      async function refreshData() {
-        try {
-          console.log('🔄 Rafraîchissement arrière-plan...');
-          await instantContent.refresh();
-          
-          const freshProducts = instantContent.getProducts();
-          const freshCategories = instantContent.getCategories();
-          const freshFarms = instantContent.getFarms();
-          
-          // Mettre à jour seulement si différent pour éviter les re-renders
-          if (freshProducts.length !== products.length) {
-            console.log('📦 Mise à jour produits:', freshProducts.length);
-            setProducts(freshProducts);
-          }
-          
-          // Marquer la fin du chargement initial
-          setIsInitialLoad(false);
-         
-          const newCategoryNames = ['Toutes les catégories', ...freshCategories.map((c: { name: string }) => c.name)];
-          if (newCategoryNames.length !== categories.length) {
-            setCategories(newCategoryNames);
-          }
-          
-          const newFarmNames = ['Toutes les farms', ...freshFarms.map((f: { name: string }) => f.name)];
-          if (newFarmNames.length !== farms.length) {
-            setFarms(newFarmNames);
-          }
-          
-        } catch (error) {
-          console.error('❌ Erreur rafraîchissement:', error);
-        }
+    const syncWithAdmin = async () => {
+      try {
+        await instantContent.refresh();
+        
+        const freshProducts = instantContent.getProducts();
+        const freshCategories = instantContent.getCategories();
+        const freshFarms = instantContent.getFarms();
+        
+        setProducts(freshProducts);
+        setCategories(['Toutes les catégories', ...freshCategories.map((c: { name: string }) => c.name)]);
+        setFarms(['Toutes les farms', ...freshFarms.map((f: { name: string }) => f.name)]);
+        
+        console.log('✅ Synchronisé avec panel admin:', {
+          products: freshProducts.length,
+          categories: freshCategories.length,
+          farms: freshFarms.length
+        });
+      } catch (error) {
+        console.error('❌ Erreur sync admin:', error);
       }
-      
-      refreshData();
-    }, 1000); // Délai pour laisser l'affichage initial se faire
-    
+    };
+
+    // Synchroniser après 2 secondes pour laisser le temps à l'affichage initial
+    const timer = setTimeout(syncWithAdmin, 2000);
     return () => clearTimeout(timer);
-  }, [products.length, categories.length, farms.length]);
+  }, []);
 
   const filteredProducts = products.filter(product => {
     const categoryMatch = selectedCategory === 'Toutes les catégories' || product.category === selectedCategory;
@@ -138,7 +76,7 @@ export default function HomePage() {
     return <ContactPageFixed onClose={() => setActiveTab('menu')} activeTab={activeTab} onTabChange={handleTabChange} />;
   }
 
-  // Background simple et direct - PAS de hook compliqué
+  // Background simple et direct
   const settings = instantContent.getSettings();
   const backgroundStyle = settings?.backgroundImage ? {
     backgroundColor: 'black',
@@ -186,8 +124,8 @@ export default function HomePage() {
               onFarmChange={setSelectedFarm}
             />
 
-            {/* Affichage conditionnel : pas de message si chargement initial */}
-            {products.length === 0 && !isInitialLoad ? (
+            {/* Affichage DIRECT des produits - pas de vérification de chargement */}
+            {products.length === 0 ? (
               <div className="text-center py-12">
                 <div className="bg-gray-900/80 border border-white/20 rounded-xl p-8 max-w-md mx-auto backdrop-blur-sm">
                   <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,39 +140,29 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
-            ) : products.length === 0 && isInitialLoad ? (
+            ) : filteredProducts.length === 0 ? (
               <div className="text-center py-12">
                 <div className="bg-gray-900/80 border border-white/20 rounded-xl p-8 max-w-md mx-auto backdrop-blur-sm">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
-                  <h3 className="text-lg font-bold text-white mb-2">Chargement des produits...</h3>
+                  <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <h3 className="text-lg font-bold text-white mb-2">Aucun produit trouvé</h3>
                   <p className="text-gray-400">
-                    Récupération depuis le panel admin
+                    Aucun produit ne correspond aux filtres sélectionnés.
                   </p>
                 </div>
               </div>
-            ) : filteredProducts.length === 0 ? (
-             <div className="text-center py-12">
-               <div className="bg-gray-900/80 border border-white/20 rounded-xl p-8 max-w-md mx-auto backdrop-blur-sm">
-                 <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                 </svg>
-                 <h3 className="text-lg font-bold text-white mb-2">Aucun produit trouvé</h3>
-                 <p className="text-gray-400">
-                   Aucun produit ne correspond aux filtres sélectionnés.
-                 </p>
-               </div>
-             </div>
-           ) : (
-             <div className="grid grid-cols-2 gap-4">
-               {filteredProducts.map((product) => (
-                 <ProductCard
-                   key={product.id}
-                   product={product}
-                   onClick={() => setSelectedProduct(product)}
-                 />
-               ))}
-             </div>
-           )}
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                {filteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onClick={() => setSelectedProduct(product)}
+                  />
+                ))}
+              </div>
+            )}
           </main>
         )}
 

@@ -18,9 +18,59 @@ class InstantContentManager {
     // Charger immédiatement depuis localStorage si disponible
     this.loadFromLocalStorage();
     
-    // Forcer l'initialisation immédiate si possible
+    // FORCER le chargement immédiat des vraies données
     if (typeof window !== 'undefined') {
-      this.initialize().catch(e => console.log('Init cache background failed:', e));
+      this.forceImmediateLoad();
+    }
+  }
+
+  // NOUVEAU: Forcer le chargement immédiat sans attendre
+  private async forceImmediateLoad(): Promise<void> {
+    try {
+      console.log('🔥 CHARGEMENT IMMÉDIAT forcé depuis API...');
+      
+      // Charger en parallèle toutes les données critiques
+      const [productsRes, categoriesRes, farmsRes, settingsRes] = await Promise.all([
+        fetch('/api/products').catch(() => null),
+        fetch('/api/categories').catch(() => null),
+        fetch('/api/farms').catch(() => null),
+        fetch('/api/settings').catch(() => null)
+      ]);
+
+      // Traiter les produits en priorité
+      if (productsRes?.ok) {
+        const products = await productsRes.json();
+        this.data.products = products;
+        console.log('📦 Produits chargés immédiatement:', products.length);
+      }
+
+      // Traiter les catégories
+      if (categoriesRes?.ok) {
+        const categories = await categoriesRes.json();
+        this.data.categories = categories;
+        console.log('🏷️ Catégories chargées immédiatement:', categories.length);
+      }
+
+      // Traiter les farms
+      if (farmsRes?.ok) {
+        const farms = await farmsRes.json();
+        this.data.farms = farms;
+        console.log('🚜 Farms chargées immédiatement:', farms.length);
+      }
+
+      // Traiter les settings
+      if (settingsRes?.ok) {
+        const settings = await settingsRes.json();
+        this.data.settings = settings;
+        console.log('⚙️ Settings chargés immédiatement');
+      }
+
+      // Sauvegarder immédiatement
+      this.saveToLocalStorage();
+      this.isInitialized = true;
+      
+    } catch (error) {
+      console.error('❌ Erreur chargement immédiat:', error);
     }
   }
 
@@ -32,7 +82,11 @@ class InstantContentManager {
       const stored = localStorage.getItem('instantContentCache');
       if (stored) {
         this.data = JSON.parse(stored);
-        console.log('🚀 Cache chargé depuis localStorage:', this.data);
+        console.log('🚀 Cache chargé depuis localStorage:', {
+          products: this.data.products?.length || 0,
+          categories: this.data.categories?.length || 0,
+          farms: this.data.farms?.length || 0
+        });
       }
     } catch (error) {
       console.error('Erreur chargement localStorage:', error);
@@ -209,10 +263,8 @@ class InstantContentManager {
 
 export const instantContent = new InstantContentManager();
 
-// Initialiser en arrière-plan dès que possible
+// FORCER l'initialisation immédiate au chargement de la page
 if (typeof window !== 'undefined') {
-  // Charger immédiatement depuis localStorage puis rafraîchir en arrière-plan
-  setTimeout(() => {
-    instantContent.initialize();
-  }, 100);
+  // Pas de setTimeout - chargement immédiat
+  instantContent.initialize();
 }
