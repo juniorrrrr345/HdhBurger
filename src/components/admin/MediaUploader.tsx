@@ -11,7 +11,7 @@ interface MediaUploaderProps {
 export default function MediaUploader({ 
   onMediaSelected, 
   acceptedTypes = "image/*,video/*",
-  maxSize = 5,
+  maxSize = 15,
   className = ""
 }: MediaUploaderProps) {
   const [uploading, setUploading] = useState(false);

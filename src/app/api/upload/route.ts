@@ -28,12 +28,12 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Limiter la taille pour base64 (5MB max pour éviter les problèmes)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Limiter la taille (15MB max - plus généreux)
+    const maxSize = 15 * 1024 * 1024; // 15MB
     if (file.size > maxSize) {
       console.log('❌ Fichier trop gros:', file.size);
       return NextResponse.json({ 
-        error: `Fichier trop volumineux: ${Math.round(file.size / 1024 / 1024)}MB. Maximum 5MB` 
+        error: `Fichier trop volumineux: ${Math.round(file.size / 1024 / 1024)}MB. Maximum 15MB` 
       }, { status: 400 });
     }
 
