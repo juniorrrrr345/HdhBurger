@@ -176,49 +176,49 @@ export default function HomePage() {
 
   const [backgroundSettings, setBackgroundSettings] = useState(getInitialBackground());
 
-  // Forcer le chargement du background immédiatement
+  // FORCER le chargement du VRAI background de la boutique depuis le panel admin
   useEffect(() => {
-    const loadBackgroundImmediately = async () => {
+    const loadRealBackground = async () => {
       try {
-        // Toujours forcer le chargement depuis l'API pour avoir le vrai background de la boutique
-          console.log('🚀 Chargement forcé background depuis API...');
-          const response = await fetch('/api/settings');
-          if (response.ok) {
-            const settings = await response.json();
-            if (settings.backgroundImage) {
-              console.log('✅ Background API trouvé:', settings.backgroundImage);
-              const newSettings = {
-                backgroundImage: settings.backgroundImage,
-                backgroundOpacity: settings.backgroundOpacity || 20,
-                backgroundBlur: settings.backgroundBlur || 5
-              };
-              setBackgroundSettings(newSettings);
-              // Sauvegarder pour la prochaine fois
-              localStorage.setItem('lastKnownBackground', JSON.stringify(newSettings));
-              // Mettre à jour le cache
-              instantContent.updateSettings(settings);
-            }
+        console.log('🚀 Chargement du VRAI background de la boutique...');
+        const response = await fetch('/api/settings');
+        if (response.ok) {
+          const settings = await response.json();
+          console.log('📥 Settings API reçus:', settings);
+          
+          if (settings.backgroundImage) {
+            console.log('✅ VRAI background de la boutique trouvé:', settings.backgroundImage);
+            const realBackground = {
+              backgroundImage: settings.backgroundImage,
+              backgroundOpacity: settings.backgroundOpacity || 20,
+              backgroundBlur: settings.backgroundBlur || 5
+            };
+            setBackgroundSettings(realBackground);
+            
+            // Sauvegarder le VRAI background
+            localStorage.setItem('lastKnownBackground', JSON.stringify(realBackground));
+            localStorage.setItem('instantContentCache', JSON.stringify({
+              settings: settings
+            }));
+            
+            // Mettre à jour le cache avec le VRAI background
+            instantContent.updateSettings(settings);
+            console.log('💾 VRAI background sauvegardé partout !');
+          } else {
+            console.log('⚠️ Pas de background configuré dans le panel admin');
           }
+        } else {
+          console.error('❌ Erreur API settings:', response.status);
         }
         
-        // Rafraîchir le cache en arrière-plan
+        // Rafraîchir le cache
         await instantContent.initialize();
-        const cachedSettings = instantContent.getSettings();
-        
-        if (cachedSettings?.backgroundImage && cachedSettings.backgroundImage !== backgroundSettings.backgroundImage) {
-          console.log('🔄 Mise à jour background depuis cache:', cachedSettings.backgroundImage);
-          setBackgroundSettings({
-            backgroundImage: cachedSettings.backgroundImage,
-            backgroundOpacity: cachedSettings.backgroundOpacity || 20,
-            backgroundBlur: cachedSettings.backgroundBlur || 5
-          });
-        }
       } catch (error) {
-        console.error('Erreur chargement background:', error);
+        console.error('❌ Erreur chargement VRAI background:', error);
       }
     };
     
-    loadBackgroundImmediately();
+    loadRealBackground();
   }, []);
 
   // Fonction pour recharger les settings uniquement
