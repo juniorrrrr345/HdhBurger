@@ -20,20 +20,33 @@ export default function ContactPageFixed({ onClose, activeTab = 'contact', onTab
   const defaultContent = `
 # Contactez HashBurger
 
-## 📞 Informations de Contact
+## 📱 Informations de Contact
 
 **Telegram Principal :** @hashburgerchannel  
-**Email :** contact@hashburger.fr  
-**Horaires :** 24h/24 - 7j/7
+**Email Pro :** contact@hashburger.fr  
+**Disponibilité :** 24h/24 - 7j/7
 
-## 🚚 Livraison
+## 🚚 Zones de Livraison
 
-**Bordeaux Métropole :** Livraison rapide et discrète  
-**France entière :** Envoi postal sécurisé
+**🏙️ Bordeaux Métropole**  
+Livraison rapide et discrète dans toute la métropole bordelaise
 
-## 💬 Support Client
+**🇫🇷 France Entière**  
+Expédition postal sécurisée partout en France métropolitaine
 
-Notre équipe est disponible 24h/24 via Telegram pour répondre à toutes vos questions.
+## 💬 Support Client Premium
+
+Notre équipe dédiée est disponible 24h/24 via Telegram pour :
+- Conseils produits personnalisés
+- Suivi de commandes
+- Support technique
+- Recommandations qualité
+
+## 🔐 Sécurité & Discrétion
+
+Tous nos envois sont sécurisés et expédiés en toute discrétion pour garantir votre confidentialité.
+
+**Rejoignez @hashburgerchannel maintenant !**
   `;
 
   const [backgroundSettings, setBackgroundSettings] = useState({

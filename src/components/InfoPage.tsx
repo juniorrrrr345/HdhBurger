@@ -10,19 +10,25 @@ export default function InfoPage({ onClose }: InfoPageProps) {
   const defaultContent = `
 # À propos de HashBurger
 
-**HashBurger** est la référence absolue pour les concentrés premium à Bordeaux et dans toute la France.
+**HashBurger** est votre référence premium pour les concentrés de cannabis à Bordeaux et partout en France.
 
-## Nos Spécialités
-- 🇲🇦 Hash Marocain (120U++, 105U, 90U Premium)
-- ❄️ Frozen Sift (Extraction à froid)
-- 🇳🇱 Weed NL (Variétés néerlandaises premium)
-- 🇮🇹 Cali Italienne (Génétiques californiennes)
+## 🎯 Notre Mission
+Fournir les meilleurs concentrés, hash et extractions avec une qualité irréprochable et un service client exceptionnel.
 
-## Nos Services
-- ✅ Livraison Bordeaux
-- ✅ Envoi Postal France
-- ✅ Qualité Garantie
-- ✅ Support 24/7
+## 🌟 Nos Spécialités
+- 🇲🇦 **Hash Marocain Premium** (120U++, 105U, 90U)
+- ❄️ **Frozen Sift** - Extractions à froid
+- 🇳🇱 **Weed Netherlands** - Génétiques premium
+- 🇮🇹 **Cali Italienne** - Qualité californienne
+
+## ⚡ Nos Services
+- 🚚 **Livraison Bordeaux** - Service rapide et discret
+- 📦 **Expédition France** - Envoi postal sécurisé
+- ✅ **Qualité Garantie** - Produits testés et vérifiés
+- 💬 **Support 24/7** - Équipe disponible via Telegram
+
+## 📞 Contact Rapide
+Rejoignez-nous sur **@hashburgerchannel** pour découvrir nos dernières arrivées !
   `;
 
   const [content, setContent] = useState(defaultContent); // Contenu par défaut immédiat
