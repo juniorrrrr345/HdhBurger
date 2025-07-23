@@ -245,24 +245,27 @@ export default function HomePage() {
 
   // Écran de chargement
   if (loading) {
-    const backgroundStyle = backgroundSettings.backgroundImage 
-      ? {
-          backgroundImage: `url(${backgroundSettings.backgroundImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
-        }
-      : {};
-
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center relative" style={backgroundStyle}>
-        {/* Overlay pour assurer la lisibilité */}
-        {backgroundSettings.backgroundImage && (
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-        )}
-        
+      <div className="min-h-screen bg-black flex items-center justify-center relative">
         <div className="text-center z-10">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
+          {/* Cercle avec background image */}
+          <div className="relative w-24 h-24 mx-auto mb-4">
+            {/* Background dans le cercle */}
+            <div 
+              className="absolute inset-0 rounded-full bg-cover bg-center"
+              style={{
+                backgroundImage: backgroundSettings.backgroundImage 
+                  ? `url(${backgroundSettings.backgroundImage})`
+                  : 'linear-gradient(135deg, #1f2937, #374151)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
+            ></div>
+            {/* Overlay sombre pour contraste */}
+            <div className="absolute inset-0 bg-black/40 rounded-full"></div>
+            {/* Spinner blanc par dessus */}
+            <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-white border-r-white"></div>
+          </div>
           <h1 className="text-2xl font-black text-white tracking-wider mb-2">HashBurger</h1>
           <p className="text-gray-400 text-sm">Chargement...</p>
         </div>

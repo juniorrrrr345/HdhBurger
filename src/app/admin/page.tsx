@@ -2,18 +2,44 @@
 import { useState, useEffect } from 'react';
 import AdminLogin from '../../components/admin/AdminLogin';
 import AdminDashboard from '../../components/admin/AdminDashboard';
+import { instantContent } from '../../lib/contentCache';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [backgroundSettings, setBackgroundSettings] = useState({
+    backgroundImage: '',
+    backgroundOpacity: 20,
+    backgroundBlur: 5
+  });
 
   useEffect(() => {
-    // Vérifier si l'utilisateur est déjà connecté
-    const adminToken = localStorage.getItem('adminToken');
-    if (adminToken) {
-      setIsAuthenticated(true);
-    }
-    setLoading(false);
+    // Charger depuis le cache instantané
+    const loadData = async () => {
+      try {
+        await instantContent.initialize();
+        const settings = instantContent.getSettings();
+        
+        setBackgroundSettings({
+          backgroundImage: settings?.backgroundImage || '',
+          backgroundOpacity: settings?.backgroundOpacity || 20,
+          backgroundBlur: settings?.backgroundBlur || 5
+        });
+        
+        // Vérifier si l'utilisateur est déjà connecté
+        const adminToken = localStorage.getItem('adminToken');
+        if (adminToken) {
+          setIsAuthenticated(true);
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Erreur chargement admin:', error);
+        setLoading(false);
+      }
+    };
+    
+    loadData();
   }, []);
 
   const handleLogin = (success: boolean) => {
@@ -28,33 +54,42 @@ export default function AdminPage() {
     setIsAuthenticated(false);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-black to-slate-800 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="graffiti-text text-4xl mb-4 animate-pulse">
-            HashBurger
-          </h1>
-          <p className="text-white/80 text-sm font-semibold tracking-[0.2em] uppercase mb-4">
-            Panel Admin
-          </p>
-          <div className="flex items-center justify-center space-x-1">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Style de background identique aux autres pages
+  const getBackgroundStyle = () => {
+    if (!backgroundSettings.backgroundImage) {
+      return { backgroundColor: 'black' };
+    }
+    
+    return {
+      backgroundColor: 'black',
+      backgroundImage: `url(${backgroundSettings.backgroundImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    };
+  };
+
+  const overlayStyle = backgroundSettings.backgroundImage 
+    ? {
+        backgroundColor: `rgba(0, 0, 0, ${backgroundSettings.backgroundOpacity / 100})`,
+        backdropFilter: `blur(${backgroundSettings.backgroundBlur}px)`
+      }
+    : {};
 
   return (
-    <div className="min-h-screen bg-black">
-      {isAuthenticated ? (
-        <AdminDashboard onLogout={handleLogout} />
-      ) : (
-        <AdminLogin onLogin={handleLogin} />
+    <div className="min-h-screen" style={getBackgroundStyle()}>
+      {/* Overlay pour l'opacité et le flou */}
+      {backgroundSettings.backgroundImage && (
+        <div className="fixed inset-0 pointer-events-none z-0" style={overlayStyle}></div>
       )}
+      
+      <div className="relative z-10 min-h-screen">
+        {isAuthenticated ? (
+          <AdminDashboard onLogout={handleLogout} />
+        ) : (
+          <AdminLogin onLogin={handleLogin} />
+        )}
+      </div>
     </div>
   );
 }
