@@ -360,6 +360,30 @@ export default function ProductsManager() {
     );
   }, [priceInputs, updatePrice]);
 
+  // Composant pour les champs de quantité sans perte de focus
+  const QuantityInput = useCallback(({ priceKey }: { priceKey: string }) => {
+    const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value;
+      handlePriceKeyChange(priceKey, newValue);
+    }, [priceKey]);
+    
+    return (
+      <input
+        type="text"
+        value={priceKey}
+        onChange={handleChange}
+        className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
+        placeholder="3g, 5g, 10g..."
+        onFocus={(e) => {
+          // Placer le curseur à la fin
+          setTimeout(() => {
+            e.target.setSelectionRange(e.target.value.length, e.target.value.length);
+          }, 0);
+        }}
+      />
+    );
+  }, []);
+
   // Fonction pour obtenir tous les prix à afficher (formData + priceInputs)
   const getAllPriceEntries = () => {
     const allPrices: { [key: string]: number } = {};
@@ -415,23 +439,34 @@ export default function ProductsManager() {
   const handlePriceKeyChange = (oldKey: string, newKey: string) => {
     if (newKey === oldKey) return;
     
+    // PERMETTRE L'EFFACEMENT COMPLET DES QUANTITÉS
+    if (newKey.trim() === '') {
+      // Si l'utilisateur efface la quantité, on supprime cette ligne de prix
+      setFormData(prev => {
+        const updatedPrices = { ...prev.prices };
+        delete updatedPrices[oldKey];
+        return { ...prev, prices: updatedPrices };
+      });
+      
+      setPriceInputs(prev => {
+        const updatedInputs = { ...prev };
+        delete updatedInputs[oldKey];
+        return updatedInputs;
+      });
+      return;
+    }
+    
+    // Sinon, renommer la clé normalement
     setFormData(prev => {
       const updatedPrices = { ...prev.prices };
-      if (newKey.trim() === '') {
-        // Si la nouvelle clé est vide, on garde l'ancienne
-        return prev;
-      }
-      updatedPrices[newKey.trim()] = updatedPrices[oldKey];
+      updatedPrices[newKey.trim()] = updatedPrices[oldKey] || 0;
       delete updatedPrices[oldKey];
       return { ...prev, prices: updatedPrices };
     });
     
     setPriceInputs(prev => {
       const updatedInputs = { ...prev };
-      if (newKey.trim() === '') {
-        return prev;
-      }
-      updatedInputs[newKey.trim()] = updatedInputs[oldKey] || '0';
+      updatedInputs[newKey.trim()] = updatedInputs[oldKey] || '';
       delete updatedInputs[oldKey];
       return updatedInputs;
     });
@@ -935,13 +970,7 @@ export default function ProductsManager() {
                     <div key={priceKey} className="flex items-center gap-3">
                       <div className="flex-1">
                         <label className="block text-xs text-gray-400 mb-1">Quantité</label>
-                        <input
-                          type="text"
-                          value={priceKey}
-                          onChange={(e) => handlePriceKeyChange(priceKey, e.target.value)}
-                          className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
-                          placeholder="3g, 5G, 10g..."
-                        />
+                        <QuantityInput priceKey={priceKey} />
                       </div>
                       <div className="flex-1">
                         <label className="block text-xs text-gray-400 mb-1">Prix (€)</label>
@@ -1130,16 +1159,10 @@ export default function ProductsManager() {
                         getAllPriceEntries().map(([priceKey, value]) => (
                         <div key={priceKey} className="bg-gray-800/50 border border-white/10 rounded-lg p-3">
                           <div className="space-y-2">
-                            <div>
-                              <label className="block text-xs text-gray-400 mb-1">Quantité</label>
-                              <input
-                                type="text"
-                                value={priceKey}
-                                onChange={(e) => handlePriceKeyChange(priceKey, e.target.value)}
-                                className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
-                                placeholder="3g, 5G, 10g..."
-                              />
-                            </div>
+                                                          <div>
+                                <label className="block text-xs text-gray-400 mb-1">Quantité</label>
+                                <QuantityInput priceKey={priceKey} />
+                              </div>
                             <div className="flex gap-2">
                               <div className="flex-1">
                                 <label className="block text-xs text-gray-400 mb-1">Prix (€)</label>
