@@ -5,8 +5,8 @@ import CategoryFilter from '../components/CategoryFilter';
 import ProductCard, { Product } from '../components/ProductCard';
 import ProductDetail from '../components/ProductDetail';
 import BottomNav from '../components/BottomNav';
-import InfoPage from '../components/InfoPage';
-import ContactPage from '../components/ContactPage';
+import InfoPageFixed from '../components/InfoPageFixed';
+import ContactPageFixed from '../components/ContactPageFixed';
 import InitButton from '../components/InitButton';
 
 // Données statiques des produits
@@ -178,11 +178,11 @@ export default function HomePage() {
 
   // Affichage conditionnel selon l'onglet actif
   if (activeTab === 'infos') {
-    return <InfoPage onClose={() => setActiveTab('menu')} />;
+    return <InfoPageFixed onClose={() => setActiveTab('menu')} />;
   }
 
   if (activeTab === 'contact') {
-    return <ContactPage onClose={() => setActiveTab('menu')} />;
+    return <ContactPageFixed onClose={() => setActiveTab('menu')} />;
   }
 
   return (
