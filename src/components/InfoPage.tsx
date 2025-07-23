@@ -36,7 +36,7 @@ export default function InfoPage({ onClose }: InfoPageProps) {
   useEffect(() => {
     async function loadContent() {
       try {
-        // Charger les settings de background en arrière-plan
+        // Charger SEULEMENT les settings de background en arrière-plan
         const settingsRes = await fetch('/api/settings');
         if (settingsRes.ok) {
           const settingsData = await settingsRes.json();
@@ -47,23 +47,13 @@ export default function InfoPage({ onClose }: InfoPageProps) {
           });
         }
 
-        // Charger le contenu de la page en arrière-plan
-        const response = await fetch('/api/pages/info');
-        if (response.ok) {
-          const data = await response.json();
-          // Ne remplacer le contenu par défaut que si le contenu de la DB est plus récent 
-          // et ne contient pas d'anciennes références (comme "boutique")
-          if (data.content && 
-              data.content.trim() !== '' && 
-              !data.content.toLowerCase().includes('boutique') &&
-              data.content !== defaultContent) {
-            setContent(data.content);
-          }
-          // Sinon on garde le contenu par défaut déjà affiché (plus récent et correct)
-        }
+        // NE PAS charger le contenu de la page depuis l'API
+        // pour éviter tout affichage de l'ancien contenu "boutique"
+        // Le contenu par défaut HashBurger reste affiché
+        
       } catch (error) {
-        console.log('📱 Mode hors ligne - contenu par défaut affiché');
-        // En cas d'erreur, on garde le contenu par défaut déjà affiché
+        console.log('📱 Mode hors ligne - contenu HashBurger affiché');
+        // En cas d'erreur, on garde le contenu HashBurger par défaut
       }
     }
 

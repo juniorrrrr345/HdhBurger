@@ -40,25 +40,19 @@ Notre équipe est disponible 24h/24 via Telegram pour répondre à toutes vos qu
   useEffect(() => {
     async function loadData() {
       try {
-        // Charger le contenu de la page contact en arrière-plan
-        const pageRes = await fetch('/api/pages/contact');
-        if (pageRes.ok) {
-          const pageData = await pageRes.json();
-          if (pageData.content && pageData.content.trim() !== '') {
-            setContent(pageData.content);
-          }
-          // Sinon on garde le contenu par défaut déjà affiché
-        }
+        // NE PAS charger le contenu de la page contact depuis l'API
+        // pour éviter tout affichage de l'ancien contenu "boutique"
+        // Le contenu par défaut HashBurger reste affiché
 
-        // Charger les réseaux sociaux en arrière-plan
+        // Charger les réseaux sociaux en arrière-plan (seulement s'ils existent)
         const socialRes = await fetch('/api/social-links');
         if (socialRes.ok) {
           const socialData = await socialRes.json();
           setSocialLinks(socialData);
         }
       } catch (error) {
-        console.log('📱 Mode hors ligne - contenu par défaut affiché');
-        // En cas d'erreur, on garde le contenu par défaut déjà affiché
+        console.log('📱 Mode hors ligne - contenu HashBurger affiché');
+        // En cas d'erreur, on garde le contenu HashBurger par défaut
       }
     }
 

@@ -43,7 +43,7 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Charger les paramètres globaux (background + titre) en arrière-plan
+        // Charger SEULEMENT les paramètres de background en arrière-plan
         const settingsResponse = await fetch('/api/settings');
         if (settingsResponse.ok) {
           const settingsData = await settingsResponse.json();
@@ -52,29 +52,20 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
             backgroundOpacity: settingsData.backgroundOpacity || 20,
             backgroundBlur: settingsData.backgroundBlur || 5
           });
+          // Forcer l'utilisation des paramètres HashBurger actuels
           setSettings({
-            shopTitle: settingsData.shopTitle || 'HashBurger',
-            shopSubtitle: settingsData.shopSubtitle || 'Premium Concentrés'
+            shopTitle: 'HashBurger',
+            shopSubtitle: 'Premium Concentrés'
           });
         }
 
-        // Charger le contenu de la page Info depuis l'API en arrière-plan
-        const pageResponse = await fetch('/api/pages/info');
-        if (pageResponse.ok) {
-          const pageData = await pageResponse.json();
-          // Ne remplacer le contenu par défaut que si le contenu de la DB est plus récent 
-          // et ne contient pas d'anciennes références (comme "boutique")
-          if (pageData.content && 
-              pageData.content.trim() !== '' && 
-              !pageData.content.toLowerCase().includes('boutique') &&
-              pageData.content !== defaultContent) {
-            setPageContent(pageData.content);
-          }
-          // Sinon on garde le contenu par défaut déjà affiché (plus récent et correct)
-        }
+        // NE PAS charger le contenu de la page Info depuis l'API
+        // pour éviter tout affichage de l'ancien contenu "boutique"
+        // Le contenu par défaut HashBurger reste affiché
+        
       } catch (error) {
-        console.log('📱 Mode hors ligne - contenu par défaut affiché');
-        // En cas d'erreur, on garde le contenu par défaut déjà affiché
+        console.log('📱 Mode hors ligne - contenu HashBurger affiché');
+        // En cas d'erreur, on garde le contenu HashBurger par défaut
       }
     };
 
