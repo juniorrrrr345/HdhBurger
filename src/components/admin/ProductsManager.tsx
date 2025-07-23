@@ -37,6 +37,8 @@ export default function ProductsManager() {
     isActive: true
   });
   const [activeTab, setActiveTab] = useState<'infos' | 'media' | 'prix'>('infos');
+  // États locaux pour les champs de prix pour éviter la perte de focus
+  const [priceInputs, setPriceInputs] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     loadData();
@@ -105,6 +107,12 @@ export default function ProductsManager() {
       ...product,
       prices: { ...product.prices }
     });
+    // Synchroniser les états locaux des prix
+    const priceStrings: { [key: string]: string } = {};
+    Object.entries(product.prices || {}).forEach(([key, value]) => {
+      priceStrings[key] = value.toString();
+    });
+    setPriceInputs(priceStrings);
     setActiveTab('infos'); // Reset tab to infos
     setShowModal(true);
   };
@@ -112,8 +120,10 @@ export default function ProductsManager() {
   const handleAdd = () => {
     setEditingProduct(null);
     const defaultPrices: { [key: string]: number } = {};
+    const defaultPriceStrings: { [key: string]: string } = {};
     defaultPriceKeys.forEach(key => {
       defaultPrices[key] = 0;
+      defaultPriceStrings[key] = '0';
     });
     setFormData({
       name: '',
@@ -125,6 +135,7 @@ export default function ProductsManager() {
       description: '',
       isActive: true
     });
+    setPriceInputs(defaultPriceStrings);
     setActiveTab('infos'); // Reset tab to infos
     setShowModal(true);
   };
@@ -294,11 +305,19 @@ export default function ProductsManager() {
   };
 
   const updatePrice = (priceKey: string, value: string) => {
+    // Mettre à jour l'état local immédiatement pour éviter la perte de focus
+    setPriceInputs(prev => ({
+      ...prev,
+      [priceKey]: value
+    }));
+    
+    // Mettre à jour formData avec debounce pour éviter les re-renders constants
+    const numericValue = value === '' ? 0 : (parseFloat(value) || 0);
     setFormData(prev => ({
       ...prev,
       prices: {
         ...prev.prices,
-        [priceKey]: value === '' ? 0 : (parseFloat(value) || 0)
+        [priceKey]: numericValue
       }
     }));
   };
@@ -316,6 +335,11 @@ export default function ProductsManager() {
       delete newPrices[priceKey];
       return { ...prev, prices: newPrices };
     });
+    setPriceInputs(prev => {
+      const newInputs = { ...prev };
+      delete newInputs[priceKey];
+      return newInputs;
+    });
   };
 
   const handlePriceKeyChange = (oldKey: string, newKey: string) => {
@@ -330,6 +354,16 @@ export default function ProductsManager() {
       updatedPrices[newKey.trim()] = updatedPrices[oldKey];
       delete updatedPrices[oldKey];
       return { ...prev, prices: updatedPrices };
+    });
+    
+    setPriceInputs(prev => {
+      const updatedInputs = { ...prev };
+      if (newKey.trim() === '') {
+        return prev;
+      }
+      updatedInputs[newKey.trim()] = updatedInputs[oldKey] || '0';
+      delete updatedInputs[oldKey];
+      return updatedInputs;
     });
   };
 
@@ -820,7 +854,7 @@ export default function ProductsManager() {
                         <label className="block text-xs text-gray-400 mb-1">Prix (€)</label>
                         <input
                           type="number"
-                          value={value}
+                          value={priceInputs[priceKey] || value.toString()}
                           onChange={(e) => updatePrice(priceKey, e.target.value)}
                           className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
                           placeholder="0"
@@ -1001,7 +1035,7 @@ export default function ProductsManager() {
                                 <label className="block text-xs text-gray-400 mb-1">Prix (€)</label>
                                 <input
                                   type="number"
-                                  value={value}
+                                  value={priceInputs[priceKey] || value.toString()}
                                   onChange={(e) => updatePrice(priceKey, e.target.value)}
                                   className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
                                   placeholder="0"
