@@ -195,27 +195,44 @@ export default function ProductsManager() {
     // RÉCUPÉRER LES PRIX DIRECTEMENT ICI POUR LA SAUVEGARDE
     const finalPrices: { [key: string]: number } = {};
     
-    // Récupérer TOUS les inputs de prix et quantité dans le modal
-    const modal = document.querySelector('[role="dialog"], .modal, .fixed');
-    if (modal) {
-      const priceInputs = modal.querySelectorAll('input[type="number"]');
-      const quantityInputs = modal.querySelectorAll('input[type="text"]');
-      
-      // Parcourir chaque ligne de prix
-      quantityInputs.forEach((quantityInput, index) => {
-        const quantity = (quantityInput as HTMLInputElement).value.trim();
-        const priceInput = priceInputs[index] as HTMLInputElement;
-        
-        if (quantity && priceInput && priceInput.value !== '') {
-          const numericValue = parseFloat(priceInput.value);
+    console.log('🔍 DEBUG: Récupération des prix...');
+    
+    // Récupérer TOUS les inputs dans la page (pas juste le modal)
+    const allNumberInputs = document.querySelectorAll('input[type="number"]');
+    const allTextInputs = document.querySelectorAll('input[type="text"]');
+    
+    console.log('🔍 Inputs trouvés - Numbers:', allNumberInputs.length, 'Text:', allTextInputs.length);
+    
+    // Aussi récupérer depuis les états locaux directement
+    console.log('🔍 États locaux - priceInputs:', priceInputs, 'quantityInputs:', quantityInputs);
+    
+    // Utiliser les états locaux comme source principale
+    Object.keys(priceInputs).forEach(key => {
+      const priceValue = priceInputs[key];
+      if (priceValue && priceValue !== '') {
+        const numericValue = parseFloat(priceValue);
+        if (!isNaN(numericValue) && numericValue > 0) {
+          finalPrices[key] = numericValue;
+        }
+      }
+    });
+    
+    // Aussi récupérer depuis quantityInputs si pas déjà dans priceInputs
+    Object.keys(quantityInputs).forEach(key => {
+      if (!(key in finalPrices)) {
+        // Chercher si il y a un prix pour cette quantité
+        const priceValue = priceInputs[key];
+        if (priceValue && priceValue !== '') {
+          const numericValue = parseFloat(priceValue);
           if (!isNaN(numericValue) && numericValue > 0) {
-            finalPrices[quantity] = numericValue;
+            finalPrices[key] = numericValue;
           }
         }
-      });
-    }
+      }
+    });
     
     console.log('💾 Prix à sauvegarder:', finalPrices);
+    console.log('💾 Nombre de prix trouvés:', Object.keys(finalPrices).length);
 
     console.log('🔍 Debug handleSave:', {
       editingProduct: editingProduct,
@@ -367,8 +384,13 @@ export default function ProductsManager() {
   };
 
   const updatePrice = useCallback((priceKey: string, value: string) => {
-    // Juste stocker dans l'objet sans déclencher de re-render
+    // Stocker dans l'objet ET dans l'état local pour être sûr
     priceInputs[priceKey] = value;
+    setPriceInputs(prev => ({
+      ...prev,
+      [priceKey]: value
+    }));
+    console.log('💰 Prix mis à jour:', priceKey, '=', value);
   }, []);
 
   // Composant de champ de prix isolé pour éviter les re-renders
@@ -379,10 +401,12 @@ export default function ProductsManager() {
         ref={(el) => { if (el) inputRefs.current[priceKey] = el; }}
         type="number"
         defaultValue={value !== undefined && value !== null && value !== 0 ? value.toString() : ''}
-        onChange={(e) => {
-          // Stocker sans re-render pour garder le clavier
-          priceInputs[priceKey] = e.target.value;
-        }}
+              onChange={(e) => {
+        // Stocker ET mettre à jour l'état
+        const value = e.target.value;
+        priceInputs[priceKey] = value;
+        updatePrice(priceKey, value);
+      }}
         className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
         placeholder="Prix en €"
         step="0.01"
@@ -399,10 +423,16 @@ export default function ProductsManager() {
         key={`quantity-${priceKey}`} // Clé unique pour chaque champ
         type="text"
         defaultValue={priceKey}
-        onChange={(e) => {
-          // Stocker sans re-render pour garder le clavier
-          quantityInputs[priceKey] = e.target.value;
-        }}
+              onChange={(e) => {
+        // Stocker ET mettre à jour l'état  
+        const value = e.target.value;
+        quantityInputs[priceKey] = value;
+        setQuantityInputs(prev => ({
+          ...prev,
+          [priceKey]: value
+        }));
+        console.log('📏 Quantité mise à jour:', priceKey, '→', value);
+      }}
         className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
         placeholder="3g, 5g, 10g..."
       />
