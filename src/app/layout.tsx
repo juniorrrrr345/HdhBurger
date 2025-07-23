@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import CachePreloader from '@/components/CachePreloader'
 
 export const metadata: Metadata = {
   title: 'HashBurger - #1 Concentrés Bordeaux',
@@ -13,7 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body className="bg-black text-white min-h-screen">{children}</body>
+      <body className="bg-black text-white min-h-screen">
+        <CachePreloader />
+        {children}
+      </body>
     </html>
   )
 }
