@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import ProductCard from './components/ProductCard'
+import ProductCardSimple from './components/ProductCardSimple'
 import BottomNavigation from './components/BottomNavigation'
 
 const products = [
@@ -11,33 +11,37 @@ const products = [
     name: 'FROZEN 90u',
     category: 'Zkittlez',
     flags: ['🧊', '🧊'],
-    image: 'https://images.unsplash.com/photo-1606041008023-472dfb5e530f?w=300&h=200&fit=crop',
-    description: 'Variété premium congelée'
+    image: '/api/placeholder/300/200',
+    description: 'Variété premium congelée',
+    color: 'from-blue-500 to-cyan-500'
   },
   {
     id: 2,
     name: 'SNOWBALL USA',
     category: 'Growlers Icecaps',
     flags: ['🇺🇸', '🇺🇸'],
-    image: 'https://images.unsplash.com/photo-1587560699334-bea93391dcef?w=300&h=200&fit=crop',
+    image: '/api/placeholder/300/200',
     description: '16 variétés différentes 🔥',
-    special: true
+    special: true,
+    color: 'from-purple-500 to-blue-500'
   },
   {
     id: 3,
     name: 'CALI USA',
     category: 'Premium',
     flags: ['🇺🇸', '🇺🇸'],
-    image: 'https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=300&h=200&fit=crop',
-    description: 'Qualité Californienne'
+    image: '/api/placeholder/300/200',
+    description: 'Qualité Californienne',
+    color: 'from-green-500 to-emerald-500'
   },
   {
     id: 4,
     name: 'JAUNE MOUSSEUX',
     category: 'Exclusive',
     flags: ['🟡', '🔴'],
-    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=200&fit=crop',
-    description: 'Édition limitée mousseuse'
+    image: '/api/placeholder/300/200',
+    description: 'Édition limitée mousseuse',
+    color: 'from-yellow-500 to-orange-500'
   }
 ]
 
@@ -121,7 +125,7 @@ export default function HomePage() {
       <div className="px-4 pb-20">
         <div className="grid grid-cols-2 gap-4">
           {products.map((product, index) => (
-            <ProductCard
+            <ProductCardSimple
               key={product.id}
               {...product}
               index={index}
