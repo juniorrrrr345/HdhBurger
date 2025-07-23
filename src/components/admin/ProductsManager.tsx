@@ -39,6 +39,8 @@ export default function ProductsManager() {
   const [activeTab, setActiveTab] = useState<'infos' | 'media' | 'prix'>('infos');
   // États locaux pour les champs de prix pour éviter la perte de focus
   const [priceInputs, setPriceInputs] = useState<{ [key: string]: string }>({});
+  // États locaux pour les quantités (séparés pour éviter les conflits)
+  const [quantityInputs, setQuantityInputs] = useState<{ [key: string]: string }>({});
   // Ref pour maintenir le focus
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
@@ -111,10 +113,13 @@ export default function ProductsManager() {
     });
     // Synchroniser les états locaux des prix
     const priceStrings: { [key: string]: string } = {};
+    const quantityStrings: { [key: string]: string } = {};
     Object.entries(product.prices || {}).forEach(([key, value]) => {
       priceStrings[key] = value.toString();
+      quantityStrings[key] = key; // La quantité est la clé
     });
     setPriceInputs(priceStrings);
+    setQuantityInputs(quantityStrings);
     setActiveTab('infos'); // Reset tab to infos
     setShowModal(true);
   };
@@ -362,16 +367,35 @@ export default function ProductsManager() {
 
   // Composant pour les champs de quantité sans perte de focus
   const QuantityInput = useCallback(({ priceKey }: { priceKey: string }) => {
+    // Utiliser l'état local des quantités ou la clé par défaut
+    const localValue = quantityInputs[priceKey] !== undefined ? quantityInputs[priceKey] : priceKey;
+    
     const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
-      handlePriceKeyChange(priceKey, newValue);
+      
+      // Mettre à jour l'état local immédiatement pour éviter la perte de focus
+      setQuantityInputs(prev => ({
+        ...prev,
+        [priceKey]: newValue
+      }));
+      
+      // Pas de mise à jour de formData en temps réel pour éviter les re-renders
+    }, [priceKey]);
+    
+    const handleBlur = useCallback(() => {
+      // Synchroniser avec formData seulement à la fin de l'édition
+      const finalValue = quantityInputs[priceKey] || priceKey;
+      if (finalValue.trim() !== '' && finalValue !== priceKey) {
+        handlePriceKeyChange(priceKey, finalValue);
+      }
     }, [priceKey]);
     
     return (
       <input
         type="text"
-        value={priceKey}
+        value={localValue}
         onChange={handleChange}
+        onBlur={handleBlur}
         className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
         placeholder="3g, 5g, 10g..."
         onFocus={(e) => {
@@ -382,7 +406,7 @@ export default function ProductsManager() {
         }}
       />
     );
-  }, []);
+  }, [quantityInputs]);
 
   // Fonction pour obtenir tous les prix à afficher (formData + priceInputs)
   const getAllPriceEntries = () => {
@@ -437,26 +461,17 @@ export default function ProductsManager() {
   };
 
   const handlePriceKeyChange = (oldKey: string, newKey: string) => {
+    // Ne pas faire de changement si c'est la même valeur
     if (newKey === oldKey) return;
     
-    // PERMETTRE L'EFFACEMENT COMPLET DES QUANTITÉS
+    // PERMETTRE LES CHAMPS VIDES SANS SUPPRIMER LA LIGNE
     if (newKey.trim() === '') {
-      // Si l'utilisateur efface la quantité, on supprime cette ligne de prix
-      setFormData(prev => {
-        const updatedPrices = { ...prev.prices };
-        delete updatedPrices[oldKey];
-        return { ...prev, prices: updatedPrices };
-      });
-      
-      setPriceInputs(prev => {
-        const updatedInputs = { ...prev };
-        delete updatedInputs[oldKey];
-        return updatedInputs;
-      });
+      // Garder la ligne mais avec une clé temporaire vide
+      // On ne fait rien ici pour éviter la perte de focus
       return;
     }
     
-    // Sinon, renommer la clé normalement
+    // Seulement renommer si différent et non vide
     setFormData(prev => {
       const updatedPrices = { ...prev.prices };
       updatedPrices[newKey.trim()] = updatedPrices[oldKey] || 0;
