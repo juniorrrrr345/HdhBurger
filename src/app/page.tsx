@@ -262,8 +262,8 @@ export default function HomePage() {
       {/* Header fixe */}
       <Header />
       
-      {/* Espacement pour le header fixe - réduit */}
-      <div className="pt-16">
+      {/* Espacement pour le header fixe - ajusté pour le texte défilant */}
+      <div className="pt-20">
         {/* Filtres */}
         <CategoryFilter
           selectedCategory={selectedCategory}

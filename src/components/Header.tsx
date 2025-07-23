@@ -65,11 +65,11 @@ export default function Header() {
   return (
     <header className="fixed top-0 w-full z-40 bg-black/95 backdrop-blur-sm">
       {/* Texte défilant si configuré */}
-      {settings.scrollingText && (
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-1 overflow-hidden">
-          <div className="animate-scroll whitespace-nowrap">
-            <span className="text-xs font-bold tracking-wide">
-              {settings.scrollingText}
+      {settings.scrollingText && settings.scrollingText.trim() && (
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-1 overflow-hidden relative">
+          <div className="animate-marquee whitespace-nowrap inline-block">
+            <span className="text-xs font-bold tracking-wide px-4">
+              {settings.scrollingText} • {settings.scrollingText} • {settings.scrollingText}
             </span>
           </div>
         </div>
