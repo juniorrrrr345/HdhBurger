@@ -456,11 +456,11 @@ export default function ProductsManager() {
                     {/* Champ URL manuel */}
                     <div className="text-sm text-gray-400 mb-2">Ou entrer une URL manuellement :</div>
                     <input
-                      type="url"
+                      type="text"
                       value={formData.image || ''}
                       onChange={(e) => updateField('image', e.target.value)}
                       className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
-                      placeholder="https://..."
+                      placeholder="https://... ou data:image/..."
                     />
                     
                     {/* Préview de l'image */}
@@ -497,11 +497,11 @@ export default function ProductsManager() {
                     {/* Champ URL manuel */}
                     <div className="text-sm text-gray-400 mb-2">Ou entrer une URL manuellement :</div>
                     <input
-                      type="url"
+                      type="text"
                       value={formData.video || ''}
                       onChange={(e) => updateField('video', e.target.value)}
                       className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
-                      placeholder="https://..."
+                      placeholder="https://... ou data:video/..."
                     />
                     
                     {/* Préview de la vidéo */}
