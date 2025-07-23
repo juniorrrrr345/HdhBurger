@@ -72,9 +72,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       result = await productsCollection.findOneAndUpdate(
         { _id: objectId },
         { $set: updateData },
-        { returnDocument: 'after' }
+        { returnOriginal: false } // Ancienne syntaxe plus compatible
       );
-      console.log('🔄 Résultat brut findOneAndUpdate:', result);
+      console.log('🔄 Résultat brut findOneAndUpdate:', {
+        hasResult: !!result,
+        hasValue: !!(result && result.value),
+        resultKeys: result ? Object.keys(result) : 'NO_RESULT'
+      });
     } catch (updateError) {
       console.error('❌ Erreur MongoDB lors de l\'update:', {
         error: updateError,
@@ -87,13 +91,45 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       }, { status: 500 });
     }
 
+    // Vérifier si l'update a marché
+    let updatedProduct;
     if (!result || !result.value) {
-      console.log('❌ Échec mise à jour malgré produit existant - result:', result);
-      return NextResponse.json({ error: 'Échec mise à jour - produit non retourné' }, { status: 500 });
+      console.log('❌ findOneAndUpdate a échoué, tentative avec updateOne + findOne');
+      
+      // Méthode alternative si findOneAndUpdate échoue
+      try {
+        const updateResult = await productsCollection.updateOne(
+          { _id: objectId },
+          { $set: updateData }
+        );
+        
+        console.log('🔄 Résultat updateOne:', {
+          matchedCount: updateResult.matchedCount,
+          modifiedCount: updateResult.modifiedCount,
+          acknowledged: updateResult.acknowledged
+        });
+        
+        if (updateResult.matchedCount === 0) {
+          return NextResponse.json({ error: 'Produit non trouvé pour update' }, { status: 404 });
+        }
+        
+        if (updateResult.modifiedCount === 0) {
+          console.log('⚠️ Aucune modification effectuée (données identiques?)');
+        }
+        
+        // Récupérer le produit mis à jour
+        updatedProduct = await productsCollection.findOne({ _id: objectId });
+        
+      } catch (altUpdateError) {
+        console.error('❌ Erreur avec updateOne:', altUpdateError);
+        return NextResponse.json({ error: 'Impossible de mettre à jour le produit' }, { status: 500 });
+      }
+    } else {
+      updatedProduct = result.value;
     }
 
-    console.log('✅ Produit mis à jour:', result.value);
-    return NextResponse.json(result.value);
+    console.log('✅ Produit mis à jour:', updatedProduct);
+    return NextResponse.json(updatedProduct);
   } catch (error) {
     console.error('❌ Erreur lors de la modification:', error);
     return NextResponse.json({ 
