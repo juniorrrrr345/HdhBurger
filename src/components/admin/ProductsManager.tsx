@@ -126,7 +126,7 @@ export default function ProductsManager() {
 
   const handleAdd = () => {
     setEditingProduct(null);
-    // Commencer avec un produit complètement vide
+    // Commencer avec un produit complètement vide mais garder les champs
     setFormData({
       name: '',
       farm: '',
@@ -139,6 +139,7 @@ export default function ProductsManager() {
     });
     // Aucun prix par défaut - interface complètement vide
     setPriceInputs({});
+    setQuantityInputs({});
     setActiveTab('infos'); // Reset tab to infos
     setShowModal(true);
   };
@@ -435,6 +436,10 @@ export default function ProductsManager() {
       setPriceInputs(prev => ({
         ...prev,
         [key]: ''
+      }));
+      setQuantityInputs(prev => ({
+        ...prev,
+        [key]: key
       }));
       console.log(`✅ Prix ajouté: ${key}`);
     }
