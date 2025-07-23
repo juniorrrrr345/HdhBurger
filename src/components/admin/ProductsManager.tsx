@@ -315,21 +315,23 @@ export default function ProductsManager() {
       [priceKey]: value
     }));
     
-    // Pour formData, on stocke la valeur numérique SEULEMENT si elle n'est pas vide
-    setFormData(prev => {
-      const newPrices = { ...prev.prices };
-      if (value === '') {
-        // Si le champ est vide, on supprime la clé au lieu de mettre 0
-        delete newPrices[priceKey];
-      } else {
-        const numericValue = parseFloat(value) || 0;
-        newPrices[priceKey] = numericValue;
-      }
-      return {
-        ...prev,
-        prices: newPrices
-      };
-    });
+    // Délai pour éviter les re-renders qui ferment le clavier
+    setTimeout(() => {
+      setFormData(prev => {
+        const newPrices = { ...prev.prices };
+        if (value === '') {
+          // Garder la clé mais avec valeur 0 pour éviter la suppression de ligne
+          newPrices[priceKey] = 0;
+        } else {
+          const numericValue = parseFloat(value) || 0;
+          newPrices[priceKey] = numericValue;
+        }
+        return {
+          ...prev,
+          prices: newPrices
+        };
+      });
+    }, 100); // Petit délai pour préserver le focus
   }, []);
 
   // Composant de champ de prix isolé pour éviter les re-renders
@@ -337,12 +339,19 @@ export default function ProductsManager() {
     // Utiliser l'état local s'il existe, sinon la valeur passée, sinon chaîne vide
     const localValue = priceInputs[priceKey] !== undefined 
       ? priceInputs[priceKey] 
-      : (value !== undefined ? value.toString() : '');
+      : (value !== undefined && value !== 0 ? value.toString() : '');
     
     const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
       const newValue = e.target.value;
       updatePrice(priceKey, newValue);
     }, [priceKey]);
+    
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+      // Empêcher la propagation pour éviter la fermeture du clavier
+      e.stopPropagation();
+    }, []);
     
     return (
       <input
@@ -350,16 +359,23 @@ export default function ProductsManager() {
         type="number"
         value={localValue}
         onChange={handleChange}
+        onKeyDown={handleKeyDown}
         className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
         placeholder="Prix en €"
         step="0.01"
         inputMode="decimal"
         min="0"
         onFocus={(e) => {
-          // Placer le curseur à la fin sans sélectionner
-          const input = e.target;
+          // Empêcher la sélection automatique
+          e.target.select = () => {};
+          e.target.setSelectionRange(e.target.value.length, e.target.value.length);
+        }}
+        onBlur={(e) => {
+          // Maintenir la référence pour éviter la perte de focus
           setTimeout(() => {
-            input.setSelectionRange(input.value.length, input.value.length);
+            if (document.activeElement !== e.target) {
+              // Le focus est vraiment perdu
+            }
           }, 0);
         }}
       />
@@ -372,6 +388,8 @@ export default function ProductsManager() {
     const localValue = quantityInputs[priceKey] !== undefined ? quantityInputs[priceKey] : priceKey;
     
     const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
       const newValue = e.target.value;
       
       // Mettre à jour l'état local immédiatement pour éviter la perte de focus
@@ -379,15 +397,21 @@ export default function ProductsManager() {
         ...prev,
         [priceKey]: newValue
       }));
-      
-      // Pas de mise à jour de formData en temps réel pour éviter les re-renders
     }, [priceKey]);
+    
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+      // Empêcher la propagation pour éviter la fermeture du clavier
+      e.stopPropagation();
+    }, []);
     
     const handleBlur = useCallback(() => {
       // Synchroniser avec formData seulement à la fin de l'édition
       const finalValue = quantityInputs[priceKey] || priceKey;
       if (finalValue.trim() !== '' && finalValue !== priceKey) {
-        handlePriceKeyChange(priceKey, finalValue);
+        // Délai pour éviter les conflits
+        setTimeout(() => {
+          handlePriceKeyChange(priceKey, finalValue);
+        }, 50);
       }
     }, [priceKey]);
     
@@ -396,14 +420,14 @@ export default function ProductsManager() {
         type="text"
         value={localValue}
         onChange={handleChange}
+        onKeyDown={handleKeyDown}
         onBlur={handleBlur}
         className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
         placeholder="3g, 5g, 10g..."
         onFocus={(e) => {
-          // Placer le curseur à la fin
-          setTimeout(() => {
-            e.target.setSelectionRange(e.target.value.length, e.target.value.length);
-          }, 0);
+          // Empêcher la sélection automatique
+          e.target.select = () => {};
+          e.target.setSelectionRange(e.target.value.length, e.target.value.length);
         }}
       />
     );
