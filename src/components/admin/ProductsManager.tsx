@@ -360,7 +360,7 @@ export default function ProductsManager() {
     );
   }, [priceInputs, updatePrice]);
 
-  // Fonction pour obtenir uniquement les prix existants + ceux en cours de saisie
+  // Fonction pour obtenir tous les prix à afficher (formData + priceInputs)
   const getAllPriceEntries = () => {
     const allPrices: { [key: string]: number } = {};
     
@@ -369,9 +369,9 @@ export default function ProductsManager() {
       allPrices[key] = value;
     });
     
-    // Ajouter les prix en cours de saisie (dans priceInputs) qui ne sont pas encore dans formData
-    Object.entries(priceInputs).forEach(([key, value]) => {
-      if (!(key in allPrices) && value !== '') {
+    // Ajouter TOUS les prix en cours de saisie (même vides) qui ne sont pas encore dans formData
+    Object.keys(priceInputs).forEach((key) => {
+      if (!(key in allPrices)) {
         allPrices[key] = 0; // Valeur temporaire pour l'affichage
       }
     });
@@ -379,15 +379,23 @@ export default function ProductsManager() {
     return Object.entries(allPrices);
   };
 
-  const addCustomPrice = () => {
-    const customKey = prompt('Entrez la quantité (ex: 3g, 5g, 10g, 25g, 50g, 100g, 1kg, etc.):');
-    if (customKey && customKey.trim()) {
-      const key = customKey.trim();
-      // Initialiser dans les états locaux pour affichage immédiat
+  // Fonction utilitaire pour ajouter un nouveau prix
+  const addNewPrice = (quantity: string) => {
+    const key = quantity.trim();
+    if (key) {
+      // Ajouter dans les états locaux pour affichage immédiat
       setPriceInputs(prev => ({
         ...prev,
         [key]: ''
       }));
+      console.log(`✅ Prix ajouté: ${key}`);
+    }
+  };
+
+  const addCustomPrice = () => {
+    const customKey = prompt('Entrez la quantité (ex: 3g, 5g, 10g, 25g, 50g, 100g, 1kg, etc.):');
+    if (customKey && customKey.trim()) {
+      addNewPrice(customKey.trim());
     }
   };
 
@@ -902,22 +910,17 @@ export default function ProductsManager() {
                   
                   {/* Raccourcis pour prix courants */}
                   <div className="flex flex-wrap gap-2">
-                    {['3g', '5g', '10g', '25g', '50g', '100g'].map(quantity => (
-                      <button
-                        key={quantity}
-                        type="button"
-                        onClick={() => {
-                          setPriceInputs(prev => ({
-                            ...prev,
-                            [quantity]: ''
-                          }));
-                        }}
-                        className="bg-blue-600/20 border border-blue-400/30 hover:bg-blue-600/40 text-blue-300 text-xs py-1 px-2 rounded transition-all duration-200"
-                        title={`Ajouter ${quantity}`}
-                      >
-                        + {quantity}
-                      </button>
-                    ))}
+                                         {['3g', '5g', '10g', '25g', '50g', '100g'].map(quantity => (
+                       <button
+                         key={quantity}
+                         type="button"
+                         onClick={() => addNewPrice(quantity)}
+                         className="bg-blue-600/20 border border-blue-400/30 hover:bg-blue-600/40 text-blue-300 text-xs py-1 px-2 rounded transition-all duration-200"
+                         title={`Ajouter ${quantity}`}
+                       >
+                         + {quantity}
+                       </button>
+                     ))}
                   </div>
                 </div>
                 
@@ -1089,15 +1092,32 @@ export default function ProductsManager() {
                 {/* Onglet Prix */}
                 {activeTab === 'prix' && (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-bold text-white">Prix</h3>
-                      <button
-                        type="button"
-                        onClick={addCustomPrice}
-                        className="bg-white/10 border border-white/20 hover:bg-white/20 text-white text-sm py-2 px-4 rounded-lg transition-all duration-200"
-                      >
-                        ➕ Ajouter
-                      </button>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-bold text-white">Prix</h3>
+                        <button
+                          type="button"
+                          onClick={addCustomPrice}
+                          className="bg-white/10 border border-white/20 hover:bg-white/20 text-white text-sm py-2 px-4 rounded-lg transition-all duration-200"
+                        >
+                          ➕ Ajouter
+                        </button>
+                      </div>
+                      
+                      {/* Raccourcis mobiles */}
+                      <div className="flex flex-wrap gap-2">
+                        {['3g', '5g', '10g', '25g', '50g', '100g'].map(quantity => (
+                          <button
+                            key={quantity}
+                            type="button"
+                            onClick={() => addNewPrice(quantity)}
+                            className="bg-blue-600/20 border border-blue-400/30 hover:bg-blue-600/40 text-blue-300 text-xs py-1 px-2 rounded transition-all duration-200"
+                            title={`Ajouter ${quantity}`}
+                          >
+                            + {quantity}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                     
                     <div className="space-y-3 max-h-80 overflow-y-auto">
