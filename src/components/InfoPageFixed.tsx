@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import BottomNav from './BottomNav';
 import { instantContent } from '@/lib/contentCache';
+import { useGlobalBackground } from '../hooks/useGlobalBackground';
 
 interface InfoPageProps {
   onClose: () => void;
@@ -10,6 +11,9 @@ interface InfoPageProps {
 }
 
 export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChange }: InfoPageProps) {
+  // Appliquer le background global en mosaïque
+  useGlobalBackground();
+  
   // Utiliser directement les données du cache instantané
   const settings = instantContent.getSettings();
   const pageContent = instantContent.getInfoContent();
@@ -83,12 +87,12 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto min-h-screen" style={getBackgroundStyle()}>
-      {/* Overlay pour background */}
-      <div style={getOverlayStyle()}></div>
+    <div className="main-container fixed inset-0 z-50 overflow-y-auto min-h-screen">
+      {/* Overlay global */}
+      <div className="global-overlay"></div>
       
       {/* Contenu */}
-      <div className="relative z-10 min-h-screen">
+      <div className="content-layer min-h-screen">
         {/* Header */}
         <div className="sticky top-0 bg-black/95 backdrop-blur-sm p-4 flex items-center justify-between border-b border-white/20 z-20">
           <button

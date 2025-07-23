@@ -110,7 +110,7 @@ class InstantContentManager {
       shopSubtitle: 'Premium Concentrés',
       titleStyle: 'glow',
       bannerText: '',
-      scrollingText: '',
+      scrollingText: 'REJOIGNEZ NOUS SUR NOS RÉSEAUX 📲 • CONTACT',
       backgroundImage: '',
       backgroundOpacity: 20,
       backgroundBlur: 5,

@@ -16,6 +16,8 @@ export async function GET() {
       const defaultSettings = {
         shopTitle: 'HashBurger',
         shopSubtitle: 'Premium Concentrés',
+        scrollingText: 'REJOIGNEZ NOUS SUR NOS RÉSEAUX 📲 • CONTACT',
+        bannerText: '',
         backgroundImage: '',
         backgroundOpacity: 20,
         backgroundBlur: 5,
@@ -47,6 +49,8 @@ export async function GET() {
     const fallbackSettings = {
       shopTitle: 'HashBurger',
       shopSubtitle: 'Premium Concentrés',
+      scrollingText: 'REJOIGNEZ NOUS SUR NOS RÉSEAUX 📲 • CONTACT',
+      bannerText: '',
       backgroundImage: '',
       backgroundOpacity: 20,
       backgroundBlur: 5,
