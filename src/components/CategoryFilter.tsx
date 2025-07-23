@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const categories = [
   "Toutes les catégories",
@@ -35,11 +35,28 @@ export default function CategoryFilter({
 }: CategoryFilterProps) {
   const [showCategories, setShowCategories] = useState(false);
   const [showFarms, setShowFarms] = useState(false);
+  const categoryRef = useRef<HTMLDivElement>(null);
+  const farmRef = useRef<HTMLDivElement>(null);
+
+  // Fermer les dropdowns en cliquant à l'extérieur
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (categoryRef.current && !categoryRef.current.contains(event.target as Node)) {
+        setShowCategories(false);
+      }
+      if (farmRef.current && !farmRef.current.contains(event.target as Node)) {
+        setShowFarms(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <div className="flex gap-3 p-4 bg-gray-800">
       {/* Dropdown Catégories */}
-      <div className="relative flex-1">
+      <div className="relative flex-1" ref={categoryRef}>
         <button
           onClick={() => setShowCategories(!showCategories)}
           className="w-full bg-gray-700 hover:bg-gray-600 text-white py-3 px-4 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-between"
@@ -69,7 +86,7 @@ export default function CategoryFilter({
       </div>
 
       {/* Dropdown Farms */}
-      <div className="relative flex-1">
+      <div className="relative flex-1" ref={farmRef}>
         <button
           onClick={() => setShowFarms(!showFarms)}
           className="w-full bg-gray-700 hover:bg-gray-600 text-white py-3 px-4 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-between"

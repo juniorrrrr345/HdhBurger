@@ -31,6 +31,7 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
           src={product.image}
           alt={product.name}
           className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+          loading="lazy"
         />
         
         {/* Badge catégorie */}

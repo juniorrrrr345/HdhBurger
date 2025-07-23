@@ -1,61 +1,174 @@
-export default function Home() {
+'use client';
+import { useState } from 'react';
+import Header from '../components/Header';
+import CategoryFilter from '../components/CategoryFilter';
+import ProductCard, { Product } from '../components/ProductCard';
+import ProductDetail from '../components/ProductDetail';
+import BottomNav from '../components/BottomNav';
+
+// Données statiques des produits
+const sampleProducts: Product[] = [
+  {
+    id: '1',
+    name: 'COOKIES GELATO',
+    farm: 'REAL FARMZ',
+    category: '120U ++ 🇲🇦',
+    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&crop=center',
+    prices: {
+      '5g': 40,
+      '10g': 70,
+      '25g': 120,
+      '50g': 230,
+      '100g': 440,
+      '200g': 840
+    }
+  },
+  {
+    id: '2',
+    name: 'PURPLE HAZE',
+    farm: 'GREEN HOUSE',
+    category: 'FROZEN SIFT ❄️',
+    image: 'https://images.unsplash.com/photo-1544966503-7e27b987d116?w=400&h=300&fit=crop&crop=center',
+    prices: {
+      '5g': 45,
+      '10g': 80,
+      '25g': 140,
+      '50g': 260,
+      '100g': 490,
+      '200g': 920
+    }
+  },
+  {
+    id: '3',
+    name: 'OG KUSH',
+    farm: 'ROYAL SEEDS',
+    category: '105U 🇲🇦',
+    image: 'https://images.unsplash.com/photo-1536925264286-a5e0d2a46085?w=400&h=300&fit=crop&crop=center',
+    prices: {
+      '5g': 35,
+      '10g': 65,
+      '25g': 110,
+      '50g': 210,
+      '100g': 400,
+      '200g': 760
+    }
+  },
+  {
+    id: '4',
+    name: 'BLUE DREAM',
+    farm: 'BLUE DREAM FARM',
+    category: '90U PREMIUM 🇲🇦',
+    image: 'https://images.unsplash.com/photo-1583423230902-b653abc541eb?w=400&h=300&fit=crop&crop=center',
+    prices: {
+      '5g': 38,
+      '10g': 68,
+      '25g': 115,
+      '50g': 220,
+      '100g': 420,
+      '200g': 800
+    }
+  },
+  {
+    id: '5',
+    name: 'AMNESIA HAZE',
+    farm: 'GOLDEN LEAF',
+    category: 'WEED NL 🇳🇱',
+    image: 'https://images.unsplash.com/photo-1615332579937-23970a67e2a9?w=400&h=300&fit=crop&crop=center',
+    prices: {
+      '5g': 42,
+      '10g': 75,
+      '25g': 125,
+      '50g': 240,
+      '100g': 460,
+      '200g': 880
+    }
+  },
+  {
+    id: '6',
+    name: 'GELATO 41',
+    farm: 'REAL FARMZ',
+    category: 'CALI ITALIENNE 🇮🇹',
+    image: 'https://images.unsplash.com/photo-1581982073427-757e541a0f67?w=400&h=300&fit=crop&crop=center',
+    prices: {
+      '5g': 50,
+      '10g': 90,
+      '25g': 160,
+      '50g': 300,
+      '100g': 580,
+      '200g': 1100
+    }
+  }
+];
+
+export default function HomePage() {
+  const [selectedCategory, setSelectedCategory] = useState('Toutes les catégories');
+  const [selectedFarm, setSelectedFarm] = useState('Toutes les farms');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [activeTab, setActiveTab] = useState('menu');
+
+  // Filtrer les produits selon les sélections
+  const filteredProducts = sampleProducts.filter(product => {
+    const categoryMatch = selectedCategory === 'Toutes les catégories' || product.category === selectedCategory;
+    const farmMatch = selectedFarm === 'Toutes les farms' || product.farm === selectedFarm;
+    return categoryMatch && farmMatch;
+  });
+
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedProduct(null);
+  };
+
   return (
-    <div className="min-h-screen text-white" style={{background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #8B0000 100%)'}}>
-      <div className="flex justify-between items-center p-5 bg-black bg-opacity-90">
-        <div className="text-lg font-semibold">01:48</div>
-        <div className="bg-white text-black px-2 py-1 rounded text-xs font-semibold">49</div>
-      </div>
+    <div className="min-h-screen bg-gray-900">
+      {/* Header fixe */}
+      <Header />
       
-      <div className="text-center p-5 bg-black bg-opacity-80">
-        <h1 className="text-lg font-bold mb-1">HASHTAG BOT #🔧</h1>
-        <p className="text-xs text-gray-400">mini-application</p>
-      </div>
-      
-      <div className="bg-red-500 text-white text-center py-2 text-sm font-semibold mb-5">
-        ENVOIE O
-      </div>
-      
-      <div className="px-5">
-        <div className="text-center mb-8">
-          <div className="w-32 h-32 bg-gray-800 rounded-full inline-flex items-center justify-center border-2 border-gray-600 text-5xl font-bold">
-            ##
-          </div>
-        </div>
+      {/* Espacement pour le header fixe */}
+      <div className="pt-28">
+        {/* Filtres */}
+        <CategoryFilter
+          selectedCategory={selectedCategory}
+          selectedFarm={selectedFarm}
+          onCategoryChange={setSelectedCategory}
+          onFarmChange={setSelectedFarm}
+        />
         
-        <div className="bg-black bg-opacity-60 rounded-2xl p-6 mb-20">
-          <div className="flex justify-between items-center mb-5">
-            <h2 className="text-3xl font-bold">Black Farm</h2>
-            <div className="bg-gray-800 text-white px-4 py-2 rounded-full text-xs font-semibold">
-              DRY-SIFT 90U 🅰️🅰️ ☠️
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            {[
-              { weight: '25g', price: '150€' },
-              { weight: '50g', price: '250€' },
-              { weight: '100g', price: '450€' },
-              { weight: '200g', price: '800€' },
-              { weight: '500g', price: '1750€' },
-              { weight: '1000g', price: '3400€' }
-            ].map((item, index) => (
-              <div key={index} className="bg-black bg-opacity-40 border border-gray-700 rounded-xl p-3 text-center">
-                <div className="text-sm text-gray-400 mb-1">{item.weight}</div>
-                <div className="text-lg font-bold text-blue-500">{item.price}</div>
-              </div>
+        {/* Grille de produits */}
+        <div className="p-4 pb-20">
+          <div className="grid grid-cols-2 gap-4">
+            {filteredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onClick={handleProductClick}
+              />
             ))}
           </div>
           
-          <div className="flex flex-col gap-4">
-            <button className="bg-sky-500 text-white rounded-full py-4 text-base font-semibold">
-              ✈️ COMMANDER VIA TELEGRAM
-            </button>
-            <button className="bg-yellow-400 text-black rounded-full py-4 text-base font-semibold">
-              👻 COMMANDER VIA SNAPCHAT
-            </button>
-          </div>
+          {/* Message si aucun produit */}
+          {filteredProducts.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 text-lg mb-2">🔍</div>
+              <p className="text-gray-400">Aucun produit trouvé</p>
+              <p className="text-gray-500 text-sm">Essayez de modifier vos filtres</p>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      
+      {/* Modal détail produit */}
+      {selectedProduct && (
+        <ProductDetail
+          product={selectedProduct}
+          onClose={handleCloseDetail}
+        />
+      )}
     </div>
   );
 }
