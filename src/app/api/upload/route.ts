@@ -19,12 +19,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Aucun fichier fourni' }, { status: 400 });
     }
 
-    // Vérifier le type de fichier
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'video/mp4', 'video/webm'];
+    // Vérifier le type de fichier - Support formats mobiles
+    const allowedTypes = [
+      'image/jpeg', 
+      'image/jpg', 
+      'image/png', 
+      'image/webp',
+      'video/mp4', 
+      'video/webm',
+      'video/quicktime', // .mov (iPhone/Mac)
+      'video/x-msvideo', // .avi
+      'video/mpeg',      // .mpeg
+      'video/3gpp'       // .3gp (Android)
+    ];
     if (!allowedTypes.includes(file.type)) {
       console.log('❌ Type non supporté:', file.type);
       return NextResponse.json({ 
-        error: `Type de fichier non supporté: ${file.type}. Utilisez: JPG, PNG, WebP, MP4, WebM` 
+        error: `Type de fichier non supporté: ${file.type}. Utilisez: JPG, PNG, WebP, MP4, WebM, MOV, AVI` 
       }, { status: 400 });
     }
 

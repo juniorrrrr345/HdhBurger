@@ -10,7 +10,7 @@ interface MediaUploaderProps {
 
 export default function MediaUploader({ 
   onMediaSelected, 
-  acceptedTypes = "image/*,video/*",
+  acceptedTypes = "image/*,video/*,.mov,.avi,.3gp",
   maxSize = 10, // Limite par défaut réduite
   className = ""
 }: MediaUploaderProps) {
@@ -110,10 +110,10 @@ export default function MediaUploader({
         
         <span className="text-sm text-gray-400">
           {acceptedTypes.includes('video') && acceptedTypes.includes('image') 
-            ? 'Images (5MB) & Vidéos (10MB)'
+            ? 'Images (5MB) & Vidéos (10MB) - MP4, MOV, WebM'
             : acceptedTypes.includes('video')
-            ? 'Vidéos (max 10MB)'
-            : 'Images (max 5MB)'
+            ? 'Vidéos (max 10MB) - MP4, MOV, WebM'
+            : 'Images (max 5MB) - JPG, PNG, WebP'
           }
         </span>
       </div>
