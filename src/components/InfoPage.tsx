@@ -12,15 +12,19 @@ export default function InfoPage({ onClose }: InfoPageProps) {
   useEffect(() => {
     async function loadContent() {
       try {
+        console.log('🔍 Chargement du contenu de la page info...');
         const response = await fetch('/api/pages/info');
         if (response.ok) {
           const data = await response.json();
+          console.log('✅ Données reçues:', data);
+          // Utiliser le contenu de la base de données ou le contenu par défaut
           setContent(data.content || defaultContent);
         } else {
+          console.warn('⚠️ API non accessible, utilisation du contenu par défaut');
           setContent(defaultContent);
         }
       } catch (error) {
-        console.error('Erreur lors du chargement:', error);
+        console.error('❌ Erreur lors du chargement:', error);
         setContent(defaultContent);
       }
       setLoading(false);
@@ -62,134 +66,81 @@ export default function InfoPage({ onClose }: InfoPageProps) {
         <div className="w-6"></div>
       </div>
 
-      <div className="p-6 max-w-2xl mx-auto">
-        {/* Logo et titre */}
-        <div className="text-center mb-8">
-          <h2 className="text-4xl graffiti-text mb-2">HashBurger</h2>
-          <p className="text-emerald-400 font-semibold tracking-widest text-sm uppercase">
-            Premium Concentrés • Bordeaux
-          </p>
-        </div>
+      <div className="p-6 max-w-4xl mx-auto">
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-white text-lg">Chargement...</div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Logo et titre */}
+            <div className="text-center mb-8">
+              <h2 className="text-4xl graffiti-text mb-2">HashBurger</h2>
+              <p className="text-emerald-400 font-semibold tracking-widest text-sm uppercase">
+                Premium Concentrés • Bordeaux
+              </p>
+            </div>
 
-        {/* À propos */}
-        <div className="card-gradient rounded-xl p-6 mb-6">
-          <h3 className="text-xl font-bold mb-4 accent-green flex items-center">
-            <span className="mr-2">🍃</span>
-            À propos de HashBurger
-          </h3>
-          <p className="text-gray-300 leading-relaxed mb-4">
-            <strong className="accent-orange">HashBurger</strong> est la référence absolue pour les concentrés premium à Bordeaux et dans toute la France. 
-            Depuis notre création, nous nous sommes imposés comme le <strong className="accent-green">#1 incontournable</strong> pour tous les connaisseurs 
-            à la recherche de qualité exceptionnelle.
-          </p>
-          <p className="text-gray-300 leading-relaxed">
-            Notre expertise s'étend sur une large gamme de produits : du <strong>120U++ marocain</strong> au <strong>Frozen Sift</strong> 
-            en passant par les <strong>variétés californiennes</strong> et néerlandaises. Chaque produit est rigoureusement sélectionné 
-            et testé pour garantir une expérience optimale.
-          </p>
-        </div>
+            {/* Contenu dynamique de la page */}
+            <div className="card-gradient rounded-xl p-6">
+              <div className="prose prose-invert max-w-none">
+                {content.split('\n').map((line, index) => {
+                  // Titres H1
+                  if (line.startsWith('# ')) {
+                    return (
+                      <h1 key={index} className="text-3xl font-bold text-white mb-6 mt-8 first:mt-0">
+                        {line.substring(2)}
+                      </h1>
+                    );
+                  }
+                  // Titres H2
+                  if (line.startsWith('## ')) {
+                    return (
+                      <h2 key={index} className="text-2xl font-bold accent-green mb-4 mt-6">
+                        {line.substring(3)}
+                      </h2>
+                    );
+                  }
+                  // Titres H3
+                  if (line.startsWith('### ')) {
+                    return (
+                      <h3 key={index} className="text-xl font-bold accent-orange mb-3 mt-4">
+                        {line.substring(4)}
+                      </h3>
+                    );
+                  }
+                  // Listes
+                  if (line.startsWith('- ')) {
+                    return (
+                      <li key={index} className="text-gray-300 ml-4 mb-2 list-disc">
+                        {line.substring(2)}
+                      </li>
+                    );
+                  }
+                  // Lignes vides
+                  if (line.trim() === '') {
+                    return <br key={index} />;
+                  }
+                  // Texte normal
+                  return (
+                    <p key={index} className="text-gray-300 leading-relaxed mb-4">
+                      {line.split('**').map((part, i) => 
+                        i % 2 === 1 ? <strong key={i} className="text-white font-bold">{part}</strong> : part
+                      )}
+                    </p>
+                  );
+                })}
+              </div>
+            </div>
 
-        {/* Nos produits */}
-        <div className="card-gradient rounded-xl p-6 mb-6">
-          <h3 className="text-xl font-bold mb-4 accent-orange flex items-center">
-            <span className="mr-2">⭐</span>
-            Nos Spécialités
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <h4 className="font-bold accent-green mb-2">🇲🇦 Hash Marocain</h4>
-              <p className="text-sm text-gray-400">120U++, 105U, 90U Premium - Qualité artisanale traditionnelle</p>
-            </div>
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <h4 className="font-bold accent-green mb-2">❄️ Frozen Sift</h4>
-              <p className="text-sm text-gray-400">Extraction à froid pour préserver tous les terpènes</p>
-            </div>
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <h4 className="font-bold accent-green mb-2">🇳🇱 Weed NL</h4>
-              <p className="text-sm text-gray-400">Variétés néerlandaises premium indoor</p>
-            </div>
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <h4 className="font-bold accent-green mb-2">🇮🇹 Cali Italienne</h4>
-              <p className="text-sm text-gray-400">Génétiques californiennes cultivées en Italie</p>
+            {/* Avertissement légal */}
+            <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-4 text-center mt-8">
+              <p className="text-red-300 text-xs">
+                ⚠️ Réservé à un usage adulte responsable • Respect de la législation en vigueur
+              </p>
             </div>
           </div>
-        </div>
-
-        {/* Services */}
-        <div className="card-gradient rounded-xl p-6 mb-6">
-          <h3 className="text-xl font-bold mb-4 accent-red flex items-center">
-            <span className="mr-2">🚚</span>
-            Nos Services
-          </h3>
-          <div className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <div className="bg-emerald-500 rounded-full p-2 mt-1">
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div>
-                <h4 className="font-bold text-white">Livraison Bordeaux</h4>
-                <p className="text-gray-400 text-sm">Livraison rapide et discrète sur Bordeaux métropole</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="bg-emerald-500 rounded-full p-2 mt-1">
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div>
-                <h4 className="font-bold text-white">Envoi Postal</h4>
-                <p className="text-gray-400 text-sm">Expédition sécurisée partout en France</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="bg-emerald-500 rounded-full p-2 mt-1">
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div>
-                <h4 className="font-bold text-white">Qualité Garantie</h4>
-                <p className="text-gray-400 text-sm">Tous nos produits sont testés et certifiés</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="bg-emerald-500 rounded-full p-2 mt-1">
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div>
-                <h4 className="font-bold text-white">Support 24/7</h4>
-                <p className="text-gray-400 text-sm">Équipe disponible via Telegram</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Engagement qualité */}
-        <div className="card-gradient rounded-xl p-6 mb-6">
-          <h3 className="text-xl font-bold mb-4 accent-orange flex items-center">
-            <span className="mr-2">🔥</span>
-            Notre Engagement
-          </h3>
-          <div className="bg-gradient-to-r from-emerald-500/20 to-orange-500/20 rounded-lg p-4 border border-emerald-500/30">
-            <p className="text-white leading-relaxed">
-              <strong>Cure au top, terpènes de fou !</strong> 🤩 Notre motto n'est pas qu'un slogan. 
-              Nous nous engageons à vous fournir uniquement des produits d'exception, avec un process de 
-              curing optimal pour préserver tous les arômes et garantir une expérience sensorielle unique.
-            </p>
-          </div>
-        </div>
-
-        {/* Avertissement légal */}
-        <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-4 text-center">
-          <p className="text-red-300 text-xs">
-            ⚠️ Réservé à un usage adulte responsable • Respect de la législation en vigueur
-          </p>
-        </div>
+        )}
       </div>
     </div>
   );

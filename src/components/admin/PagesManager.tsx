@@ -52,8 +52,9 @@ export default function PagesManager() {
     if (!editingPage) return;
     
     try {
+      console.log('💾 Sauvegarde de la page:', editingPage.slug);
       const response = await fetch(`/api/pages/${editingPage.slug}`, {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -61,14 +62,19 @@ export default function PagesManager() {
       });
 
       if (response.ok) {
+        const savedData = await response.json();
+        console.log('✅ Page sauvegardée:', savedData);
         setShowModal(false);
         loadPages();
+        alert('✅ Page sauvegardée avec succès !');
       } else {
-        alert('Erreur lors de la sauvegarde');
+        const errorData = await response.text();
+        console.error('❌ Erreur API:', errorData);
+        alert('❌ Erreur lors de la sauvegarde');
       }
     } catch (error) {
-      console.error('Erreur:', error);
-      alert('Erreur lors de la sauvegarde');
+      console.error('❌ Erreur:', error);
+      alert('❌ Erreur lors de la sauvegarde');
     }
   };
 
@@ -87,53 +93,64 @@ export default function PagesManager() {
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white">Gestion des Pages</h1>
-        <p className="text-gray-400 mt-2">Modifier le contenu des pages Info et Contact</p>
+    <div className="p-4 lg:p-8">
+      <div className="mb-6 lg:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-white">📄 Gestion des Pages</h1>
+            <p className="text-gray-400 mt-2">Modifier le contenu des pages Info et Contact</p>
+          </div>
+        </div>
       </div>
 
       {/* Liste des pages */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
         {pages.map((page) => (
-          <div key={page.slug} className="bg-gray-900 border border-white/20 rounded-xl p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 className="font-bold text-white text-xl">{page.title}</h3>
-                <p className="text-gray-400 text-sm">/{page.slug}</p>
+          <div key={page.slug} className="bg-gray-900/50 border border-white/20 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm">
+            <div className="p-4 lg:p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="font-bold text-white text-lg lg:text-xl">{page.title}</h3>
+                  <p className="text-gray-400 text-xs lg:text-sm">/{page.slug}</p>
+                </div>
+                <span className={`px-2 py-1 rounded text-xs ${
+                  page.isActive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+                }`}>
+                  {page.isActive ? 'Actif' : 'Inactif'}
+                </span>
               </div>
-              <span className={`px-2 py-1 rounded text-xs ${
-                page.isActive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
-              }`}>
-                {page.isActive ? 'Actif' : 'Inactif'}
-              </span>
+              
+              <div className="bg-gray-800/50 rounded-lg p-3 lg:p-4 mb-4">
+                <p className="text-gray-300 text-xs lg:text-sm line-clamp-3">
+                  {page.content.substring(0, 120)}...
+                </p>
+              </div>
+              
+              <button
+                onClick={() => handleEdit(page)}
+                className="w-full bg-white/10 border border-white/20 hover:bg-white/20 text-white font-bold py-2 lg:py-3 px-3 lg:px-4 rounded-lg lg:rounded-xl transition-all duration-300 backdrop-blur-sm shadow-lg hover:scale-[1.02] text-sm lg:text-base"
+              >
+                ✏️ Modifier le contenu
+              </button>
             </div>
-            
-            <div className="bg-gray-800 rounded-lg p-4 mb-4">
-              <p className="text-gray-300 text-sm line-clamp-3">
-                {page.content.substring(0, 150)}...
-              </p>
-            </div>
-            
-            <button
-              onClick={() => handleEdit(page)}
-              className="w-full bg-white hover:bg-gray-100 text-black font-bold py-2 px-4 rounded-lg"
-            >
-              ✏️ Modifier le contenu
-            </button>
           </div>
         ))}
       </div>
 
       {/* Modal d'édition */}
       {showModal && editingPage && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-900 border border-white/20 rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold text-white mb-6">
-              Modifier la page - {editingPage.title}
-            </h2>
+        <div className="fixed inset-0 bg-black/90 flex items-start justify-center p-2 sm:p-4 z-[9999] overflow-y-auto lg:items-center">
+          <div className="bg-gray-900 border border-white/20 rounded-xl w-full max-w-4xl my-2 lg:my-4 backdrop-blur-sm max-h-[98vh] lg:max-h-[95vh] flex flex-col">
+            {/* Header du modal */}
+            <div className="p-4 sm:p-6 border-b border-white/20 flex-shrink-0">
+              <h2 className="text-lg lg:text-xl font-bold text-white">
+                Modifier la page - {editingPage.title}
+              </h2>
+            </div>
 
-            <div className="space-y-6 mb-6">
+            {/* Contenu du modal */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+              <div className="space-y-6 mb-6">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Titre</label>
                 <input
@@ -144,15 +161,15 @@ export default function PagesManager() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Contenu</label>
-                <textarea
-                  value={editingPage.content}
-                  onChange={(e) => updateField('content', e.target.value)}
-                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white h-80"
-                  placeholder="Contenu de la page..."
-                />
-              </div>
+                              <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Contenu</label>
+                  <textarea
+                    value={editingPage.content}
+                    onChange={(e) => updateField('content', e.target.value)}
+                    className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 lg:px-4 py-2 lg:py-3 focus:outline-none focus:ring-2 focus:ring-white/50 h-60 lg:h-80 text-sm lg:text-base"
+                    placeholder="Contenu de la page..."
+                  />
+                </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Statut</label>
@@ -167,29 +184,34 @@ export default function PagesManager() {
               </div>
             </div>
 
-            {/* Aperçu */}
-            <div className="mb-6">
-              <h3 className="text-lg font-bold text-white mb-4">Aperçu</h3>
-              <div className="bg-gray-800 border border-white/20 rounded-lg p-4 max-h-40 overflow-y-auto">
-                <pre className="text-gray-300 text-sm whitespace-pre-wrap">
-                  {editingPage.content}
-                </pre>
+                {/* Aperçu */}
+                <div className="mb-6">
+                  <h3 className="text-base lg:text-lg font-bold text-white mb-4">Aperçu</h3>
+                  <div className="bg-gray-800 border border-white/20 rounded-lg p-3 lg:p-4 max-h-32 lg:max-h-40 overflow-y-auto">
+                    <pre className="text-gray-300 text-xs lg:text-sm whitespace-pre-wrap">
+                      {editingPage.content}
+                    </pre>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="flex space-x-4">
-              <button
-                onClick={handleSave}
-                className="bg-white hover:bg-gray-100 text-black font-bold py-2 px-4 rounded-lg flex-1"
-              >
-                💾 Sauvegarder
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg"
-              >
-                ❌ Annuler
-              </button>
+            {/* Boutons fixes en bas */}
+            <div className="p-3 sm:p-4 lg:p-6 border-t border-white/20 bg-gray-900 flex-shrink-0 rounded-b-xl sticky bottom-0">
+              <div className="flex gap-2 sm:gap-4">
+                <button
+                  onClick={handleSave}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 sm:py-3 px-3 sm:px-4 lg:px-6 rounded-lg lg:rounded-xl transition-all duration-300 shadow-lg text-xs sm:text-sm lg:text-base"
+                >
+                  💾 Sauvegarder
+                </button>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 sm:py-3 px-3 sm:px-4 lg:px-6 rounded-lg lg:rounded-xl transition-all duration-300 text-xs sm:text-sm lg:text-base"
+                >
+                  ❌ Annuler
+                </button>
+              </div>
             </div>
           </div>
         </div>

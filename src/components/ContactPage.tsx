@@ -21,11 +21,14 @@ export default function ContactPage({ onClose }: ContactPageProps) {
     async function loadData() {
       try {
         // Charger le contenu de la page contact
+        console.log('🔍 Chargement du contenu de la page contact...');
         const pageRes = await fetch('/api/pages/contact');
         if (pageRes.ok) {
           const pageData = await pageRes.json();
+          console.log('✅ Données page contact reçues:', pageData);
           setContent(pageData.content || defaultContent);
         } else {
+          console.warn('⚠️ API page contact non accessible, utilisation du contenu par défaut');
           setContent(defaultContent);
         }
 
