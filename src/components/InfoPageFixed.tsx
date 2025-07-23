@@ -82,7 +82,10 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
 
   const getBackgroundStyle = () => {
     if (!backgroundSettings.backgroundImage) {
-      return { backgroundColor: 'black' };
+      return { 
+        backgroundColor: 'rgb(15, 23, 42)', // slate-900 pour un fond plus approprié
+        backgroundImage: 'linear-gradient(135deg, rgb(15, 23, 42) 0%, rgb(30, 41, 59) 100%)' // gradient subtil
+      };
     }
     
     return {
@@ -97,7 +100,7 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
 
   const getOverlayStyle = () => {
     if (!backgroundSettings.backgroundImage) {
-      return { display: 'none' };
+      return { display: 'none' }; // Pas d'overlay si pas d'image
     }
     
     return {
@@ -149,7 +152,7 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
               </div>
 
               {/* Contenu dynamique de la page */}
-              <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-6 shadow-lg hover:bg-black/50 transition-all duration-300">
+              <div className="bg-black/60 backdrop-blur-sm border border-white/20 rounded-xl p-6 mb-6 shadow-2xl hover:bg-black/70 transition-all duration-300">
                 <div className="prose prose-invert max-w-none">
                   {pageContent.split('\n').map((line, index) => {
                     // Titres H1
