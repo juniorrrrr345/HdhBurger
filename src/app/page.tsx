@@ -178,11 +178,11 @@ export default function HomePage() {
 
   // Affichage conditionnel selon l'onglet actif
   if (activeTab === 'infos') {
-    return <InfoPageFixed onClose={() => setActiveTab('menu')} />;
+    return <InfoPageFixed onClose={() => setActiveTab('menu')} activeTab={activeTab} onTabChange={handleTabChange} />;
   }
 
   if (activeTab === 'contact') {
-    return <ContactPageFixed onClose={() => setActiveTab('menu')} />;
+    return <ContactPageFixed onClose={() => setActiveTab('menu')} activeTab={activeTab} onTabChange={handleTabChange} />;
   }
 
   return (

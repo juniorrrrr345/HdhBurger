@@ -1,10 +1,13 @@
 'use client';
+import BottomNav from './BottomNav';
 
 interface ContactPageProps {
   onClose: () => void;
+  activeTab?: string;
+  onTabChange?: (tabId: string) => void;
 }
 
-export default function ContactPageFixed({ onClose }: ContactPageProps) {
+export default function ContactPageFixed({ onClose, activeTab = 'contact', onTabChange }: ContactPageProps) {
   const socialLinks = [
     { name: 'Telegram', url: 'https://t.me/hashburgerchannel', icon: '📱', color: '#0088cc' },
     { name: 'Instagram', url: 'https://instagram.com/hashburger', icon: '📷', color: '#E4405F' },
