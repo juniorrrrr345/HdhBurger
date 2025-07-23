@@ -9,7 +9,7 @@ interface Settings {
   canalLink: string;
   deliveryInfo: string;
   qualityInfo: string;
-  titleEffect: string;
+  titleStyle: string;
   backgroundImage: string;
   backgroundOpacity: number;
   backgroundBlur: number;
@@ -25,7 +25,7 @@ export default function SettingsManager() {
     canalLink: '',
     deliveryInfo: '',
     qualityInfo: '',
-    titleEffect: 'none',
+    titleStyle: 'glow',
     backgroundImage: '',
     backgroundOpacity: 20,
     backgroundBlur: 5,
@@ -53,7 +53,7 @@ export default function SettingsManager() {
           canalLink: data.canalLink || '',
           deliveryInfo: data.deliveryInfo || '',
           qualityInfo: data.qualityInfo || '',
-          titleEffect: data.titleEffect || 'none',
+          titleStyle: data.titleStyle || 'glow',
           backgroundImage: data.backgroundImage || '',
           backgroundOpacity: data.backgroundOpacity || 20,
           backgroundBlur: data.backgroundBlur || 5,
@@ -147,7 +147,7 @@ export default function SettingsManager() {
           {/* Debug info - visible seulement en dev */}
           {process.env.NODE_ENV === 'development' && (
             <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 text-yellow-200 text-xs">
-              <p>Debug: titleEffect = {settings.titleEffect}</p>
+              <p>Debug: titleStyle = {settings.titleStyle}</p>
               <p>Debug: backgroundImage = {settings.backgroundImage || 'vide'}</p>
               <p>Debug: scrollingText = {settings.scrollingText || 'vide'}</p>
             </div>
@@ -250,20 +250,20 @@ export default function SettingsManager() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Effet du titre
+                Style du titre
               </label>
               <select
-                value={settings.titleEffect}
-                onChange={(e) => updateField('titleEffect', e.target.value)}
+                value={settings.titleStyle}
+                onChange={(e) => updateField('titleStyle', e.target.value)}
                 className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white"
               >
-                <option value="none">Aucun effet</option>
+                <option value="glow">Lueur (défaut)</option>
                 <option value="gradient">Dégradé coloré</option>
                 <option value="neon">Effet néon</option>
                 <option value="rainbow">Arc-en-ciel</option>
-                <option value="glow">Lueur</option>
                 <option value="shadow">Ombre portée</option>
                 <option value="bounce">Animation rebond</option>
+                <option value="graffiti">🎨 Graffiti Style</option>
               </select>
             </div>
 

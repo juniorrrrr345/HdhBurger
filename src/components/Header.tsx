@@ -50,7 +50,7 @@ export default function Header() {
   const getTitleClass = () => {
     const baseClass = "text-xl font-black tracking-wider transition-all duration-300";
     
-    switch (settings.titleEffect) {
+    switch (settings.titleStyle) {
       case 'gradient':
         return `${baseClass} bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent`;
       case 'neon':
@@ -63,6 +63,8 @@ export default function Header() {
         return `${baseClass} text-white drop-shadow-[2px_2px_4px_rgba(0,0,0,0.8)]`;
       case 'bounce':
         return `${baseClass} text-white animate-bounce`;
+      case 'graffiti':
+        return `graffiti-text text-2xl font-normal`;
       default:
         return `${baseClass} text-white`;
     }
