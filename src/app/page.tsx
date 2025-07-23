@@ -119,106 +119,26 @@ export default function HomePage() {
   const [categories, setCategories] = useState<string[]>(['Toutes les catégories']);
   const [farms, setFarms] = useState<string[]>(['Toutes les farms']);
   const [loading, setLoading] = useState(true);
-  // Charger le background de manière absolument synchrone - FORCER le background de la boutique
-  const getInitialBackground = () => {
-    // Essayer d'abord le cache instantané
-    const cachedSettings = instantContent.getSettings();
-    console.log('🔍 Cache settings:', cachedSettings);
-    
-    if (cachedSettings?.backgroundImage) {
-      console.log('✅ Background trouvé dans cache:', cachedSettings.backgroundImage);
-      return {
-        backgroundImage: cachedSettings.backgroundImage,
-        backgroundOpacity: cachedSettings.backgroundOpacity || 20,
-        backgroundBlur: cachedSettings.backgroundBlur || 5
-      };
-    }
-    
-    // Fallback: localStorage direct
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem('instantContentCache');
-        if (stored) {
-          const cache = JSON.parse(stored);
-          console.log('🔍 Cache localStorage:', cache);
-          if (cache.settings?.backgroundImage) {
-            console.log('✅ Background trouvé dans localStorage:', cache.settings.backgroundImage);
-            return {
-              backgroundImage: cache.settings.backgroundImage,
-              backgroundOpacity: cache.settings.backgroundOpacity || 20,
-              backgroundBlur: cache.settings.backgroundBlur || 5
-            };
-          }
-        }
-        
-        // Essayer aussi l'ancien localStorage
-        const oldBackground = localStorage.getItem('lastKnownBackground');
-        if (oldBackground) {
-          const parsed = JSON.parse(oldBackground);
-          if (parsed.backgroundImage) {
-            console.log('✅ Background trouvé dans ancien localStorage:', parsed.backgroundImage);
-            return parsed;
-          }
-        }
-      } catch (e) {
-        console.log('Erreur lecture localStorage direct');
-      }
-    }
-    
-    console.log('⚠️ Aucun background trouvé - utilisation background HashBurger par défaut');
-    // Dernier fallback - background HashBurger par défaut
-    return {
-      backgroundImage: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=1920&h=1080&fit=crop&crop=center',
-      backgroundOpacity: 20,
-      backgroundBlur: 5
-    };
-  };
+  // Utiliser EXACTEMENT la même méthode que InfoPageFixed
+  const settings = instantContent.getSettings();
 
-  const [backgroundSettings, setBackgroundSettings] = useState(getInitialBackground());
+  const [backgroundSettings, setBackgroundSettings] = useState({
+    backgroundImage: settings.backgroundImage || '',
+    backgroundOpacity: settings.backgroundOpacity || 20,
+    backgroundBlur: settings.backgroundBlur || 5
+  });
 
-  // FORCER le chargement du VRAI background de la boutique depuis le panel admin
+  // Rafraîchir en arrière-plan comme InfoPageFixed
   useEffect(() => {
-    const loadRealBackground = async () => {
-      try {
-        console.log('🚀 Chargement du VRAI background de la boutique...');
-        const response = await fetch('/api/settings');
-        if (response.ok) {
-          const settings = await response.json();
-          console.log('📥 Settings API reçus:', settings);
-          
-          if (settings.backgroundImage) {
-            console.log('✅ VRAI background de la boutique trouvé:', settings.backgroundImage);
-            const realBackground = {
-              backgroundImage: settings.backgroundImage,
-              backgroundOpacity: settings.backgroundOpacity || 20,
-              backgroundBlur: settings.backgroundBlur || 5
-            };
-            setBackgroundSettings(realBackground);
-            
-            // Sauvegarder le VRAI background
-            localStorage.setItem('lastKnownBackground', JSON.stringify(realBackground));
-            localStorage.setItem('instantContentCache', JSON.stringify({
-              settings: settings
-            }));
-            
-            // Mettre à jour le cache avec le VRAI background
-            instantContent.updateSettings(settings);
-            console.log('💾 VRAI background sauvegardé partout !');
-          } else {
-            console.log('⚠️ Pas de background configuré dans le panel admin');
-          }
-        } else {
-          console.error('❌ Erreur API settings:', response.status);
-        }
-        
-        // Rafraîchir le cache
-        await instantContent.initialize();
-      } catch (error) {
-        console.error('❌ Erreur chargement VRAI background:', error);
-      }
-    };
-    
-    loadRealBackground();
+    instantContent.refresh().then(() => {
+      const freshSettings = instantContent.getSettings();
+      console.log('🔄 Background settings rafraîchis:', freshSettings);
+      setBackgroundSettings({
+        backgroundImage: freshSettings.backgroundImage || '',
+        backgroundOpacity: freshSettings.backgroundOpacity || 20,
+        backgroundBlur: freshSettings.backgroundBlur || 5
+      });
+    });
   }, []);
 
   // Fonction pour recharger les settings uniquement
