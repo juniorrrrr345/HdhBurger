@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import connectDB from '@/lib/mongodb-fixed';
 import Page from '@/models/Page';
 
 export async function GET(request: Request, { params }: { params: { slug: string } }) {
