@@ -108,7 +108,7 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
           <div className="text-center mb-8">
             <h2 className="text-3xl font-black text-white mb-2">{settings.shopTitle}</h2>
             <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
-              {settings.shopSubtitle} • Bordeaux
+              {settings.shopSubtitle}
             </p>
           </div>
 
@@ -164,12 +164,7 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
             </div>
           </div>
 
-          {/* Avertissement légal */}
-          <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-4 text-center">
-            <p className="text-red-300 text-xs">
-              ⚠️ Réservé à un usage adulte responsable • Respect de la législation en vigueur
-            </p>
-          </div>
+
         </div>
       </div>
 
