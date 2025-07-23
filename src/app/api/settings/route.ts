@@ -1,51 +1,86 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb-fixed';
-import Settings from '@/models/Settings';
+import { connectToDatabase } from '@/lib/mongodb-fixed';
 
 export async function GET() {
   try {
-    await connectDB();
-    let settings = await Settings.findOne();
+    console.log('🔍 API Settings - GET Request');
+    
+    const { db } = await connectToDatabase();
+    const settingsCollection = db.collection('settings');
+    
+    let settings = await settingsCollection.findOne({});
     
     // Si aucun paramètre n'existe, créer les valeurs par défaut
     if (!settings) {
-      settings = new Settings();
-      await settings.save();
+      const defaultSettings = {
+        shopTitle: 'HashBurger',
+        shopSubtitle: 'Premium Concentrés',
+        backgroundImage: '',
+        backgroundOpacity: 20,
+        backgroundBlur: 5,
+        telegramLink: 'https://t.me/hashburgerchannel',
+        email: 'contact@hashburger.fr',
+        address: 'Bordeaux, France',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      await settingsCollection.insertOne(defaultSettings);
+      settings = defaultSettings;
     }
     
+    console.log('✅ Settings chargés:', settings);
     return NextResponse.json(settings);
   } catch (error) {
-    console.error('Error fetching settings:', error);
-    return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
+    console.error('❌ Erreur API Settings GET:', error);
+    
+    // Fallback settings si erreur DB
+    const fallbackSettings = {
+      shopTitle: 'HashBurger',
+      shopSubtitle: 'Premium Concentrés',
+      backgroundImage: '',
+      backgroundOpacity: 20,
+      backgroundBlur: 5,
+      telegramLink: 'https://t.me/hashburgerchannel',
+      email: 'contact@hashburger.fr',
+      address: 'Bordeaux, France'
+    };
+    
+    return NextResponse.json(fallbackSettings);
   }
 }
 
 async function updateSettings(request: Request) {
   try {
-    console.log('🔧 /api/settings - Début de la requête de mise à jour');
-    await connectDB();
-    console.log('✅ Connexion MongoDB établie');
+    console.log('🔧 API Settings - POST/PUT Request');
+    
+    const { db } = await connectToDatabase();
+    const settingsCollection = db.collection('settings');
     
     const data = await request.json();
     console.log('📝 Données reçues:', data);
     
-    let settings = await Settings.findOne();
-    if (!settings) {
-      console.log('📦 Création de nouveaux paramètres');
-      settings = new Settings(data);
-    } else {
-      console.log('🔄 Mise à jour des paramètres existants');
-      Object.assign(settings, data);
-    }
+    // Ajouter la date de mise à jour
+    data.updatedAt = new Date();
     
-    const savedSettings = await settings.save();
-    console.log('✅ Paramètres sauvegardés:', savedSettings);
-    return NextResponse.json(savedSettings);
+    // Upsert : mise à jour si existe, création sinon
+    const result = await settingsCollection.replaceOne(
+      {}, // Critère de recherche (vide = premier document)
+      data,
+      { upsert: true } // Créer si n'existe pas
+    );
+    
+    console.log('✅ Paramètres sauvegardés:', result);
+    
+    // Récupérer les paramètres mis à jour
+    const updatedSettings = await settingsCollection.findOne({});
+    
+    return NextResponse.json(updatedSettings);
   } catch (error) {
-    console.error('❌ Error updating settings:', error);
+    console.error('❌ Erreur API Settings POST/PUT:', error);
     return NextResponse.json({ 
-      error: 'Failed to update settings',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: 'Erreur lors de la mise à jour des paramètres',
+      details: error instanceof Error ? error.message : 'Erreur inconnue'
     }, { status: 500 });
   }
 }

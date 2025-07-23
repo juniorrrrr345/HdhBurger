@@ -8,32 +8,95 @@ interface ContactPageProps {
   onTabChange?: (tabId: string) => void;
 }
 
+interface SocialLink {
+  name: string;
+  url: string;
+  icon: string;
+  color: string;
+}
+
 export default function ContactPageFixed({ onClose, activeTab = 'contact', onTabChange }: ContactPageProps) {
   const [backgroundSettings, setBackgroundSettings] = useState({
     backgroundImage: '',
     backgroundOpacity: 20,
     backgroundBlur: 5
   });
+  const [pageContent, setPageContent] = useState('');
+  const [settings, setSettings] = useState({
+    shopTitle: 'HashBurger',
+    shopSubtitle: 'Premium Concentrés',
+    telegramLink: 'https://t.me/hashburgerchannel'
+  });
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadBackgroundSettings = async () => {
+    const loadData = async () => {
       try {
-        const response = await fetch('/api/settings');
-        if (response.ok) {
-          const data = await response.json();
+        // Charger les paramètres globaux
+        console.log('🔍 Chargement paramètres globaux...');
+        const settingsResponse = await fetch('/api/settings');
+        if (settingsResponse.ok) {
+          const settingsData = await settingsResponse.json();
           setBackgroundSettings({
-            backgroundImage: data.backgroundImage || '',
-            backgroundOpacity: data.backgroundOpacity || 20,
-            backgroundBlur: data.backgroundBlur || 5
+            backgroundImage: settingsData.backgroundImage || '',
+            backgroundOpacity: settingsData.backgroundOpacity || 20,
+            backgroundBlur: settingsData.backgroundBlur || 5
+          });
+          setSettings({
+            shopTitle: settingsData.shopTitle || 'HashBurger',
+            shopSubtitle: settingsData.shopSubtitle || 'Premium Concentrés',
+            telegramLink: settingsData.telegramLink || 'https://t.me/hashburgerchannel'
           });
         }
+
+        // Charger le contenu de la page Contact
+        console.log('🔍 Chargement contenu page Contact...');
+        const pageResponse = await fetch('/api/pages/contact');
+        if (pageResponse.ok) {
+          const pageData = await pageResponse.json();
+          console.log('✅ Contenu page Contact chargé:', pageData);
+          setPageContent(pageData.content || defaultContent);
+        } else {
+          console.warn('⚠️ API page Contact non accessible, contenu par défaut');
+          setPageContent(defaultContent);
+        }
+
+        // Charger les réseaux sociaux
+        const socialResponse = await fetch('/api/social-links');
+        if (socialResponse.ok) {
+          const socialData = await socialResponse.json();
+          setSocialLinks(socialData);
+        }
       } catch (error) {
-        console.error('Erreur lors du chargement des paramètres:', error);
+        console.error('❌ Erreur lors du chargement:', error);
+        setPageContent(defaultContent);
+      } finally {
+        setLoading(false);
       }
     };
 
-    loadBackgroundSettings();
+    loadData();
   }, []);
+
+  const defaultContent = `
+# Contactez HashBurger
+
+## 📞 Informations de Contact
+
+**Telegram Principal :** @hashburgerchannel  
+**Email :** contact@hashburger.fr  
+**Horaires :** 24h/24 - 7j/7
+
+## 🚚 Livraison
+
+**Bordeaux Métropole :** Livraison rapide et discrète  
+**France entière :** Envoi postal sécurisé
+
+## 💬 Support Client
+
+Notre équipe est disponible 24h/24 via Telegram pour répondre à toutes vos questions.
+  `;
 
   const getBackgroundStyle = () => {
     if (!backgroundSettings.backgroundImage) {
@@ -52,189 +115,155 @@ export default function ContactPageFixed({ onClose, activeTab = 'contact', onTab
 
   const getOverlayStyle = () => {
     if (!backgroundSettings.backgroundImage) {
-      return {};
+      return { display: 'none' };
     }
     
     return {
-      backgroundColor: `rgba(0, 0, 0, ${(100 - backgroundSettings.backgroundOpacity) / 100})`,
-      backdropFilter: `blur(${backgroundSettings.backgroundBlur}px)`,
       position: 'absolute' as const,
       top: 0,
       left: 0,
       right: 0,
       bottom: 0,
+      backgroundColor: `rgba(0, 0, 0, ${backgroundSettings.backgroundOpacity / 100})`,
+      backdropFilter: `blur(${backgroundSettings.backgroundBlur}px)`,
       zIndex: 1
     };
   };
-  const socialLinks = [
-    { name: 'Telegram', url: 'https://t.me/hashburgerchannel', icon: '📱', color: '#0088cc' },
-    { name: 'Instagram', url: 'https://instagram.com/hashburger', icon: '📷', color: '#E4405F' },
-    { name: 'WhatsApp', url: 'https://wa.me/33123456789', icon: '💬', color: '#25D366' },
-    { name: 'Discord', url: 'https://discord.gg/hashburger', icon: '🎮', color: '#7289DA' }
-  ];
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto" style={getBackgroundStyle()}>
-      {/* Overlay pour opacity et blur */}
-      {backgroundSettings.backgroundImage && (
-        <div style={getOverlayStyle()}></div>
-      )}
+      {/* Overlay pour background */}
+      <div style={getOverlayStyle()}></div>
       
-      {/* Contenu principal */}
+      {/* Contenu */}
       <div className="relative z-10">
-        {/* Header avec bouton retour */}
-        <div className="sticky top-0 bg-black/80 backdrop-blur-sm p-4 flex items-center justify-between border-b border-white/20 z-10">
-        <button
-          onClick={onClose}
-          className="text-white hover:text-gray-300 transition-colors"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <h1 className="text-lg font-bold text-white">Contact</h1>
-        <div className="w-6"></div>
-      </div>
-
-      <div className="p-6 max-w-2xl mx-auto pb-32">
-        {/* Logo et titre */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-black text-white mb-2">HashBurger</h2>
-          <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
-            Nous Contacter
-          </p>
+        {/* Header */}
+        <div className="sticky top-0 bg-black/95 backdrop-blur-sm p-4 flex items-center justify-between border-b border-white/20 z-20">
+          <button
+            onClick={onClose}
+            className="text-white hover:text-gray-300 transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h1 className="text-lg font-bold text-white">Contact</h1>
+          <div className="w-6"></div>
         </div>
 
-        {/* Informations de contact */}
-        <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-8 shadow-lg hover:bg-black/50 transition-all duration-300">
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-            <span className="mr-2">📞</span>
-            Informations de Contact
-          </h3>
-          
-          <div className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <div className="bg-blue-600 rounded-full p-3">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                </svg>
-              </div>
-              <div>
-                <h4 className="font-bold text-white">Telegram Principal</h4>
-                <p className="text-gray-400">@hashburgerchannel</p>
-              </div>
+        <div className="p-6 max-w-4xl mx-auto pb-32">
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-white text-lg">Chargement...</div>
             </div>
+          ) : (
+            <>
+              {/* Logo et titre dynamiques */}
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-black text-white mb-2">{settings.shopTitle}</h2>
+                <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
+                  {settings.shopSubtitle} • Contact
+                </p>
+              </div>
 
-            <div className="flex items-center space-x-4">
-              <div className="bg-gray-600 rounded-full p-3">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+              {/* Contenu dynamique de la page */}
+              <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-6 shadow-lg hover:bg-black/50 transition-all duration-300">
+                <div className="prose prose-invert max-w-none">
+                  {pageContent.split('\n').map((line, index) => {
+                    // Titres H1
+                    if (line.startsWith('# ')) {
+                      return (
+                        <h1 key={index} className="text-2xl font-bold text-white mb-4 mt-6 first:mt-0">
+                          {line.substring(2)}
+                        </h1>
+                      );
+                    }
+                    // Titres H2
+                    if (line.startsWith('## ')) {
+                      return (
+                        <h2 key={index} className="text-xl font-bold text-gray-200 mb-3 mt-4">
+                          {line.substring(3)}
+                        </h2>
+                      );
+                    }
+                    // Titres H3
+                    if (line.startsWith('### ')) {
+                      return (
+                        <h3 key={index} className="text-lg font-bold text-gray-300 mb-2 mt-3">
+                          {line.substring(4)}
+                        </h3>
+                      );
+                    }
+                    // Listes
+                    if (line.startsWith('- ')) {
+                      return (
+                        <li key={index} className="text-gray-200 ml-4 mb-2 list-disc">
+                          {line.substring(2)}
+                        </li>
+                      );
+                    }
+                    // Lignes vides
+                    if (line.trim() === '') {
+                      return <br key={index} />;
+                    }
+                    // Texte normal
+                    return (
+                      <p key={index} className="text-gray-200 leading-relaxed mb-3">
+                        {line.split('**').map((part, i) => 
+                          i % 2 === 1 ? <strong key={i} className="text-white font-bold">{part}</strong> : part
+                        )}
+                      </p>
+                    );
+                  })}
+                </div>
               </div>
-              <div>
-                <h4 className="font-bold text-white">Email</h4>
-                <p className="text-gray-400">contact@hashburger.fr</p>
-              </div>
-            </div>
 
-            <div className="flex items-center space-x-4">
-              <div className="bg-green-600 rounded-full p-3">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+              {/* Contact rapide Telegram */}
+              <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-6 shadow-lg">
+                <h3 className="text-lg font-bold text-white mb-4">📞 Contact Direct</h3>
+                <a
+                  href={settings.telegramLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-center bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                >
+                  <div className="flex items-center justify-center">
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                    </svg>
+                    Nous contacter sur Telegram
+                  </div>
+                </a>
               </div>
-              <div>
-                <h4 className="font-bold text-white">Horaires</h4>
-                <p className="text-gray-400">24h/24 - 7j/7</p>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Livraison */}
-        <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-8 shadow-lg hover:bg-black/50 transition-all duration-300">
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-            <span className="mr-2">🚚</span>
-            Livraison
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-gray-800 rounded-lg p-4">
-              <h4 className="font-bold text-white mb-2">📍 Bordeaux Métropole</h4>
-              <p className="text-gray-400 text-sm">Livraison rapide et discrète</p>
-              <p className="text-white font-medium mt-2">Délai : 1-2h</p>
-            </div>
-            
-            <div className="bg-gray-800 rounded-lg p-4">
-              <h4 className="font-bold text-white mb-2">📦 France entière</h4>
-              <p className="text-gray-400 text-sm">Envoi postal sécurisé</p>
-              <p className="text-white font-medium mt-2">Délai : 24-48h</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Réseaux sociaux */}
-        <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-8 shadow-lg hover:bg-black/50 transition-all duration-300">
-          <h3 className="text-xl font-bold text-white mb-6 text-center">
-            🌐 Suivez-nous
-          </h3>
-          <div className="grid grid-cols-1 gap-4">
-            {socialLinks.map((social, index) => (
-              <a
-                key={index}
-                href={social.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between p-4 bg-gray-800 border border-white/10 rounded-lg hover:bg-gray-700 transition-colors group"
-              >
-                <div className="flex items-center space-x-4">
-                  <span className="text-2xl">{social.icon}</span>
-                  <div>
-                    <span className="font-semibold text-white">{social.name}</span>
-                    <p className="text-gray-400 text-sm">{social.url.replace('https://', '')}</p>
+              {/* Réseaux sociaux dynamiques */}
+              {socialLinks.length > 0 && (
+                <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-6 shadow-lg">
+                  <h3 className="text-lg font-bold text-white mb-4">🌐 Nos Réseaux</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {socialLinks.map((social, index) => (
+                      <a
+                        key={index}
+                        href={social.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center p-3 rounded-lg border border-white/20 hover:border-white/40 text-white hover:bg-white/10 transition-all duration-300"
+                        style={{ borderColor: social.color + '40' }}
+                      >
+                        <span className="text-lg mr-2">{social.icon}</span>
+                        <span className="font-medium">{social.name}</span>
+                      </a>
+                    ))}
                   </div>
                 </div>
-                <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* Support Client */}
-        <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-8 shadow-lg hover:bg-black/50 transition-all duration-300">
-          <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-            <span className="mr-2">💬</span>
-            Support Client
-          </h3>
-          <p className="text-gray-300 leading-relaxed">
-            Notre équipe est disponible 24h/24 via Telegram pour répondre à toutes vos questions. 
-            N'hésitez pas à nous contacter pour des conseils personnalisés ou toute assistance.
-          </p>
-        </div>
-
-        {/* Bouton principal Telegram */}
-        <div className="mb-8">
-          <a
-            href="https://t.me/hashburgerchannel"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block text-center bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-          >
-            <div className="flex items-center justify-center">
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-              </svg>
-              Nous Contacter sur Telegram
-            </div>
-          </a>
+              )}
+            </>
+          )}
         </div>
       </div>
 
-        {/* Bottom Navigation avec fond transparent */}
-        <BottomNav activeTab={activeTab} onTabChange={onTabChange} />
-      </div>
+      {/* Bottom Navigation */}
+      <BottomNav activeTab={activeTab} onTabChange={onTabChange} />
     </div>
   );
 }
