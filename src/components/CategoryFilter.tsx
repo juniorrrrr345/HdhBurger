@@ -53,7 +53,7 @@ export default function CategoryFilter({
         </button>
         
         {showCategories && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 rounded-lg shadow-xl z-[9999] border border-white/20">
+          <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 rounded-lg shadow-xl z-[9999] border-2 border-white/40 shadow-2xl backdrop-blur-sm">
             {categories.map((category) => (
                               <button
                   key={category}
@@ -83,7 +83,7 @@ export default function CategoryFilter({
         </button>
         
         {showFarms && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 rounded-lg shadow-xl z-[9999] border border-white/20">
+          <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 rounded-lg shadow-xl z-[9999] border-2 border-white/40 shadow-2xl backdrop-blur-sm">
             {farms.map((farm) => (
                               <button
                   key={farm}

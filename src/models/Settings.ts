@@ -25,6 +25,27 @@ const SettingsSchema = new mongoose.Schema({
     type: String,
     default: 'Qualité premium garantie • Produit testé'
   },
+  titleEffect: {
+    type: String,
+    enum: ['none', 'gradient', 'neon', 'rainbow', 'glow', 'shadow', 'bounce'],
+    default: 'none'
+  },
+  backgroundImage: {
+    type: String,
+    default: ''
+  },
+  backgroundOpacity: {
+    type: Number,
+    min: 0,
+    max: 100,
+    default: 20
+  },
+  backgroundBlur: {
+    type: Number,
+    min: 0,
+    max: 20,
+    default: 5
+  },
   updatedAt: {
     type: Date,
     default: Date.now
