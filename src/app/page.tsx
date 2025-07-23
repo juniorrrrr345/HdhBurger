@@ -176,13 +176,11 @@ export default function HomePage() {
 
             {/* Affichage avec chargement pour première visite */}
             {isFirstLoad ? (
-              <div className="text-center py-12">
-                <div className="bg-gray-900/80 border border-white/20 rounded-xl p-8 max-w-md mx-auto backdrop-blur-sm">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
-                  <h3 className="text-lg font-bold text-white mb-2">Chargement de la boutique...</h3>
-                  <p className="text-gray-400">
-                    Première visite - récupération des produits
-                  </p>
+              <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
+                <div className="text-center">
+                  <h1 className="text-4xl font-bold text-white mb-4 animate-pulse">
+                    Bienvenu(e)s sur Notre Mini App 📲
+                  </h1>
                 </div>
               </div>
             ) : products.length === 0 ? (
