@@ -148,17 +148,20 @@ export default function ProductsManager() {
   const syncLocalStatesWithFormData = () => {
     const finalPrices: { [key: string]: number } = {};
     
-    // Synchroniser les prix depuis les états locaux
-    Object.entries(priceInputs).forEach(([key, value]) => {
-      const numericValue = parseFloat(value) || 0;
-      if (value !== '' && !isNaN(numericValue)) {
-        finalPrices[key] = numericValue;
+    // Récupérer les valeurs directement depuis les inputs DOM
+    Object.keys(inputRefs.current).forEach(key => {
+      const input = inputRefs.current[key];
+      if (input && input.value !== '') {
+        const numericValue = parseFloat(input.value);
+        if (!isNaN(numericValue)) {
+          finalPrices[key] = numericValue;
+        }
       }
     });
     
-    // Ajouter les prix existants qui ne sont pas dans les états locaux
+    // Ajouter les prix existants qui ne sont pas dans les inputs
     Object.entries(formData.prices || {}).forEach(([key, value]) => {
-      if (!(key in priceInputs)) {
+      if (!(key in inputRefs.current)) {
         finalPrices[key] = value;
       }
     });
@@ -337,148 +340,45 @@ export default function ProductsManager() {
   };
 
   const updatePrice = useCallback((priceKey: string, value: string) => {
-    // SEULEMENT mettre à jour l'état local - PAS de formData en temps réel
-    setPriceInputs(prev => ({
-      ...prev,
-      [priceKey]: value
-    }));
-    
-    // NE PAS mettre à jour formData ici pour éviter les re-renders
-    // La sauvegarde se fera lors du submit du formulaire
+    // Juste stocker dans l'objet sans déclencher de re-render
+    priceInputs[priceKey] = value;
   }, []);
 
   // Composant de champ de prix isolé pour éviter les re-renders
   const PriceInput = useCallback(({ priceKey, value }: { priceKey: string; value?: number | undefined }) => {
-    // Utiliser l'état local s'il existe, sinon la valeur passée, sinon chaîne vide
-    const localValue = priceInputs[priceKey] !== undefined 
-      ? priceInputs[priceKey] 
-      : (value !== undefined && value !== null && value !== 0 ? value.toString() : '');
-    
-    const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = e.target.value;
-      // Forcer le maintien du focus
-      const currentTarget = e.currentTarget;
-      
-      updatePrice(priceKey, newValue);
-      
-      // Re-forcer le focus après le changement
-      requestAnimationFrame(() => {
-        if (currentTarget && document.activeElement !== currentTarget) {
-          currentTarget.focus();
-        }
-      });
-    }, [priceKey]);
-    
-    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-      // Empêcher TOUTE propagation d'événement
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-    }, []);
-    
     return (
       <input
         ref={(el) => { if (el) inputRefs.current[priceKey] = el; }}
         type="number"
-        value={localValue}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
+        defaultValue={priceInputs[priceKey] || (value !== undefined && value !== null && value !== 0 ? value.toString() : '')}
+        onChange={(e) => {
+          // Juste sauvegarder la valeur sans re-render
+          priceInputs[priceKey] = e.target.value;
+        }}
         className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
         placeholder="Prix en €"
         step="0.01"
         inputMode="decimal"
         min="0"
-        onFocus={(e) => {
-          // Empêcher la sélection automatique et maintenir le focus
-          const input = e.target;
-          input.select = () => {};
-          setTimeout(() => {
-            input.setSelectionRange(input.value.length, input.value.length);
-          }, 0);
-        }}
-        onBlur={(e) => {
-          // Empêcher la perte de focus non désirée
-          const input = e.target;
-          setTimeout(() => {
-            if (document.activeElement === document.body) {
-              // Si aucun élément n'a le focus, remettre le focus sur l'input
-              input.focus();
-            }
-          }, 50);
-        }}
       />
     );
-  }, [priceInputs, updatePrice]);
+  }, []);
 
   // Composant pour les champs de quantité sans perte de focus
   const QuantityInput = useCallback(({ priceKey }: { priceKey: string }) => {
-    // Utiliser l'état local des quantités ou la clé par défaut
-    const localValue = quantityInputs[priceKey] !== undefined ? quantityInputs[priceKey] : priceKey;
-    
-    const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = e.target.value;
-      const currentTarget = e.currentTarget;
-      
-      // Mettre à jour l'état local immédiatement pour éviter la perte de focus
-      setQuantityInputs(prev => ({
-        ...prev,
-        [priceKey]: newValue
-      }));
-      
-      // Re-forcer le focus après le changement
-      requestAnimationFrame(() => {
-        if (currentTarget && document.activeElement !== currentTarget) {
-          currentTarget.focus();
-        }
-      });
-    }, [priceKey]);
-    
-    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-      // Empêcher TOUTE propagation d'événement
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-    }, []);
-    
-    const handleBlur = useCallback(() => {
-      // Synchroniser avec formData seulement à la fin de l'édition
-      const finalValue = quantityInputs[priceKey] || priceKey;
-      if (finalValue.trim() !== '' && finalValue !== priceKey) {
-        // Délai pour éviter les conflits
-        setTimeout(() => {
-          handlePriceKeyChange(priceKey, finalValue);
-        }, 50);
-      }
-    }, [priceKey]);
-    
     return (
       <input
         type="text"
-        value={localValue}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        onBlur={handleBlur}
+        defaultValue={quantityInputs[priceKey] || priceKey}
+        onChange={(e) => {
+          // Juste sauvegarder la valeur sans re-render
+          quantityInputs[priceKey] = e.target.value;
+        }}
         className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
         placeholder="3g, 5g, 10g..."
-        onFocus={(e) => {
-          // Empêcher la sélection automatique et maintenir le focus
-          const input = e.target;
-          input.select = () => {};
-          setTimeout(() => {
-            input.setSelectionRange(input.value.length, input.value.length);
-          }, 0);
-        }}
-        onBlur={(e) => {
-          // Empêcher la perte de focus non désirée
-          const input = e.target;
-          setTimeout(() => {
-            if (document.activeElement === document.body) {
-              // Si aucun élément n'a le focus, remettre le focus sur l'input
-              input.focus();
-            }
-          }, 50);
-        }}
       />
     );
-  }, [quantityInputs]);
+  }, []);
 
   // Fonction pour obtenir tous les prix à afficher (TOUJOURS garder les lignes même vides)
   const getAllPriceEntries = () => {
