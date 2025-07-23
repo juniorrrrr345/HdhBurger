@@ -22,15 +22,39 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     console.log('🔄 Données nettoyées pour update:', updateData);
     
     const { ObjectId } = require('mongodb');
+    
+    // Vérifier la validité de l'ID
+    console.log('🔍 ID reçu:', params.id);
+    if (!ObjectId.isValid(params.id)) {
+      console.log('❌ ID invalide:', params.id);
+      return NextResponse.json({ error: 'ID produit invalide' }, { status: 400 });
+    }
+    
+    const objectId = new ObjectId(params.id);
+    console.log('🔍 ObjectId créé:', objectId);
+    
+    // D'abord vérifier si le produit existe
+    const existingProduct = await productsCollection.findOne({ _id: objectId });
+    console.log('🔍 Produit existant trouvé:', existingProduct ? 'OUI' : 'NON');
+    
+    if (!existingProduct) {
+      console.log('❌ Produit inexistant avec ID:', params.id);
+      // Lister quelques produits pour debug
+      const allProducts = await productsCollection.find({}).limit(3).toArray();
+      console.log('📋 Exemples produits en base:', allProducts.map(p => ({ id: p._id, name: p.name })));
+      return NextResponse.json({ error: 'Produit non trouvé en base' }, { status: 404 });
+    }
+    
+    console.log('✅ Produit existe, tentative mise à jour...');
     const result = await productsCollection.findOneAndUpdate(
-      { _id: new ObjectId(params.id) },
+      { _id: objectId },
       { $set: updateData },
       { returnDocument: 'after' }
     );
 
     if (!result.value) {
-      console.log('❌ Produit non trouvé:', params.id);
-      return NextResponse.json({ error: 'Produit non trouvé' }, { status: 404 });
+      console.log('❌ Échec mise à jour malgré produit existant');
+      return NextResponse.json({ error: 'Échec mise à jour' }, { status: 500 });
     }
 
     console.log('✅ Produit mis à jour:', result.value);
