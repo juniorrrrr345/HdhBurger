@@ -10,7 +10,8 @@
     "setup-new-shop": "node scripts/duplicate-setup.js",
     "restore-hashburger": "node scripts/restore-hashburger.js",
     "restore-hashburger-complete": "node scripts/restore-hashburger-complete.js",
-    "restore-hashburger-cloudinary": "node scripts/restore-hashburger-cloudinary.js"
+    "restore-hashburger-cloudinary": "node scripts/restore-hashburger-cloudinary.js",
+    "restore-hashburger-final": "node scripts/restore-hashburger-final.js"
   },
   "dependencies": {
     "cloudinary": "^2.7.0",
