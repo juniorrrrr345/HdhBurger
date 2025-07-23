@@ -10,12 +10,15 @@ interface Settings {
 }
 
 export default function Header() {
-  const [settings, setSettings] = useState<Settings>({
+  const [settings, setSettings] = useState({
     shopTitle: 'HashBurger',
-    shopSubtitle: 'Premium Concentrés',
-    bannerText: '⭐ NUMERO 1 SUR BORDEAUX ET ENVOI POSTAL ⭐',
-    titleEffect: 'none',
-    scrollingText: ''
+    shopSubtitle: 'Premium Cannabis',
+    titleStyle: 'glow',
+    bannerText: '',
+    scrollingText: '',
+    backgroundImage: '',
+    backgroundOpacity: 20,
+    backgroundBlur: 5
   });
 
   useEffect(() => {
@@ -26,10 +29,13 @@ export default function Header() {
           const data = await response.json();
           setSettings({
             shopTitle: data.shopTitle || 'HashBurger',
-            shopSubtitle: data.shopSubtitle || 'Premium Concentrés',
-            bannerText: data.bannerText || '⭐ NUMERO 1 SUR BORDEAUX ET ENVOI POSTAL ⭐',
-            titleEffect: data.titleEffect || 'none',
-            scrollingText: data.scrollingText || ''
+            shopSubtitle: data.shopSubtitle || 'Premium Cannabis',
+            titleStyle: data.titleStyle || 'glow',
+            bannerText: data.bannerText || '',
+            scrollingText: data.scrollingText || '',
+            backgroundImage: data.backgroundImage || '',
+            backgroundOpacity: data.backgroundOpacity || 20,
+            backgroundBlur: data.backgroundBlur || 5
           });
         }
       } catch (error) {

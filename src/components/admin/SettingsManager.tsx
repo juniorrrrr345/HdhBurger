@@ -196,7 +196,7 @@ export default function SettingsManager() {
               value={settings.bannerText}
               onChange={(e) => updateField('bannerText', e.target.value)}
               className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white"
-              placeholder="⭐ NUMERO 1 SUR BORDEAUX ET ENVOI POSTAL ⭐"
+              placeholder="Texte du bandeau promotionnel (optionnel)"
             />
           </div>
         </div>
@@ -420,9 +420,9 @@ export default function SettingsManager() {
           
           <div className="bg-black rounded-lg overflow-hidden border border-white/20">
             {/* Bandeau */}
-            <div className="bg-white text-black py-2 px-4 text-center">
+            <div className="bg-white text-black py-1 px-4 text-center">
               <p className="text-black text-xs font-bold tracking-wide">
-                {settings.bannerText || '⭐ NUMERO 1 SUR BORDEAUX ET ENVOI POSTAL ⭐'}
+                {settings.bannerText || 'Aperçu du bandeau'}
               </p>
             </div>
             

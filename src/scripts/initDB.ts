@@ -86,14 +86,24 @@ async function initializeDatabase() {
     console.log('✅ Produits initialisés');
 
     // Initialiser les paramètres
+    const defaultSettings = {
+      shopTitle: 'HashBurger',
+      shopSubtitle: 'Premium Cannabis',
+      bannerText: '',
+      titleStyle: 'glow',
+      scrollingText: '',
+      backgroundImage: '',
+      backgroundOpacity: 20,
+      backgroundBlur: 5,
+      telegramLink: 'https://t.me/hashburgerchannel',
+      canalLink: 'https://t.me/hashburgerchannel',
+      deliveryInfo: '🚚 Livraison Bordeaux • 📦 Envoi postal France',
+      qualityInfo: 'Qualité premium garantie • Produit testé'
+    };
+
     await Settings.findOneAndUpdate(
       {},
-      {
-        shopTitle: 'HashBurger',
-        shopSubtitle: 'Premium Concentrés',
-        bannerText: '⭐ NUMERO 1 SUR BORDEAUX ET ENVOI POSTAL ⭐',
-        telegramLink: 'https://t.me/hashburgerchannel'
-      },
+      defaultSettings,
       { upsert: true, new: true }
     );
     console.log('✅ Paramètres initialisés');
