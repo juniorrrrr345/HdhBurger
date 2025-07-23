@@ -1,9 +1,14 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/hashburger';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable');
+  console.error('❌ MONGODB_URI non définie ! Variables d\'environnement:', {
+    NODE_ENV: process.env.NODE_ENV,
+    VERCEL: process.env.VERCEL,
+    MONGODB_URI: process.env.MONGODB_URI ? 'DÉFINIE' : 'NON DÉFINIE'
+  });
+  throw new Error('⚠️ MONGODB_URI non définie. Ajoutez-la dans Vercel: Settings > Environment Variables');
 }
 
 let cached = (global as any).mongoose;
