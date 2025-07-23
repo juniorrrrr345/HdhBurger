@@ -16,27 +16,35 @@ export default function HomePage() {
   const [selectedFarm, setSelectedFarm] = useState('Toutes les farms');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState('menu');
-  // Forcer le chargement IMMÉDIAT depuis localStorage
+  // Chargement ULTRA-IMMÉDIAT - éviter même un micro-délai
   const [products, setProducts] = useState<Product[]>(() => {
-    // Forcer le rechargement du localStorage si pas encore fait
+    // Essayer localStorage en premier
     if (typeof window !== 'undefined') {
       try {
         const stored = localStorage.getItem('instantContentCache');
         if (stored) {
           const cacheData = JSON.parse(stored);
           const cachedProducts = cacheData.products || [];
-          console.log('🔍 Produits chargés DIRECTEMENT localStorage:', cachedProducts.length);
-          return cachedProducts;
+          if (cachedProducts.length > 0) {
+            console.log('🔍 Produits INSTANTANÉS localStorage:', cachedProducts.length);
+            return cachedProducts;
+          }
         }
       } catch (e) {
-        console.log('Pas de cache localStorage disponible');
+        console.log('Cache localStorage indisponible');
       }
     }
     
-    // Fallback sur le cache instantané
+    // Si pas de localStorage, essayer le cache instantané  
     const cached = instantContent.getProducts();
-    console.log('🔍 Produits fallback cache instantané:', cached.length);
-    return cached;
+    if (cached.length > 0) {
+      console.log('🔍 Produits cache instantané:', cached.length);
+      return cached;
+    }
+    
+    // Dernier fallback - marquer comme "en chargement" plutôt que vide
+    console.log('🔍 Pas de produits en cache - marquage chargement');
+    return [];
   });
   
   const [categories, setCategories] = useState<string[]>(() => {
@@ -77,6 +85,22 @@ export default function HomePage() {
     return ['Toutes les farms', ...cached.map((f: { name: string }) => f.name)];
   });
   const [loading, setLoading] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(() => {
+    // Si on a des produits en cache, pas de chargement initial
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('instantContentCache');
+        if (stored) {
+          const cacheData = JSON.parse(stored);
+          const cachedProducts = cacheData.products || [];
+          return cachedProducts.length === 0; // True si pas de produits en cache
+        }
+      } catch (e) {
+        return true; // Pas de cache = chargement initial
+      }
+    }
+    return true;
+  });
   // Utiliser EXACTEMENT la même méthode que InfoPageFixed
   const settings = instantContent.getSettings();
 
@@ -145,11 +169,14 @@ export default function HomePage() {
           const freshCategories = instantContent.getCategories();
           const freshFarms = instantContent.getFarms();
           
-          // Mettre à jour seulement si différent pour éviter les re-renders
-          if (freshProducts.length !== products.length) {
-            console.log('📦 Mise à jour produits:', freshProducts.length);
-            setProducts(freshProducts);
-          }
+                     // Mettre à jour seulement si différent pour éviter les re-renders
+           if (freshProducts.length !== products.length) {
+             console.log('📦 Mise à jour produits:', freshProducts.length);
+             setProducts(freshProducts);
+           }
+           
+           // Marquer la fin du chargement initial
+           setIsInitialLoad(false);
           
           const newCategoryNames = ['Toutes les catégories', ...freshCategories.map((c: { name: string }) => c.name)];
           if (newCategoryNames.length !== categories.length) {
@@ -254,23 +281,33 @@ export default function HomePage() {
               onFarmChange={setSelectedFarm}
             />
 
-            {/* Message si aucun produit dans le panel admin */}
-            {products.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="bg-gray-900/80 border border-white/20 rounded-xl p-8 max-w-md mx-auto backdrop-blur-sm">
-                  <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2M4 13h2m0 0V9a2 2 0 012-2h2m0 0V6a2 2 0 012-2h2.586a1 1 0 01.707.293l2.414 2.414A1 1 0 0016 7.414V9a2 2 0 012 2v2m0 0v2a2 2 0 01-2 2h-2m0 0H9a2 2 0 01-2-2v-2m0 0V9a2 2 0 012-2h2" />
-                  </svg>
-                  <h3 className="text-lg font-bold text-white mb-2">Aucun produit disponible</h3>
-                  <p className="text-gray-400 mb-4">
-                    Ajoutez des produits depuis le panel admin pour qu'ils apparaissent ici.
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Panel Admin → Produits → Ajouter un produit
-                  </p>
-                </div>
-              </div>
-            ) : filteredProducts.length === 0 ? (
+                         {/* Affichage conditionnel : pas de message si chargement initial */}
+             {products.length === 0 && !isInitialLoad ? (
+               <div className="text-center py-12">
+                 <div className="bg-gray-900/80 border border-white/20 rounded-xl p-8 max-w-md mx-auto backdrop-blur-sm">
+                   <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2M4 13h2m0 0V9a2 2 0 012-2h2m0 0V6a2 2 0 012-2h2.586a1 1 0 01.707.293l2.414 2.414A1 1 0 0016 7.414V9a2 2 0 012 2v2m0 0v2a2 2 0 01-2 2h-2m0 0H9a2 2 0 01-2-2v-2m0 0V9a2 2 0 012-2h2" />
+                   </svg>
+                   <h3 className="text-lg font-bold text-white mb-2">Aucun produit disponible</h3>
+                   <p className="text-gray-400 mb-4">
+                     Ajoutez des produits depuis le panel admin pour qu'ils apparaissent ici.
+                   </p>
+                   <p className="text-sm text-gray-500">
+                     Panel Admin → Produits → Ajouter un produit
+                   </p>
+                 </div>
+               </div>
+             ) : products.length === 0 && isInitialLoad ? (
+               <div className="text-center py-12">
+                 <div className="bg-gray-900/80 border border-white/20 rounded-xl p-8 max-w-md mx-auto backdrop-blur-sm">
+                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+                   <h3 className="text-lg font-bold text-white mb-2">Chargement des produits...</h3>
+                   <p className="text-gray-400">
+                     Récupération depuis le panel admin
+                   </p>
+                 </div>
+               </div>
+             ) : filteredProducts.length === 0 ? (
               <div className="text-center py-12">
                 <div className="bg-gray-900/80 border border-white/20 rounded-xl p-8 max-w-md mx-auto backdrop-blur-sm">
                   <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
