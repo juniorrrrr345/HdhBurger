@@ -121,7 +121,7 @@ export default function ProductsManager() {
 
   const handleAdd = () => {
     setEditingProduct(null);
-    // Ne pas créer de prix par défaut - permettre aux utilisateurs de les saisir
+    // Commencer avec un produit complètement vide
     setFormData({
       name: '',
       farm: '',
@@ -132,12 +132,8 @@ export default function ProductsManager() {
       description: '',
       isActive: true
     });
-    // Initialiser avec des champs vides pour les prix courants
-    const emptyPriceInputs: { [key: string]: string } = {};
-    defaultPriceKeys.forEach(key => {
-      emptyPriceInputs[key] = '';
-    });
-    setPriceInputs(emptyPriceInputs);
+    // Aucun prix par défaut - interface complètement vide
+    setPriceInputs({});
     setActiveTab('infos'); // Reset tab to infos
     setShowModal(true);
   };
@@ -364,29 +360,34 @@ export default function ProductsManager() {
     );
   }, [priceInputs, updatePrice]);
 
-  // Fonction pour obtenir tous les prix (existants + par défaut avec champs vides)
+  // Fonction pour obtenir uniquement les prix existants + ceux en cours de saisie
   const getAllPriceEntries = () => {
     const allPrices: { [key: string]: number } = {};
     
-    // Ajouter les prix par défaut comme vides s'ils n'existent pas
-    defaultPriceKeys.forEach(key => {
-      if (!(key in (formData.prices || {}))) {
-        allPrices[key] = 0; // Valeur fictive, l'input local sera vide
-      }
-    });
-    
-    // Ajouter les prix existants
+    // Ajouter les prix existants dans formData
     Object.entries(formData.prices || {}).forEach(([key, value]) => {
       allPrices[key] = value;
+    });
+    
+    // Ajouter les prix en cours de saisie (dans priceInputs) qui ne sont pas encore dans formData
+    Object.entries(priceInputs).forEach(([key, value]) => {
+      if (!(key in allPrices) && value !== '') {
+        allPrices[key] = 0; // Valeur temporaire pour l'affichage
+      }
     });
     
     return Object.entries(allPrices);
   };
 
   const addCustomPrice = () => {
-    const customKey = prompt('Entrez la quantité (ex: 1kg, 250g, etc.):');
+    const customKey = prompt('Entrez la quantité (ex: 3g, 5g, 10g, 25g, 50g, 100g, 1kg, etc.):');
     if (customKey && customKey.trim()) {
-      updatePrice(customKey.trim(), '');
+      const key = customKey.trim();
+      // Initialiser dans les états locaux pour affichage immédiat
+      setPriceInputs(prev => ({
+        ...prev,
+        [key]: ''
+      }));
     }
   };
 
@@ -887,19 +888,47 @@ export default function ProductsManager() {
 
               {/* Gestion des prix */}
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-white">Prix</h3>
-                  <button
-                    type="button"
-                    onClick={addCustomPrice}
-                    className="bg-white/10 border border-white/20 hover:bg-white/20 text-white text-sm py-2 px-4 rounded-lg transition-all duration-200"
-                  >
-                    ➕ Ajouter prix
-                  </button>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-white">Prix</h3>
+                    <button
+                      type="button"
+                      onClick={addCustomPrice}
+                      className="bg-white/10 border border-white/20 hover:bg-white/20 text-white text-sm py-2 px-4 rounded-lg transition-all duration-200"
+                    >
+                      ➕ Ajouter prix
+                    </button>
+                  </div>
+                  
+                  {/* Raccourcis pour prix courants */}
+                  <div className="flex flex-wrap gap-2">
+                    {['3g', '5g', '10g', '25g', '50g', '100g'].map(quantity => (
+                      <button
+                        key={quantity}
+                        type="button"
+                        onClick={() => {
+                          setPriceInputs(prev => ({
+                            ...prev,
+                            [quantity]: ''
+                          }));
+                        }}
+                        className="bg-blue-600/20 border border-blue-400/30 hover:bg-blue-600/40 text-blue-300 text-xs py-1 px-2 rounded transition-all duration-200"
+                        title={`Ajouter ${quantity}`}
+                      >
+                        + {quantity}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 
                 <div className="space-y-3 max-h-80 overflow-y-auto">
-                  {getAllPriceEntries().map(([priceKey, value]) => (
+                  {getAllPriceEntries().length === 0 ? (
+                    <div className="text-center py-8 text-gray-400">
+                      <p className="mb-2">Aucun prix défini</p>
+                      <p className="text-sm">Cliquez sur "➕ Ajouter prix" pour commencer</p>
+                    </div>
+                  ) : (
+                    getAllPriceEntries().map(([priceKey, value]) => (
                     <div key={priceKey} className="flex items-center gap-3">
                       <div className="flex-1">
                         <label className="block text-xs text-gray-400 mb-1">Quantité</label>
@@ -922,9 +951,10 @@ export default function ProductsManager() {
                         title="Supprimer ce prix"
                       >
                         🗑️
-                      </button>
-                    </div>
-                  ))}
+                                              </button>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
               </div>
@@ -1071,7 +1101,13 @@ export default function ProductsManager() {
                     </div>
                     
                     <div className="space-y-3 max-h-80 overflow-y-auto">
-                      {getAllPriceEntries().map(([priceKey, value]) => (
+                      {getAllPriceEntries().length === 0 ? (
+                        <div className="text-center py-8 text-gray-400">
+                          <p className="mb-2">Aucun prix défini</p>
+                          <p className="text-sm">Cliquez sur "➕ Ajouter prix" pour commencer</p>
+                        </div>
+                      ) : (
+                        getAllPriceEntries().map(([priceKey, value]) => (
                         <div key={priceKey} className="bg-gray-800/50 border border-white/10 rounded-lg p-3">
                           <div className="space-y-2">
                             <div>
@@ -1100,7 +1136,8 @@ export default function ProductsManager() {
                             </div>
                           </div>
                         </div>
-                      ))}
+                      ))
+                    )}
                     </div>
                   </div>
                 )}
