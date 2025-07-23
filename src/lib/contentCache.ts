@@ -14,6 +14,11 @@ class InstantContentManager {
   constructor() {
     // Charger immédiatement depuis localStorage si disponible
     this.loadFromLocalStorage();
+    
+    // Forcer l'initialisation immédiate si possible
+    if (typeof window !== 'undefined') {
+      this.initialize().catch(e => console.log('Init cache background failed:', e));
+    }
   }
 
   // Charger depuis localStorage de manière synchrone

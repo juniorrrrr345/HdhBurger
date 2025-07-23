@@ -119,13 +119,46 @@ export default function HomePage() {
   const [categories, setCategories] = useState<string[]>(['Toutes les catégories']);
   const [farms, setFarms] = useState<string[]>(['Toutes les farms']);
   const [loading, setLoading] = useState(true);
-  // Cache instantané - disponible immédiatement depuis localStorage
-  const cachedSettings = instantContent.getSettings();
-  const [backgroundSettings, setBackgroundSettings] = useState({
-    backgroundImage: cachedSettings?.backgroundImage || '',
-    backgroundOpacity: cachedSettings?.backgroundOpacity || 20,
-    backgroundBlur: cachedSettings?.backgroundBlur || 5
-  });
+  // Charger le background de manière absolument synchrone
+  const getInitialBackground = () => {
+    // Essayer d'abord le cache instantané
+    const cachedSettings = instantContent.getSettings();
+    if (cachedSettings?.backgroundImage) {
+      return {
+        backgroundImage: cachedSettings.backgroundImage,
+        backgroundOpacity: cachedSettings.backgroundOpacity || 20,
+        backgroundBlur: cachedSettings.backgroundBlur || 5
+      };
+    }
+    
+    // Fallback: localStorage direct
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('instantContentCache');
+        if (stored) {
+          const cache = JSON.parse(stored);
+          if (cache.settings?.backgroundImage) {
+            return {
+              backgroundImage: cache.settings.backgroundImage,
+              backgroundOpacity: cache.settings.backgroundOpacity || 20,
+              backgroundBlur: cache.settings.backgroundBlur || 5
+            };
+          }
+        }
+      } catch (e) {
+        console.log('Erreur lecture localStorage direct');
+      }
+    }
+    
+    // Dernier fallback - gradient par défaut au lieu de noir
+    return {
+      backgroundImage: 'linear-gradient(135deg, #1a1a1a, #2d2d2d)',
+      backgroundOpacity: 100,
+      backgroundBlur: 0
+    };
+  };
+
+  const [backgroundSettings, setBackgroundSettings] = useState(getInitialBackground());
 
   // Rafraîchir le cache en arrière-plan
   useEffect(() => {
@@ -268,9 +301,11 @@ export default function HomePage() {
             <div 
               className="absolute inset-0 rounded-full bg-cover bg-center"
               style={{
-                backgroundImage: backgroundSettings.backgroundImage 
-                  ? `url(${backgroundSettings.backgroundImage})`
-                  : 'linear-gradient(135deg, #1f2937, #374151)',
+                background: backgroundSettings.backgroundImage.startsWith('linear-gradient') 
+                  ? backgroundSettings.backgroundImage
+                  : backgroundSettings.backgroundImage 
+                    ? `url(${backgroundSettings.backgroundImage})`
+                    : 'linear-gradient(135deg, #1f2937, #374151)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}
