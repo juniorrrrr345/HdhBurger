@@ -1,80 +1,171 @@
-# HashBurger - Boutique de Concentrés Premium
+# 🛍️ HashBurger - Boutique E-commerce Complète
 
-## 🚀 Déploiement sur Vercel
+Une boutique e-commerce moderne et complète avec panel admin intégré, prête à être dupliquée pour créer de nouvelles boutiques.
 
-### 1. Préparation
+## ✨ Fonctionnalités
 
-1. **Créer un compte Vercel** sur [vercel.com](https://vercel.com)
-2. **Connecter votre repository GitHub** à Vercel
+### 🏪 Boutique Client
+- **Responsive Design** - Mobile, tablette, desktop
+- **Catalogue produits** - Avec filtres par catégories et farms
+- **Galerie d'images** - Upload et gestion via Cloudinary
+- **Pages dynamiques** - Info et Contact modifiables
+- **Texte défilant** - Configurable depuis l'admin
+- **Background personnalisé** - Upload d'image de fond
+- **Performance optimisée** - Cache instantané et chargement rapide
 
-### 2. Configuration des variables d'environnement
+### 🔧 Panel Admin Complet
+- **Gestion Produits** - CRUD complet avec upload d'images
+- **Gestion Catégories** - Organisation des produits
+- **Gestion Farms** - Fournisseurs/producteurs
+- **Configuration** - Titre, sous-titre, background, styles
+- **Pages** - Édition du contenu Info et Contact
+- **Réseaux sociaux** - Gestion des liens
+- **Commandes** - Configuration lien Telegram
 
-Dans le dashboard Vercel, allez dans **Settings > Environment Variables** et ajoutez :
+### 🎨 Personnalisation
+- **Thèmes visuels** - Style "glow" ou "graffiti"
+- **Background dynamique** - Image avec opacité et flou réglables
+- **Branding complet** - Logo, couleurs, textes
+- **SEO optimisé** - Métadonnées configurables
+
+## 🚀 Déploiement Rapide
+
+### Prérequis
+- Node.js 18+
+- Compte MongoDB Atlas (gratuit)
+- Compte Cloudinary (gratuit)
+- Compte Vercel (gratuit)
+
+### Installation
+```bash
+git clone https://github.com/juniorrrrr345/HdhBurger.git
+cd HdhBurger
+npm install
+```
+
+### Configuration
+```bash
+# Utiliser l'assistant automatique
+npm run setup-new-shop
+
+# Ou créer manuellement le fichier .env.local
+cp .env.example .env.local
+# Puis éditer avec vos valeurs
+```
+
+### Développement local
+```bash
+npm run dev
+# Ouvrir http://localhost:3000
+# Admin : http://localhost:3000/admin
+```
+
+### Déploiement Vercel
+1. Push votre code sur GitHub
+2. Connecter le repository sur Vercel
+3. Ajouter les variables d'environnement
+4. Déployer !
+
+## 🔄 Duplication pour Nouvelle Boutique
+
+### Méthode Automatique (Recommandée)
+```bash
+# 1. Fork ce repository sur GitHub
+# 2. Cloner votre fork
+git clone https://github.com/VOTRE_USERNAME/VOTRE_BOUTIQUE.git
+cd VOTRE_BOUTIQUE
+
+# 3. Installer les dépendances
+npm install
+
+# 4. Lancer l'assistant de configuration
+npm run setup-new-shop
+
+# 5. Suivre les instructions à l'écran
+```
+
+### Méthode Manuelle
+Consultez [DUPLICATION_GUIDE.md](DUPLICATION_GUIDE.md) pour le guide complet.
+
+## 📱 Technologies Utilisées
+
+- **Frontend** - Next.js 14, React 18, TypeScript
+- **Styling** - Tailwind CSS, CSS animations
+- **Backend** - Next.js API Routes
+- **Base de données** - MongoDB Atlas
+- **Upload d'images** - Cloudinary
+- **Déploiement** - Vercel
+- **Cache** - localStorage + API optimisé
+
+## 🎯 Cas d'Usage
+
+Cette boutique est parfaite pour :
+- **Boutiques en ligne** - Vente de produits physiques
+- **Catalogues numériques** - Présentation de services
+- **Marketplaces** - Multi-vendeurs avec farms
+- **Showrooms** - Galeries de produits
+- **Sites vitrines** - Avec système de commande
+
+## 📋 Structure du Projet
 
 ```
-MONGODB_URI = mongodb+srv://votre-string-mongodb-atlas
+src/
+├── app/                 # Pages Next.js 14
+├── components/          # Composants React
+│   ├── admin/          # Panel d'administration
+│   └── ui/             # Composants UI
+├── lib/                # Utilitaires et configuration
+├── models/             # Modèles MongoDB
+└── hooks/              # Hooks React personnalisés
+
+scripts/
+└── duplicate-setup.js  # Assistant de duplication
+
+docs/
+└── DUPLICATION_GUIDE.md # Guide de duplication complet
 ```
 
-⚠️ **Important**: Assurez-vous que votre MongoDB Atlas autorise l'IP `0.0.0.0/0` (toutes les IPs) pour les déploiements Vercel.
+## 🔐 Sécurité
 
-### 3. Déploiement
+- **Authentification admin** - Username/password sécurisé
+- **Variables d'environnement** - Credentials protégés
+- **Validation** - Sanitisation des entrées
+- **HTTPS** - Déploiement sécurisé via Vercel
 
-1. **Méthode automatique** (recommandée) :
-   - Connectez votre repo GitHub à Vercel
-   - Vercel déploiera automatiquement à chaque push
+## 🆘 Support
 
-2. **Méthode manuelle** :
-   ```bash
-   npm install -g vercel
-   vercel login
-   vercel --prod
-   ```
+### Documentation
+- [Guide de Duplication](DUPLICATION_GUIDE.md)
+- [Configuration MongoDB](docs/mongodb-setup.md)
+- [Configuration Cloudinary](docs/cloudinary-setup.md)
 
-### 4. Configuration MongoDB Atlas
+### Dépannage
+- Vérifiez vos variables d'environnement
+- Consultez les logs Vercel
+- Testez en local avec `npm run dev`
 
-1. Dans MongoDB Atlas, allez dans **Network Access**
-2. Ajoutez l'IP `0.0.0.0/0` pour autoriser Vercel
-3. Ou utilisez les IPs spécifiques de Vercel si préféré
+## 🎉 Exemples de Boutiques
 
-### 5. Initialisation de la base de données
+Créées avec ce template :
+- **HashBurger** - Boutique originale
+- **VotreMarque** - Personnalisée avec l'assistant
+- **MonShop** - Version customisée
 
-Après le déploiement, visitez :
-```
-https://votre-app.vercel.app/api/init-db
-```
+## 📄 Licence
 
-Cela créera les données initiales (catégories, farms, produits d'exemple).
+MIT License - Libre d'utilisation pour vos projets commerciaux.
 
-## 🛠️ Fonctionnalités
+## 🤝 Contribution
 
-- **Interface utilisateur** : Catalogue de produits avec filtres
-- **Panel Admin** : Gestion complète des produits, catégories, paramètres
-- **Responsive Design** : Optimisé mobile, tablette, desktop
-- **Personnalisation** : Arrière-plan, styles de titre, texte défilant
-- **Upload d'images** : Téléchargement d'images depuis mobile
+Les contributions sont les bienvenues ! 
+1. Fork le projet
+2. Créez votre branche feature
+3. Committez vos changements
+4. Push vers la branche
+5. Ouvrez une Pull Request
 
-## 🔧 Technologies
+---
 
-- **Frontend** : Next.js 14, React 18, TypeScript, Tailwind CSS
-- **Backend** : Next.js API Routes, MongoDB, Mongoose
-- **Déploiement** : Vercel
-- **Base de données** : MongoDB Atlas
+**Fait avec ❤️ pour la communauté e-commerce**
 
-## 📱 Accès Admin
-
-URL : `https://votre-app.vercel.app/admin`
-Mot de passe par défaut : `admin123`
-
-## 🎨 Personnalisation
-
-Le panel admin permet de modifier :
-- Titre et sous-titre de la boutique
-- Styles du titre (gradient, néon, etc.)
-- Arrière-plan personnalisé avec upload
-- Texte défilant
-- Liens Telegram et Canal
-- Contenu des pages Info et Contact
-
-## 📞 Support
-
-Pour toute question technique, consultez la documentation Vercel ou MongoDB Atlas.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/juniorrrrr345/HdhBurger)
