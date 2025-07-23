@@ -57,6 +57,10 @@ export default function Header() {
         return `${baseClass} text-white drop-shadow-[2px_2px_4px_rgba(0,0,0,0.8)]`;
       case 'bounce':
         return `${baseClass} text-white animate-bounce`;
+      case 'gothic':
+        return `gothic-title`;
+      case 'metal':
+        return `metal-title`;
       default:
         return `${baseClass} text-white`;
     }
@@ -84,7 +88,10 @@ export default function Header() {
       
       {/* Logo HashBurger - réduit */}
       <div className="bg-black py-2 px-4 text-center border-b border-white/20">
-        <h1 className={getTitleClass()}>
+        <h1 
+          className={getTitleClass()}
+          data-text={settings.shopTitle}
+        >
           {settings.shopTitle}
         </h1>
         <p className="text-gray-400 text-xs uppercase tracking-[0.2em] font-medium">
