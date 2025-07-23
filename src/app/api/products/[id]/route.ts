@@ -1,59 +1,89 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import Product from '@/models/Product';
+import { connectToDatabase } from '@/lib/mongodb-fixed';
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
-    await connectDB();
-    const data = await request.json();
+    console.log('🔍 API Products PUT - Request pour ID:', params.id);
     
-    const product = await Product.findByIdAndUpdate(
-      params.id,
-      { ...data, updatedAt: new Date() },
-      { new: true }
+    const { db } = await connectToDatabase();
+    const productsCollection = db.collection('products');
+    
+    const data = await request.json();
+    console.log('📝 Données reçues pour mise à jour:', data);
+    
+    data.updatedAt = new Date();
+    
+    const { ObjectId } = require('mongodb');
+    const result = await productsCollection.findOneAndUpdate(
+      { _id: new ObjectId(params.id) },
+      { $set: data },
+      { returnDocument: 'after' }
     );
 
-    if (!product) {
+    if (!result.value) {
+      console.log('❌ Produit non trouvé:', params.id);
       return NextResponse.json({ error: 'Produit non trouvé' }, { status: 404 });
     }
 
-    return NextResponse.json(product);
+    console.log('✅ Produit mis à jour:', result.value);
+    return NextResponse.json(result.value);
   } catch (error) {
-    console.error('Erreur lors de la modification:', error);
-    return NextResponse.json({ error: 'Erreur lors de la modification' }, { status: 500 });
+    console.error('❌ Erreur lors de la modification:', error);
+    return NextResponse.json({ 
+      error: 'Erreur lors de la modification',
+      details: error instanceof Error ? error.message : 'Erreur inconnue'
+    }, { status: 500 });
   }
 }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
-    await connectDB();
+    console.log('🔍 API Products DELETE - Request pour ID:', params.id);
     
-    const product = await Product.findByIdAndDelete(params.id);
+    const { db } = await connectToDatabase();
+    const productsCollection = db.collection('products');
+    
+    const { ObjectId } = require('mongodb');
+    const result = await productsCollection.findOneAndDelete({ _id: new ObjectId(params.id) });
 
-    if (!product) {
+    if (!result.value) {
+      console.log('❌ Produit non trouvé pour suppression:', params.id);
       return NextResponse.json({ error: 'Produit non trouvé' }, { status: 404 });
     }
 
+    console.log('✅ Produit supprimé:', result.value);
     return NextResponse.json({ message: 'Produit supprimé avec succès' });
   } catch (error) {
-    console.error('Erreur lors de la suppression:', error);
-    return NextResponse.json({ error: 'Erreur lors de la suppression' }, { status: 500 });
+    console.error('❌ Erreur lors de la suppression:', error);
+    return NextResponse.json({ 
+      error: 'Erreur lors de la suppression',
+      details: error instanceof Error ? error.message : 'Erreur inconnue'
+    }, { status: 500 });
   }
 }
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
-    await connectDB();
+    console.log('🔍 API Products GET - Request pour ID:', params.id);
     
-    const product = await Product.findById(params.id);
+    const { db } = await connectToDatabase();
+    const productsCollection = db.collection('products');
+    
+    const { ObjectId } = require('mongodb');
+    const product = await productsCollection.findOne({ _id: new ObjectId(params.id) });
 
     if (!product) {
+      console.log('❌ Produit non trouvé:', params.id);
       return NextResponse.json({ error: 'Produit non trouvé' }, { status: 404 });
     }
 
+    console.log('✅ Produit trouvé:', product);
     return NextResponse.json(product);
   } catch (error) {
-    console.error('Erreur lors de la récupération:', error);
-    return NextResponse.json({ error: 'Erreur lors de la récupération' }, { status: 500 });
+    console.error('❌ Erreur lors de la récupération:', error);
+    return NextResponse.json({ 
+      error: 'Erreur lors de la récupération',
+      details: error instanceof Error ? error.message : 'Erreur inconnue'
+    }, { status: 500 });
   }
 }

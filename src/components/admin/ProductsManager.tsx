@@ -152,6 +152,12 @@ export default function ProductsManager() {
       const url = editingProduct ? `/api/products/${editingProduct._id}` : '/api/products';
       const method = editingProduct ? 'PUT' : 'POST';
       
+      console.log('💾 Sauvegarde produit:', {
+        url,
+        method,
+        data: cleanedFormData
+      });
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -159,6 +165,8 @@ export default function ProductsManager() {
         },
         body: JSON.stringify(cleanedFormData),
       });
+
+      console.log('📡 Réponse sauvegarde:', response.status, response.statusText);
 
       if (response.ok) {
         // Afficher un message de succès
@@ -174,10 +182,18 @@ export default function ProductsManager() {
         setShowModal(false);
         loadData(); // Recharger les données pour synchroniser
       } else {
+        // Récupérer le détail de l'erreur
+        const errorData = await response.text();
+        console.error('❌ Erreur sauvegarde détaillée:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorData
+        });
+
         // Afficher un message d'erreur
         const errorMsg = document.createElement('div');
         errorMsg.className = 'fixed top-4 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999]';
-        errorMsg.textContent = '❌ Erreur lors de la sauvegarde';
+        errorMsg.textContent = `❌ Erreur ${response.status}: ${response.statusText}`;
         document.body.appendChild(errorMsg);
         
         setTimeout(() => {
