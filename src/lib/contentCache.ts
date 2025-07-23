@@ -11,7 +11,39 @@ class InstantContentManager {
   private isInitialized = false;
   private initPromise: Promise<void> | null = null;
 
-  // Initialiser le cache au démarrage de l'app
+  constructor() {
+    // Charger immédiatement depuis localStorage si disponible
+    this.loadFromLocalStorage();
+  }
+
+  // Charger depuis localStorage de manière synchrone
+  private loadFromLocalStorage(): void {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      const stored = localStorage.getItem('instantContentCache');
+      if (stored) {
+        this.data = JSON.parse(stored);
+        console.log('🚀 Cache chargé depuis localStorage:', this.data);
+      }
+    } catch (error) {
+      console.error('Erreur chargement localStorage:', error);
+    }
+  }
+
+  // Sauvegarder en localStorage
+  private saveToLocalStorage(): void {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      localStorage.setItem('instantContentCache', JSON.stringify(this.data));
+      console.log('💾 Cache sauvegardé en localStorage');
+    } catch (error) {
+      console.error('Erreur sauvegarde localStorage:', error);
+    }
+  }
+
+  // Initialiser le cache avec API en arrière-plan
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
     if (this.initPromise) return this.initPromise;
@@ -42,12 +74,15 @@ class InstantContentManager {
       if (socialRes?.ok) {
         this.data.socialLinks = await socialRes.json();
       }
+
+      // Sauvegarder les nouvelles données
+      this.saveToLocalStorage();
     } catch (error) {
       console.error('Erreur chargement cache admin:', error);
     }
   }
 
-  // Obtenir les settings instantanément
+  // Obtenir les settings instantanément (localStorage + fallback)
   getSettings() {
     return this.data.settings || {
       shopTitle: 'HashBurger',
@@ -103,11 +138,30 @@ class InstantContentManager {
     this.initPromise = null;
     await this.initialize();
   }
+
+  // Mettre à jour et sauvegarder
+  updateSettings(newSettings: any): void {
+    this.data.settings = newSettings;
+    this.saveToLocalStorage();
+  }
+
+  updateInfoContent(content: string): void {
+    this.data.infoPage = { content };
+    this.saveToLocalStorage();
+  }
+
+  updateContactContent(content: string): void {
+    this.data.contactPage = { content };
+    this.saveToLocalStorage();
+  }
 }
 
 export const instantContent = new InstantContentManager();
 
-// Initialiser dès que possible
+// Initialiser en arrière-plan dès que possible
 if (typeof window !== 'undefined') {
-  instantContent.initialize();
+  // Charger immédiatement depuis localStorage puis rafraîchir en arrière-plan
+  setTimeout(() => {
+    instantContent.initialize();
+  }, 100);
 }

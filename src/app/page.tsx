@@ -119,68 +119,33 @@ export default function HomePage() {
   const [categories, setCategories] = useState<string[]>(['Toutes les catégories']);
   const [farms, setFarms] = useState<string[]>(['Toutes les farms']);
   const [loading, setLoading] = useState(true);
-  // Utiliser directement le cache avec fallback sur le background de la boutique
+  // Cache instantané - disponible immédiatement depuis localStorage
   const cachedSettings = instantContent.getSettings();
-  
-  // Utiliser le même background que dans toutes les autres pages
-  const [backgroundSettings, setBackgroundSettings] = useState(() => {
-    // Essayer d'abord le cache
-    if (cachedSettings?.backgroundImage) {
-      return {
-        backgroundImage: cachedSettings.backgroundImage,
-        backgroundOpacity: cachedSettings.backgroundOpacity || 20,
-        backgroundBlur: cachedSettings.backgroundBlur || 5
-      };
-    }
-    
-    // Fallback: essayer localStorage ou valeur par défaut
-    try {
-      const stored = localStorage.getItem('lastKnownBackground');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return {
-          backgroundImage: parsed.backgroundImage || '',
-          backgroundOpacity: parsed.backgroundOpacity || 20,
-          backgroundBlur: parsed.backgroundBlur || 5
-        };
-      }
-    } catch (e) {
-      console.log('Pas de background stocké localement');
-    }
-    
-    // Dernier fallback
-    return {
-      backgroundImage: '',
-      backgroundOpacity: 20,
-      backgroundBlur: 5
-    };
+  const [backgroundSettings, setBackgroundSettings] = useState({
+    backgroundImage: cachedSettings?.backgroundImage || '',
+    backgroundOpacity: cachedSettings?.backgroundOpacity || 20,
+    backgroundBlur: cachedSettings?.backgroundBlur || 5
   });
 
-  // Initialiser le cache et sauvegarder le background
+  // Rafraîchir le cache en arrière-plan
   useEffect(() => {
-    const initializeCache = async () => {
+    const refreshCache = async () => {
       try {
         await instantContent.initialize();
         const settings = instantContent.getSettings();
         
-        if (settings) {
-          const newSettings = {
-            backgroundImage: settings.backgroundImage || '',
-            backgroundOpacity: settings.backgroundOpacity || 20,
-            backgroundBlur: settings.backgroundBlur || 5
-          };
-          
-          setBackgroundSettings(newSettings);
-          
-          // Sauvegarder en localStorage pour la prochaine fois
-          localStorage.setItem('lastKnownBackground', JSON.stringify(newSettings));
-        }
+        // Mettre à jour si les données ont changé
+        setBackgroundSettings({
+          backgroundImage: settings?.backgroundImage || '',
+          backgroundOpacity: settings?.backgroundOpacity || 20,
+          backgroundBlur: settings?.backgroundBlur || 5
+        });
       } catch (error) {
-        console.error('Erreur initialisation cache:', error);
+        console.error('Erreur rafraîchissement cache:', error);
       }
     };
     
-    initializeCache();
+    refreshCache();
   }, []);
 
   // Fonction pour recharger les settings uniquement
