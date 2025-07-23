@@ -125,15 +125,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
           </div>
         </a>
 
-        {/* Informations supplémentaires */}
-        <div className="mt-6 bg-gray-900 border border-white/20 rounded-xl p-4">
-          <p className="text-xs text-gray-400 text-center">
-            🚚 Livraison Bordeaux • 📦 Envoi postal France
-          </p>
-          <p className="text-xs text-gray-500 text-center mt-1">
-            Qualité premium garantie • Produit testé
-          </p>
-        </div>
+
       </div>
     </div>
   );
