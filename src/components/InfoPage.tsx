@@ -69,14 +69,21 @@ export default function InfoPage({ onClose }: InfoPageProps) {
   `;
 
   const getBackgroundStyle = () => {
+    const baseStyle = {
+      minHeight: '100vh',
+      minWidth: '100vw'
+    };
+    
     if (!backgroundSettings.backgroundImage) {
       return { 
+        ...baseStyle,
         backgroundColor: 'rgb(15, 23, 42)', // slate-900 pour un fond plus approprié
         backgroundImage: 'linear-gradient(135deg, rgb(15, 23, 42) 0%, rgb(30, 41, 59) 100%)' // gradient subtil
       };
     }
     
     return {
+      ...baseStyle,
       backgroundColor: 'black',
       backgroundImage: `url(${backgroundSettings.backgroundImage})`,
       backgroundSize: 'cover',
@@ -111,7 +118,7 @@ export default function InfoPage({ onClose }: InfoPageProps) {
       )}
       
       {/* Contenu principal */}
-      <div className="relative z-10">
+      <div className="relative z-10 min-h-screen">
         {/* Header avec bouton retour */}
         <div className="sticky top-0 bg-slate-900/95 backdrop-blur-sm p-4 flex items-center justify-between border-b border-emerald-500/30 z-10">
           <button
@@ -126,7 +133,7 @@ export default function InfoPage({ onClose }: InfoPageProps) {
           <div className="w-6"></div>
         </div>
 
-        <div className="p-6 max-w-4xl mx-auto min-h-screen">
+        <div className="p-6 max-w-4xl mx-auto pb-8 min-h-screen">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="text-white text-lg">Chargement...</div>
