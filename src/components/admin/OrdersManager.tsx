@@ -5,7 +5,6 @@ export default function OrdersManager() {
   const [telegramLink, setTelegramLink] = useState('');
   const [editingLink, setEditingLink] = useState(false);
   const [newTelegramLink, setNewTelegramLink] = useState('');
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadSettings();
@@ -22,8 +21,6 @@ export default function OrdersManager() {
       }
     } catch (error) {
       console.error('Erreur chargement paramètres:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -45,14 +42,6 @@ export default function OrdersManager() {
       alert('Erreur lors de la sauvegarde');
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-white">Chargement...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
