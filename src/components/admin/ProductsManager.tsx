@@ -148,23 +148,37 @@ export default function ProductsManager() {
   const syncLocalStatesWithFormData = () => {
     const finalPrices: { [key: string]: number } = {};
     
-    // Récupérer les valeurs directement depuis les inputs DOM
-    Object.keys(inputRefs.current).forEach(key => {
-      const input = inputRefs.current[key];
-      if (input && input.value !== '') {
-        const numericValue = parseFloat(input.value);
-        if (!isNaN(numericValue)) {
+    // Récupérer TOUS les inputs de prix et quantité dans le modal
+    const modal = document.querySelector('[role="dialog"], .modal, .fixed');
+    if (modal) {
+      const priceInputs = modal.querySelectorAll('input[type="number"]');
+      const quantityInputs = modal.querySelectorAll('input[type="text"]');
+      
+      // Parcourir chaque ligne de prix
+      quantityInputs.forEach((quantityInput, index) => {
+        const quantity = (quantityInput as HTMLInputElement).value.trim();
+        const priceInput = priceInputs[index] as HTMLInputElement;
+        
+        if (quantity && priceInput && priceInput.value !== '') {
+          const numericValue = parseFloat(priceInput.value);
+          if (!isNaN(numericValue) && numericValue > 0) {
+            finalPrices[quantity] = numericValue;
+          }
+        }
+      });
+    }
+    
+    // Aussi récupérer depuis les objets états locaux
+    Object.entries(priceInputs).forEach(([key, value]) => {
+      if (value && value !== '') {
+        const numericValue = parseFloat(value);
+        if (!isNaN(numericValue) && numericValue > 0) {
           finalPrices[key] = numericValue;
         }
       }
     });
     
-    // Ajouter les prix existants qui ne sont pas dans les inputs
-    Object.entries(formData.prices || {}).forEach(([key, value]) => {
-      if (!(key in inputRefs.current)) {
-        finalPrices[key] = value;
-      }
-    });
+    console.log('💾 Prix récupérés pour sauvegarde:', finalPrices);
     
     setFormData(prev => ({
       ...prev,
@@ -180,6 +194,9 @@ export default function ProductsManager() {
     
     // Synchroniser les états locaux avant sauvegarde
     syncLocalStatesWithFormData();
+    
+    // Petit délai pour s'assurer que formData est mis à jour
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     console.log('🔍 Debug handleSave:', {
       editingProduct: editingProduct,
