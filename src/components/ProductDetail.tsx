@@ -21,10 +21,10 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
   return (
     <div className="fixed inset-0 bg-black z-50 overflow-y-auto">
       {/* Header avec bouton retour */}
-      <div className="sticky top-0 bg-gray-900 p-4 flex items-center justify-between border-b border-gray-700 z-10">
+      <div className="sticky top-0 bg-black p-4 flex items-center justify-between border-b border-white/20 z-10">
         <button
           onClick={onClose}
-          className="text-white hover:text-purple-400 transition-colors"
+          className="text-white hover:text-gray-300 transition-colors"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -63,7 +63,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
           )}
           
           {/* Badge catégorie sur la vidéo */}
-          <div className="absolute top-3 left-3 bg-emerald-600 text-white text-xs font-semibold px-3 py-1 rounded-lg shadow-lg">
+          <div className="absolute top-3 left-3 bg-white text-black text-xs font-bold px-3 py-1 rounded-lg shadow-lg">
             {product.category}
           </div>
         </div>
@@ -73,7 +73,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
           <h2 className="text-2xl font-bold mb-2 uppercase tracking-wide text-white">
             {product.name}
           </h2>
-          <p className="text-emerald-400 font-medium mb-1">{product.category}</p>
+          <p className="text-gray-400 font-medium mb-1">{product.category}</p>
           <p className="text-gray-400 uppercase tracking-widest text-sm font-medium mb-3">
             {product.farm}
           </p>
@@ -85,16 +85,16 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
         </div>
 
         {/* Liste des prix */}
-        <div className="bg-gray-800 rounded-xl p-5 mb-6 border border-gray-700">
+        <div className="bg-gray-900 border border-white/20 rounded-xl p-5 mb-6">
           <h3 className="text-lg font-bold mb-4 text-white flex items-center">
             <span className="mr-2">💰</span>
             Tarifs disponibles :
           </h3>
           <div className="space-y-3">
             {priceList.map(({ weight, price }, idx) => (
-              <div key={idx} className="flex justify-between items-center py-2 px-3 bg-slate-700 rounded-lg hover:bg-slate-600 transition-colors">
+              <div key={idx} className="flex justify-between items-center py-2 px-3 bg-gray-800 border border-white/10 rounded-lg hover:bg-gray-700 transition-colors">
                 <span className="font-medium text-white">{weight}</span>
-                <span className="font-bold text-emerald-400 text-lg">{price}</span>
+                <span className="font-bold text-white text-lg">{price}</span>
               </div>
             ))}
           </div>
@@ -116,7 +116,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
         </a>
 
         {/* Informations supplémentaires */}
-        <div className="mt-6 bg-gray-800 rounded-xl p-4 border border-gray-700">
+        <div className="mt-6 bg-gray-900 border border-white/20 rounded-xl p-4">
           <p className="text-xs text-gray-400 text-center">
             🚚 Livraison Bordeaux • 📦 Envoi postal France
           </p>

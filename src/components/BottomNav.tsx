@@ -55,7 +55,7 @@ export default function BottomNav({ activeTab = 'menu', onTabChange }: BottomNav
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 z-40">
+    <nav className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/20 z-40">
       <div className="flex items-center justify-around py-2">
         {navItems.map((item) => (
           <button
@@ -63,7 +63,7 @@ export default function BottomNav({ activeTab = 'menu', onTabChange }: BottomNav
             onClick={() => handleTabClick(item.id)}
             className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-all duration-200 ${
               activeTab === item.id
-                ? 'text-purple-400 bg-gray-800'
+                ? 'text-white bg-gray-800 border border-white/20'
                 : 'text-gray-400 hover:text-white hover:bg-gray-800'
             }`}
           >

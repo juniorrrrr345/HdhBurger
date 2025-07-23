@@ -14,32 +14,25 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.graffiti-text {
+.hashburger-title {
   font-weight: 900;
-  text-shadow: 3px 3px 0px #059669, 6px 6px 0px #dc2626;
-  background: linear-gradient(135deg, #10b981, #f59e0b, #dc2626);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 2.5rem;
+  color: white;
+  text-shadow: 
+    2px 2px 0px #000,
+    4px 4px 0px rgba(0,0,0,0.5),
+    6px 6px 10px rgba(0,0,0,0.3);
+  letter-spacing: 0.1em;
+  position: relative;
 }
 
-.gradient-bg {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #059669 100%);
-}
-
-.card-gradient {
-  background: linear-gradient(145deg, #1e293b, #0f172a);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-.accent-green {
-  color: #10b981;
-}
-
-.accent-orange {
-  color: #f59e0b;
-}
-
-.accent-red {
-  color: #dc2626;
+.hashburger-title::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, white, transparent);
 }
