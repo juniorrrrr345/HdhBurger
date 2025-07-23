@@ -119,32 +119,44 @@ export default function HomePage() {
   const [categories, setCategories] = useState<string[]>(['Toutes les catégories']);
   const [farms, setFarms] = useState<string[]>(['Toutes les farms']);
   const [loading, setLoading] = useState(true);
-  // Initialiser avec un background par défaut pour éviter le noir
+  // Initialiser avec le background du cache instantané
   const [backgroundSettings, setBackgroundSettings] = useState({
-    backgroundImage: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=1920&h=1080&fit=crop',
+    backgroundImage: '',
     backgroundOpacity: 20,
     backgroundBlur: 5
   });
 
-  // Charger les vrais settings immédiatement
+  // Charger le VRAI background depuis le cache instantané
   useEffect(() => {
-    const loadBackgroundImmediately = async () => {
+    const loadBackgroundFromCache = async () => {
       try {
-        const settingsRes = await fetch('/api/settings');
-        if (settingsRes.ok) {
-          const settingsData = await settingsRes.json();
+        await instantContent.initialize();
+        const settings = instantContent.getSettings();
+        
+        if (settings) {
           setBackgroundSettings({
-            backgroundImage: settingsData.backgroundImage || 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=1920&h=1080&fit=crop',
-            backgroundOpacity: settingsData.backgroundOpacity || 20,
-            backgroundBlur: settingsData.backgroundBlur || 5
+            backgroundImage: settings.backgroundImage || '',
+            backgroundOpacity: settings.backgroundOpacity || 20,
+            backgroundBlur: settings.backgroundBlur || 5
           });
+        } else {
+          // Fallback sur API si cache vide
+          const settingsRes = await fetch('/api/settings');
+          if (settingsRes.ok) {
+            const settingsData = await settingsRes.json();
+            setBackgroundSettings({
+              backgroundImage: settingsData.backgroundImage || '',
+              backgroundOpacity: settingsData.backgroundOpacity || 20,
+              backgroundBlur: settingsData.backgroundBlur || 5
+            });
+          }
         }
       } catch (error) {
         console.error('Erreur chargement background:', error);
       }
     };
     
-    loadBackgroundImmediately();
+    loadBackgroundFromCache();
   }, []);
 
   // Fonction pour recharger les settings uniquement
