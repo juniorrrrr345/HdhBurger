@@ -302,13 +302,18 @@ export default function ProductsManager() {
 
       {/* Modal d'édition */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-900 border border-white/20 rounded-xl p-6 w-full max-w-4xl max-h-[85vh] lg:max-h-[90vh] overflow-y-auto backdrop-blur-sm">
-            <h2 className="text-xl font-bold text-white mb-6">
-              {editingProduct ? '✏️ Modifier le produit' : '➕ Ajouter un produit'}
-            </h2>
+        <div className="fixed inset-0 bg-black/80 flex items-start justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+          <div className="bg-gray-900 border border-white/20 rounded-xl w-full max-w-4xl my-4 backdrop-blur-sm max-h-[95vh] flex flex-col">
+            {/* Header fixe */}
+            <div className="p-4 sm:p-6 border-b border-white/20 flex-shrink-0">
+              <h2 className="text-xl font-bold text-white">
+                {editingProduct ? '✏️ Modifier le produit' : '➕ Ajouter un produit'}
+              </h2>
+            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Contenu scrollable */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               {/* Informations de base */}
               <div className="space-y-4">
                 <h3 className="text-lg font-bold text-white">Informations de base</h3>
@@ -435,20 +440,24 @@ export default function ProductsManager() {
                 </div>
               </div>
             </div>
+            </div>
 
-            <div className="flex gap-4 pt-4 border-t border-white/20 bg-gray-900 sticky bottom-0 rounded-b-xl">
-              <button
-                onClick={handleSave}
-                className="flex-1 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg"
-              >
-                💾 Sauvegarder
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="bg-gray-700/50 border border-white/20 hover:bg-gray-600/50 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300"
-              >
-                ❌ Annuler
-              </button>
+            {/* Boutons fixes en bas */}
+            <div className="p-4 sm:p-6 border-t border-white/20 bg-gray-900 flex-shrink-0 rounded-b-xl">
+              <div className="flex gap-4">
+                <button
+                  onClick={handleSave}
+                  className="flex-1 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-bold py-3 px-4 sm:px-6 rounded-xl transition-all duration-300 shadow-lg text-sm sm:text-base"
+                >
+                  💾 Sauvegarder
+                </button>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="bg-gray-700/50 border border-white/20 hover:bg-gray-600/50 text-white font-bold py-3 px-4 sm:px-6 rounded-xl transition-all duration-300 text-sm sm:text-base"
+                >
+                  ❌ Annuler
+                </button>
+              </div>
             </div>
           </div>
         </div>
