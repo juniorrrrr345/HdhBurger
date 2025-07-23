@@ -1,46 +1,66 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { writeFile, mkdir } from 'fs/promises';
+import path from 'path';
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
-
+    
     if (!file) {
-      return NextResponse.json(
-        { error: 'Aucun fichier fourni' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Aucun fichier fourni' }, { status: 400 });
     }
 
     // Vérifier le type de fichier
-    if (!file.type.startsWith('image/')) {
-      return NextResponse.json(
-        { error: 'Le fichier doit être une image' },
-        { status: 400 }
-      );
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'video/mp4', 'video/webm'];
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json({ 
+        error: 'Type de fichier non supporté. Utilisez: JPG, PNG, WebP, MP4, WebM' 
+      }, { status: 400 });
     }
 
-    // Pour l'instant, on convertit l'image en base64 data URL
-    // Cette solution fonctionne mais n'est pas optimale pour de gros fichiers
+    // Limiter la taille (20MB max)
+    const maxSize = 20 * 1024 * 1024; // 20MB
+    if (file.size > maxSize) {
+      return NextResponse.json({ 
+        error: 'Fichier trop volumineux. Maximum 20MB' 
+      }, { status: 400 });
+    }
+
+    // Créer le nom de fichier unique
+    const timestamp = Date.now();
+    const extension = path.extname(file.name);
+    const filename = `${timestamp}${extension}`;
+    
+    // Créer le dossier uploads s'il n'existe pas
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+    try {
+      await mkdir(uploadDir, { recursive: true });
+    } catch (error) {
+      // Le dossier existe déjà
+    }
+
+    // Sauvegarder le fichier
+    const filepath = path.join(uploadDir, filename);
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const base64 = buffer.toString('base64');
-    const dataUrl = `data:${file.type};base64,${base64}`;
+    
+    await writeFile(filepath, buffer);
 
-    console.log('✅ Image convertie en base64, taille:', file.size, 'bytes');
-
+    // Retourner l'URL publique
+    const fileUrl = `/uploads/${filename}`;
+    
     return NextResponse.json({ 
-      url: dataUrl,
-      message: 'Image uploadée avec succès (base64)',
-      size: file.size,
-      type: file.type
+      url: fileUrl,
+      filename: filename,
+      type: file.type.startsWith('image/') ? 'image' : 'video',
+      size: file.size
     });
 
   } catch (error) {
-    console.error('❌ Erreur upload:', error);
-    return NextResponse.json(
-      { error: 'Erreur lors de l\'upload' },
-      { status: 500 }
-    );
+    console.error('Erreur upload:', error);
+    return NextResponse.json({ 
+      error: 'Erreur lors de l\'upload du fichier' 
+    }, { status: 500 });
   }
 }

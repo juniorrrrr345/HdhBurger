@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import MediaUploader from './MediaUploader';
 
 interface Product {
   _id?: string;
@@ -436,26 +437,89 @@ export default function ProductsManager() {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">URL Image</label>
-                  <input
-                    type="url"
-                    value={formData.image || ''}
-                    onChange={(e) => updateField('image', e.target.value)}
-                    className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
-                    placeholder="https://..."
-                  />
-                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Image du produit</label>
+                    
+                    {/* Upload d'image */}
+                    <MediaUploader
+                      onMediaSelected={(url, type) => {
+                        if (type === 'image') {
+                          updateField('image', url);
+                        }
+                      }}
+                      acceptedTypes="image/*"
+                      maxSize={10}
+                      className="mb-3"
+                    />
+                    
+                    {/* Champ URL manuel */}
+                    <div className="text-sm text-gray-400 mb-2">Ou entrer une URL manuellement :</div>
+                    <input
+                      type="url"
+                      value={formData.image || ''}
+                      onChange={(e) => updateField('image', e.target.value)}
+                      className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
+                      placeholder="https://..."
+                    />
+                    
+                    {/* Préview de l'image */}
+                    {formData.image && (
+                      <div className="mt-3">
+                        <div className="text-xs text-gray-400 mb-2">Aperçu :</div>
+                        <img 
+                          src={formData.image} 
+                          alt="Aperçu" 
+                          className="w-32 h-20 object-cover rounded border border-white/20"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">URL Vidéo (optionnel)</label>
-                  <input
-                    type="url"
-                    value={formData.video || ''}
-                    onChange={(e) => updateField('video', e.target.value)}
-                    className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
-                    placeholder="https://..."
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Vidéo du produit (optionnel)</label>
+                    
+                    {/* Upload de vidéo */}
+                    <MediaUploader
+                      onMediaSelected={(url, type) => {
+                        if (type === 'video') {
+                          updateField('video', url);
+                        }
+                      }}
+                      acceptedTypes="video/*"
+                      maxSize={50}
+                      className="mb-3"
+                    />
+                    
+                    {/* Champ URL manuel */}
+                    <div className="text-sm text-gray-400 mb-2">Ou entrer une URL manuellement :</div>
+                    <input
+                      type="url"
+                      value={formData.video || ''}
+                      onChange={(e) => updateField('video', e.target.value)}
+                      className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
+                      placeholder="https://..."
+                    />
+                    
+                    {/* Préview de la vidéo */}
+                    {formData.video && (
+                      <div className="mt-3">
+                        <div className="text-xs text-gray-400 mb-2">Aperçu :</div>
+                        <video 
+                          src={formData.video} 
+                          className="w-32 h-20 object-cover rounded border border-white/20"
+                          controls
+                          muted
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div>
