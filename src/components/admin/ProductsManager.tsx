@@ -50,8 +50,11 @@ export default function ProductsManager() {
       console.log('📦 Réponse produits:', productsRes.status);
       if (productsRes.ok) {
         const productsData = await productsRes.json();
-        console.log('📦 Produits chargés:', productsData.length);
+        console.log('📦 Produits chargés:', productsData.length, productsData);
         setProducts(productsData);
+      } else {
+        console.error('❌ Erreur produits:', productsRes.status);
+        setProducts([]); // Fallback to empty array
       }
 
       // Charger les catégories
@@ -60,8 +63,11 @@ export default function ProductsManager() {
       console.log('🏷️ Réponse catégories:', categoriesRes.status);
       if (categoriesRes.ok) {
         const categoriesData = await categoriesRes.json();
-        console.log('🏷️ Catégories chargées:', categoriesData.length);
-        setCategories(categoriesData.map((c: any) => c.name));
+        console.log('🏷️ Catégories chargées:', categoriesData.length, categoriesData);
+        setCategories(categoriesData.map((c: { name: string }) => c.name));
+      } else {
+        console.error('❌ Erreur catégories:', categoriesRes.status);
+        setCategories([]);
       }
 
       // Charger les farms
@@ -70,15 +76,23 @@ export default function ProductsManager() {
       console.log('🏭 Réponse farms:', farmsRes.status);
       if (farmsRes.ok) {
         const farmsData = await farmsRes.json();
-        console.log('🏭 Farms chargées:', farmsData.length);
-        setFarms(farmsData.map((f: any) => f.name));
+        console.log('🏭 Farms chargées:', farmsData.length, farmsData);
+        setFarms(farmsData.map((f: { name: string }) => f.name));
+      } else {
+        console.error('❌ Erreur farms:', farmsRes.status);
+        setFarms([]);
       }
       
       console.log('✅ Chargement terminé avec succès');
     } catch (error) {
       console.error('❌ Erreur lors du chargement:', error);
+      // En cas d'erreur, on s'assure que loading devient false
+      setProducts([]);
+      setCategories([]);
+      setFarms([]);
     } finally {
       setLoading(false);
+      console.log('🏁 Loading mis à false');
     }
   };
 
@@ -247,10 +261,12 @@ export default function ProductsManager() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-white">Chargement...</div>
+        <div className="text-white">Chargement des produits...</div>
       </div>
     );
   }
+
+  console.log('🎯 Rendu ProductsManager - Produits:', products.length, 'Catégories:', categories.length, 'Farms:', farms.length);
 
   return (
     <div className="p-4 lg:p-6">
@@ -278,8 +294,24 @@ export default function ProductsManager() {
       </div>
 
       {/* Grid de produits - Plus compact */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {products.map((product) => (
+      {products.length === 0 ? (
+        <div className="bg-gray-900/50 border border-white/20 rounded-xl p-8 text-center">
+          <div className="text-gray-400 mb-4">
+            <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-white mb-2">Aucun produit trouvé</h3>
+          <p className="text-gray-400 mb-4">
+            Les produits se chargent ou il n'y en a aucun dans la base de données.
+          </p>
+          <p className="text-sm text-gray-500">
+            Vérifiez la console pour plus de détails ou initialisez la base avec /api/init-db
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {products.map((product) => (
           <div key={product._id} className="bg-gray-900/50 border border-white/20 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm">
             <div className="relative h-32">
               <img
@@ -344,7 +376,8 @@ export default function ProductsManager() {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       {/* Modal d'édition */}
       {showModal && (
