@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import BottomNav from './BottomNav';
 import { instantContent } from '@/lib/contentCache';
-import { useGlobalBackground } from '../hooks/useGlobalBackground';
 
 interface InfoPageProps {
   onClose: () => void;
@@ -11,72 +10,45 @@ interface InfoPageProps {
 }
 
 export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChange }: InfoPageProps) {
-  // Appliquer le background global en mosaïque
-  useGlobalBackground();
-  
   // Utiliser directement les données du cache instantané
   const settings = instantContent.getSettings();
   const pageContent = instantContent.getInfoContent();
-  
-  // Background géré par useGlobalBackground() - plus d'état local nécessaire
 
-  const getBackgroundStyle = () => {
-    const baseStyle = {
-      minHeight: '100vh',
-      minWidth: '100vw'
-    };
-    
-    if (!backgroundSettings.backgroundImage) {
-      return { 
-        ...baseStyle,
-        backgroundColor: 'rgb(15, 23, 42)', // slate-900 pour un fond plus approprié
-        backgroundImage: 'linear-gradient(135deg, rgb(15, 23, 42) 0%, rgb(30, 41, 59) 100%)' // gradient subtil
-      };
+  const handleTabChange = (tabId: string) => {
+    if (onTabChange) {
+      onTabChange(tabId);
     }
-    
-    return {
-      ...baseStyle,
-      backgroundColor: 'black',
-      backgroundImage: `url(${backgroundSettings.backgroundImage})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      position: 'relative' as const
-    };
   };
 
-  // Précharger l'image de background pour un affichage instantané
-  useEffect(() => {
-    if (backgroundSettings.backgroundImage) {
-      const img = new Image();
-      img.src = backgroundSettings.backgroundImage;
-    }
-  }, [backgroundSettings.backgroundImage]);
+  // Background simple et direct - MÊME que page menu
+  const backgroundStyle = settings?.backgroundImage ? {
+    backgroundColor: 'black',
+    backgroundImage: `url(${settings.backgroundImage})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundAttachment: 'fixed',
+    backgroundRepeat: 'no-repeat'
+  } : { backgroundColor: 'black' };
 
-  const getOverlayStyle = () => {
-    if (!backgroundSettings.backgroundImage) {
-      return { display: 'none' }; // Pas d'overlay si pas d'image
-    }
-    
-    return {
-      position: 'absolute' as const,
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: `rgba(0, 0, 0, ${backgroundSettings.backgroundOpacity / 100})`,
-      backdropFilter: `blur(${backgroundSettings.backgroundBlur}px)`,
-      zIndex: 1
-    };
-  };
+  const overlayStyle = settings?.backgroundImage ? {
+    position: 'fixed' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: `rgba(0, 0, 0, ${(settings?.backgroundOpacity || 20) / 100})`,
+    backdropFilter: `blur(${settings?.backgroundBlur || 5}px)`,
+    pointerEvents: 'none' as const,
+    zIndex: 0
+  } : {};
 
   return (
-    <div className="main-container fixed inset-0 z-50 overflow-y-auto min-h-screen">
-      {/* Overlay global */}
-      <div className="global-overlay"></div>
+    <div className="fixed inset-0 z-50 overflow-y-auto min-h-screen" style={backgroundStyle}>
+      {/* Overlay */}
+      {settings?.backgroundImage && <div style={overlayStyle}></div>}
       
       {/* Contenu */}
-      <div className="content-layer min-h-screen">
+      <div className="relative z-10 min-h-screen">
         {/* Header */}
         <div className="sticky top-0 bg-black/95 backdrop-blur-sm p-4 flex items-center justify-between border-b border-white/20 z-20">
           <button
@@ -87,27 +59,19 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 className="text-lg font-bold text-white">Informations</h1>
+          <h1 className="text-xl font-bold text-white">Informations</h1>
           <div className="w-6"></div>
         </div>
 
-        <div className="p-6 max-w-4xl mx-auto pb-32 min-h-screen">
-          {/* Logo et titre dynamiques */}
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-black text-white mb-2">{settings.shopTitle}</h2>
-            <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
-              {settings.shopSubtitle}
-            </p>
-          </div>
-
-          {/* Contenu dynamique de la page */}
-          <div className="bg-black/60 backdrop-blur-sm border border-white/20 rounded-xl p-6 mb-6 shadow-2xl hover:bg-black/70 transition-all duration-300">
-            <div className="prose prose-invert max-w-none">
-              {pageContent.split('\n').map((line, index) => {
+        {/* Contenu de la page */}
+        <div className="flex-1 p-6">
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+              {pageContent.split('\n').map((line: string, index: number) => {
                 // Titres H1
                 if (line.startsWith('# ')) {
                   return (
-                    <h1 key={index} className="text-2xl font-bold text-white mb-4 mt-6 first:mt-0">
+                    <h1 key={index} className="text-3xl font-bold text-white mb-6 mt-8 first:mt-0">
                       {line.substring(2)}
                     </h1>
                   );
@@ -115,7 +79,7 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
                 // Titres H2
                 if (line.startsWith('## ')) {
                   return (
-                    <h2 key={index} className="text-xl font-bold text-gray-200 mb-3 mt-4">
+                    <h2 key={index} className="text-2xl font-bold text-white mb-4 mt-6">
                       {line.substring(3)}
                     </h2>
                   );
@@ -123,12 +87,12 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
                 // Titres H3
                 if (line.startsWith('### ')) {
                   return (
-                    <h3 key={index} className="text-lg font-bold text-gray-300 mb-2 mt-3">
+                    <h3 key={index} className="text-xl font-bold text-white mb-3 mt-4">
                       {line.substring(4)}
                     </h3>
                   );
                 }
-                // Listes
+                // Listes à puces
                 if (line.startsWith('- ')) {
                   return (
                     <li key={index} className="text-gray-200 ml-4 mb-2 list-disc">
@@ -151,13 +115,11 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
               })}
             </div>
           </div>
-
-
         </div>
-      </div>
 
-      {/* Bottom Navigation */}
-      <BottomNav activeTab={activeTab} onTabChange={onTabChange} />
+        {/* Bottom Navigation */}
+        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+      </div>
     </div>
   );
 }
