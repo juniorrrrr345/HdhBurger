@@ -144,11 +144,39 @@ export default function ProductsManager() {
     setShowModal(true);
   };
 
+  // Fonction pour synchroniser les états locaux avec formData avant sauvegarde
+  const syncLocalStatesWithFormData = () => {
+    const finalPrices: { [key: string]: number } = {};
+    
+    // Synchroniser les prix depuis les états locaux
+    Object.entries(priceInputs).forEach(([key, value]) => {
+      const numericValue = parseFloat(value) || 0;
+      if (value !== '' && !isNaN(numericValue)) {
+        finalPrices[key] = numericValue;
+      }
+    });
+    
+    // Ajouter les prix existants qui ne sont pas dans les états locaux
+    Object.entries(formData.prices || {}).forEach(([key, value]) => {
+      if (!(key in priceInputs)) {
+        finalPrices[key] = value;
+      }
+    });
+    
+    setFormData(prev => ({
+      ...prev,
+      prices: finalPrices
+    }));
+  };
+
   const handleSave = async () => {
     if (!formData.name || !formData.farm || !formData.category) {
       alert('Veuillez remplir tous les champs obligatoires');
       return;
     }
+    
+    // Synchroniser les états locaux avant sauvegarde
+    syncLocalStatesWithFormData();
 
     console.log('🔍 Debug handleSave:', {
       editingProduct: editingProduct,
@@ -309,29 +337,14 @@ export default function ProductsManager() {
   };
 
   const updatePrice = useCallback((priceKey: string, value: string) => {
-    // Mettre à jour l'état local immédiatement - PERMETTRE LES VALEURS COMPLÈTEMENT VIDES
+    // SEULEMENT mettre à jour l'état local - PAS de formData en temps réel
     setPriceInputs(prev => ({
       ...prev,
       [priceKey]: value
     }));
     
-    // Délai pour éviter les re-renders qui ferment le clavier
-    setTimeout(() => {
-      setFormData(prev => {
-        const newPrices = { ...prev.prices };
-        if (value === '') {
-          // NE PAS METTRE DE VALEUR - garder juste la structure pour l'affichage
-          // La ligne restera visible grâce aux états locaux
-        } else {
-          const numericValue = parseFloat(value) || 0;
-          newPrices[priceKey] = numericValue;
-        }
-        return {
-          ...prev,
-          prices: newPrices
-        };
-      });
-    }, 100); // Petit délai pour préserver le focus
+    // NE PAS mettre à jour formData ici pour éviter les re-renders
+    // La sauvegarde se fera lors du submit du formulaire
   }, []);
 
   // Composant de champ de prix isolé pour éviter les re-renders
@@ -342,15 +355,24 @@ export default function ProductsManager() {
       : (value !== undefined && value !== null && value !== 0 ? value.toString() : '');
     
     const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      e.preventDefault();
-      e.stopPropagation();
       const newValue = e.target.value;
+      // Forcer le maintien du focus
+      const currentTarget = e.currentTarget;
+      
       updatePrice(priceKey, newValue);
+      
+      // Re-forcer le focus après le changement
+      requestAnimationFrame(() => {
+        if (currentTarget && document.activeElement !== currentTarget) {
+          currentTarget.focus();
+        }
+      });
     }, [priceKey]);
     
     const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-      // Empêcher la propagation pour éviter la fermeture du clavier
+      // Empêcher TOUTE propagation d'événement
       e.stopPropagation();
+      e.stopImmediatePropagation();
     }, []);
     
     return (
@@ -366,17 +388,22 @@ export default function ProductsManager() {
         inputMode="decimal"
         min="0"
         onFocus={(e) => {
-          // Empêcher la sélection automatique
-          e.target.select = () => {};
-          e.target.setSelectionRange(e.target.value.length, e.target.value.length);
+          // Empêcher la sélection automatique et maintenir le focus
+          const input = e.target;
+          input.select = () => {};
+          setTimeout(() => {
+            input.setSelectionRange(input.value.length, input.value.length);
+          }, 0);
         }}
         onBlur={(e) => {
-          // Maintenir la référence pour éviter la perte de focus
+          // Empêcher la perte de focus non désirée
+          const input = e.target;
           setTimeout(() => {
-            if (document.activeElement !== e.target) {
-              // Le focus est vraiment perdu
+            if (document.activeElement === document.body) {
+              // Si aucun élément n'a le focus, remettre le focus sur l'input
+              input.focus();
             }
-          }, 0);
+          }, 50);
         }}
       />
     );
@@ -388,20 +415,27 @@ export default function ProductsManager() {
     const localValue = quantityInputs[priceKey] !== undefined ? quantityInputs[priceKey] : priceKey;
     
     const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      e.preventDefault();
-      e.stopPropagation();
       const newValue = e.target.value;
+      const currentTarget = e.currentTarget;
       
       // Mettre à jour l'état local immédiatement pour éviter la perte de focus
       setQuantityInputs(prev => ({
         ...prev,
         [priceKey]: newValue
       }));
+      
+      // Re-forcer le focus après le changement
+      requestAnimationFrame(() => {
+        if (currentTarget && document.activeElement !== currentTarget) {
+          currentTarget.focus();
+        }
+      });
     }, [priceKey]);
     
     const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-      // Empêcher la propagation pour éviter la fermeture du clavier
+      // Empêcher TOUTE propagation d'événement
       e.stopPropagation();
+      e.stopImmediatePropagation();
     }, []);
     
     const handleBlur = useCallback(() => {
@@ -425,9 +459,22 @@ export default function ProductsManager() {
         className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
         placeholder="3g, 5g, 10g..."
         onFocus={(e) => {
-          // Empêcher la sélection automatique
-          e.target.select = () => {};
-          e.target.setSelectionRange(e.target.value.length, e.target.value.length);
+          // Empêcher la sélection automatique et maintenir le focus
+          const input = e.target;
+          input.select = () => {};
+          setTimeout(() => {
+            input.setSelectionRange(input.value.length, input.value.length);
+          }, 0);
+        }}
+        onBlur={(e) => {
+          // Empêcher la perte de focus non désirée
+          const input = e.target;
+          setTimeout(() => {
+            if (document.activeElement === document.body) {
+              // Si aucun élément n'a le focus, remettre le focus sur l'input
+              input.focus();
+            }
+          }, 50);
         }}
       />
     );
