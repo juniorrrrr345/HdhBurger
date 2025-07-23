@@ -84,7 +84,7 @@ export default function SettingsManager() {
     }
   };
 
-  const updateField = (field: keyof Settings, value: string) => {
+  const updateField = (field: keyof Settings, value: string | number) => {
     setSettings(prev => ({ ...prev, [field]: value }));
   };
 

@@ -1,127 +1,80 @@
-# HashBurger 🍃
+# HashBurger - Boutique de Concentrés Premium
 
-Une application web moderne pour la vente de concentrés premium avec design mobile-first et thème sombre.
+## 🚀 Déploiement sur Vercel
 
-## 🚀 Fonctionnalités
+### 1. Préparation
 
-- **Design Mobile-First** : Interface optimisée pour mobile avec Tailwind CSS
-- **Thème Sombre** : Interface élégante avec palette de couleurs sombres
-- **Logo Graffiti** : Branding HashBurger avec style graffiti flashy
-- **Filtres Dynamiques** : Filtrage par catégorie et farm
-- **Grille Produits** : Affichage en grille 2x2 pour mobile
-- **Détail Produit** : Vue détaillée avec vidéo/image, prix et commande
-- **Navigation Bottom** : Barre de navigation fixe en bas
+1. **Créer un compte Vercel** sur [vercel.com](https://vercel.com)
+2. **Connecter votre repository GitHub** à Vercel
 
-## 🛠 Technologies
+### 2. Configuration des variables d'environnement
 
-- **Next.js 14** avec App Router
-- **React 18** avec TypeScript
-- **Tailwind CSS** pour le styling
-- **Google Fonts** (Inter)
-
-## 🎨 Composants
-
-### `Header`
-- Bandeau violet promotionnel
-- Logo HashBurger en style graffiti
-- Fixé en haut de page
-
-### `CategoryFilter`
-- Dropdown "Toutes les catégories" (120U ++, FROZEN SIFT, etc.)
-- Dropdown "Toutes les farms"
-- Filtrage en temps réel
-
-### `ProductCard`
-- Image produit avec badge catégorie
-- Nom en majuscules + nom de farm
-- Prix de base affiché
-- Effet hover animé
-
-### `ProductDetail`
-- Vue plein écran avec vidéo/image
-- Badge "CURE AU TOP 🔥"
-- Liste complète des prix (5g à 200g)
-- Bouton "Commander via Telegram"
-- Informations de livraison
-
-### `BottomNav`
-- 4 boutons : Menu, Infos, Canal, Contact
-- Icônes SVG personnalisées
-- Navigation et lien Telegram
-
-## 📁 Structure
+Dans le dashboard Vercel, allez dans **Settings > Environment Variables** et ajoutez :
 
 ```
-src/
-├── app/
-│   ├── layout.tsx          # Layout global avec métadonnées
-│   ├── page.tsx            # Page d'accueil avec logique
-│   └── globals.css         # Styles globaux et graffiti
-└── components/
-    ├── Header.tsx          # Header fixe avec logo
-    ├── CategoryFilter.tsx  # Filtres dropdown
-    ├── ProductCard.tsx     # Carte produit
-    ├── ProductDetail.tsx   # Détail produit modal
-    └── BottomNav.tsx       # Navigation bottom
+MONGODB_URI = mongodb+srv://votre-string-mongodb-atlas
 ```
 
-## 🎯 Données
+⚠️ **Important**: Assurez-vous que votre MongoDB Atlas autorise l'IP `0.0.0.0/0` (toutes les IPs) pour les déploiements Vercel.
 
-L'application utilise des données statiques avec 6 produits d'exemple :
-- COOKIES GELATO (Real Farmz)
-- PURPLE HAZE (Green House)
-- OG KUSH (Royal Seeds)
-- BLUE DREAM (Blue Dream Farm)
-- AMNESIA HAZE (Golden Leaf)
-- GELATO 41 (Real Farmz)
+### 3. Déploiement
 
-Chaque produit contient :
-- Nom, farm, catégorie
-- Image (Unsplash placeholders)
-- Prix pour 6 quantités (5g à 200g)
+1. **Méthode automatique** (recommandée) :
+   - Connectez votre repo GitHub à Vercel
+   - Vercel déploiera automatiquement à chaque push
 
-## 🚀 Installation
+2. **Méthode manuelle** :
+   ```bash
+   npm install -g vercel
+   vercel login
+   vercel --prod
+   ```
 
-```bash
-# Installer les dépendances
-npm install
+### 4. Configuration MongoDB Atlas
 
-# Lancer en développement
-npm run dev
+1. Dans MongoDB Atlas, allez dans **Network Access**
+2. Ajoutez l'IP `0.0.0.0/0` pour autoriser Vercel
+3. Ou utilisez les IPs spécifiques de Vercel si préféré
 
-# Build production
-npm run build
-npm start
+### 5. Initialisation de la base de données
+
+Après le déploiement, visitez :
 ```
+https://votre-app.vercel.app/api/init-db
+```
+
+Cela créera les données initiales (catégories, farms, produits d'exemple).
+
+## 🛠️ Fonctionnalités
+
+- **Interface utilisateur** : Catalogue de produits avec filtres
+- **Panel Admin** : Gestion complète des produits, catégories, paramètres
+- **Responsive Design** : Optimisé mobile, tablette, desktop
+- **Personnalisation** : Arrière-plan, styles de titre, texte défilant
+- **Upload d'images** : Téléchargement d'images depuis mobile
+
+## 🔧 Technologies
+
+- **Frontend** : Next.js 14, React 18, TypeScript, Tailwind CSS
+- **Backend** : Next.js API Routes, MongoDB, Mongoose
+- **Déploiement** : Vercel
+- **Base de données** : MongoDB Atlas
+
+## 📱 Accès Admin
+
+URL : `https://votre-app.vercel.app/admin`
+Mot de passe par défaut : `admin123`
 
 ## 🎨 Personnalisation
 
-### Couleurs principales
-- **Violet** : `bg-purple-600` (badges, accents)
-- **Gris foncé** : `bg-gray-900` (background)
-- **Gris moyen** : `bg-gray-800` (cartes)
-- **Bleu** : `bg-blue-600` (Telegram)
+Le panel admin permet de modifier :
+- Titre et sous-titre de la boutique
+- Styles du titre (gradient, néon, etc.)
+- Arrière-plan personnalisé avec upload
+- Texte défilant
+- Liens Telegram et Canal
+- Contenu des pages Info et Contact
 
-### Police
-- **Inter** : Police principale pour lisibilité
-- **Graffiti** : Classe `.graffiti-text` pour le logo
+## 📞 Support
 
-### Responsive
-- **Mobile** : 2 colonnes en grille
-- **Desktop** : Conserve l'aspect mobile (mobile-first)
-
-## 📱 Navigation
-
-- **Menu** : Page principale (actuel)
-- **Infos** : Informations boutique
-- **Canal** : Lien direct vers Telegram
-- **Contact** : Coordonnées
-
-## 🔗 Liens Telegram
-
-- Canal principal : `https://t.me/hashburgerchannel`
-- Utilisé pour le bouton "Canal" et "Commander"
-
----
-
-**HashBurger** - *Premium Concentrés • #1 Bordeaux • Envoi Postal*
+Pour toute question technique, consultez la documentation Vercel ou MongoDB Atlas.
