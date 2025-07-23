@@ -176,7 +176,7 @@ export default function HomePage() {
     setSelectedProduct(null); // Fermer le détail produit si ouvert
   };
 
-  // Affichage conditionnel selon l'onglet actif
+  // Rendu conditionnel des pages
   if (activeTab === 'infos') {
     return <InfoPageFixed onClose={() => setActiveTab('menu')} activeTab={activeTab} onTabChange={handleTabChange} />;
   }
