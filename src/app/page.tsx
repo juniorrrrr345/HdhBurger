@@ -176,9 +176,9 @@ export default function HomePage() {
 
             {/* Affichage avec chargement pour première visite */}
             {isFirstLoad ? (
-              <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
-                <div className="text-center">
-                  <h1 className="text-4xl font-bold text-white mb-4 animate-pulse">
+              <div className="fixed inset-0 bg-black flex items-center justify-center z-[9999] overflow-hidden">
+                <div className="text-center px-4 w-full max-w-2xl">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white animate-pulse leading-tight">
                     Bienvenu(e)s sur Notre Mini App 📲
                   </h1>
                 </div>
