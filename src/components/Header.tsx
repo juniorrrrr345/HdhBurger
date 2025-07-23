@@ -27,11 +27,18 @@ export default function Header() {
         const response = await fetch('/api/settings');
         if (response.ok) {
           const data = await response.json();
-          // Forcer les valeurs HashBurger actuelles, charger seulement les paramètres sûrs
+          // Charger les settings admin, mais seulement s'ils ne contiennent pas d'anciens termes
+          const shopTitle = (data.shopTitle && !data.shopTitle.toLowerCase().includes('boutique')) 
+            ? data.shopTitle 
+            : 'HashBurger';
+          const shopSubtitle = (data.shopSubtitle && !data.shopSubtitle.toLowerCase().includes('cannabis')) 
+            ? data.shopSubtitle 
+            : 'Premium Concentrés';
+          
           setSettings({
-            shopTitle: 'HashBurger', // Forcé
-            shopSubtitle: 'Premium Concentrés', // Forcé
-            titleStyle: 'graffiti', // Forcé
+            shopTitle,
+            shopSubtitle,
+            titleStyle: data.titleStyle || 'graffiti',
             bannerText: data.bannerText || '',
             scrollingText: data.scrollingText || '',
             backgroundImage: data.backgroundImage || '',
