@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect } from 'react';
 import BottomNav from './BottomNav';
 
 interface InfoPageProps {
@@ -8,9 +9,73 @@ interface InfoPageProps {
 }
 
 export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChange }: InfoPageProps) {
+  const [backgroundSettings, setBackgroundSettings] = useState({
+    backgroundImage: '',
+    backgroundOpacity: 20,
+    backgroundBlur: 5
+  });
+
+  useEffect(() => {
+    const loadBackgroundSettings = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        if (response.ok) {
+          const data = await response.json();
+          setBackgroundSettings({
+            backgroundImage: data.backgroundImage || '',
+            backgroundOpacity: data.backgroundOpacity || 20,
+            backgroundBlur: data.backgroundBlur || 5
+          });
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des paramètres:', error);
+      }
+    };
+
+    loadBackgroundSettings();
+  }, []);
+
+  const getBackgroundStyle = () => {
+    if (!backgroundSettings.backgroundImage) {
+      return { backgroundColor: 'black' };
+    }
+    
+    return {
+      backgroundColor: 'black',
+      backgroundImage: `url(${backgroundSettings.backgroundImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed',
+      position: 'relative' as const
+    };
+  };
+
+  const getOverlayStyle = () => {
+    if (!backgroundSettings.backgroundImage) {
+      return {};
+    }
+    
+    return {
+      backgroundColor: `rgba(0, 0, 0, ${(100 - backgroundSettings.backgroundOpacity) / 100})`,
+      backdropFilter: `blur(${backgroundSettings.backgroundBlur}px)`,
+      position: 'absolute' as const,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 1
+    };
+  };
   
   return (
-    <div className="fixed inset-0 bg-black z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-50 overflow-y-auto" style={getBackgroundStyle()}>
+      {/* Overlay pour opacity et blur */}
+      {backgroundSettings.backgroundImage && (
+        <div style={getOverlayStyle()}></div>
+      )}
+      
+      {/* Contenu principal */}
+      <div className="relative z-10">
       {/* Header avec bouton retour */}
       <div className="sticky top-0 bg-black/80 backdrop-blur-sm p-4 flex items-center justify-between border-b border-white/20 z-10">
         <button
@@ -129,8 +194,9 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
         </div>
       </div>
 
-      {/* Bottom Navigation avec fond transparent */}
-      <BottomNav activeTab={activeTab} onTabChange={onTabChange} />
+        {/* Bottom Navigation avec fond transparent */}
+        <BottomNav activeTab={activeTab} onTabChange={onTabChange} />
+      </div>
     </div>
   );
 }

@@ -118,6 +118,11 @@ export default function HomePage() {
   const [categories, setCategories] = useState<string[]>(['Toutes les catégories']);
   const [farms, setFarms] = useState<string[]>(['Toutes les farms']);
   const [loading, setLoading] = useState(true);
+  const [backgroundSettings, setBackgroundSettings] = useState({
+    backgroundImage: '',
+    backgroundOpacity: 20,
+    backgroundBlur: 5
+  });
 
   // Charger les données depuis l'API
   useEffect(() => {
@@ -148,6 +153,17 @@ export default function HomePage() {
           const farmsData = await farmsRes.json();
           const farmNames = ['Toutes les farms', ...farmsData.map((f: any) => f.name)];
           setFarms(farmNames);
+        }
+
+        // Charger les paramètres d'arrière-plan
+        const settingsRes = await fetch('/api/settings');
+        if (settingsRes.ok) {
+          const settingsData = await settingsRes.json();
+          setBackgroundSettings({
+            backgroundImage: settingsData.backgroundImage || '',
+            backgroundOpacity: settingsData.backgroundOpacity || 20,
+            backgroundBlur: settingsData.backgroundBlur || 5
+          });
         }
       } catch (error) {
         console.error('Erreur lors du chargement:', error);
@@ -202,8 +218,47 @@ export default function HomePage() {
     );
   }
 
+  const getBackgroundStyle = () => {
+    if (!backgroundSettings.backgroundImage) {
+      return { backgroundColor: 'black' };
+    }
+    
+    return {
+      backgroundColor: 'black',
+      backgroundImage: `url(${backgroundSettings.backgroundImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed',
+      position: 'relative' as const
+    };
+  };
+
+  const getOverlayStyle = () => {
+    if (!backgroundSettings.backgroundImage) {
+      return {};
+    }
+    
+    return {
+      backgroundColor: `rgba(0, 0, 0, ${(100 - backgroundSettings.backgroundOpacity) / 100})`,
+      backdropFilter: `blur(${backgroundSettings.backgroundBlur}px)`,
+      position: 'absolute' as const,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 1
+    };
+  };
+
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen" style={getBackgroundStyle()}>
+      {/* Overlay pour opacity et blur */}
+      {backgroundSettings.backgroundImage && (
+        <div style={getOverlayStyle()}></div>
+      )}
+      
+      {/* Contenu principal */}
+      <div className="relative z-10">
       {/* Header fixe */}
       <Header />
       
@@ -242,16 +297,17 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
-      
-      {/* Modal détail produit */}
-      {selectedProduct && (
-        <ProductDetail
-          product={selectedProduct}
-          onClose={handleCloseDetail}
-        />
-      )}
+        {/* Bottom Navigation */}
+        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+        
+        {/* Modal détail produit */}
+        {selectedProduct && (
+          <ProductDetail
+            product={selectedProduct}
+            onClose={handleCloseDetail}
+          />
+        )}
+      </div>
     </div>
   );
 }

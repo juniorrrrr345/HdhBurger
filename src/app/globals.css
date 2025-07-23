@@ -36,3 +36,17 @@ body {
   height: 3px;
   background: linear-gradient(90deg, transparent, white, transparent);
 }
+
+/* Animation pour le texte défilant */
+@keyframes scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 15s linear infinite;
+}

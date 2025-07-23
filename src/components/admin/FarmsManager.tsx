@@ -46,8 +46,7 @@ export default function FarmsManager() {
     setEditingFarm(null);
     setFormData({
       name: '',
-      description: '',
-      isActive: true
+      description: ''
     });
     setShowModal(true);
   };
@@ -122,18 +121,14 @@ export default function FarmsManager() {
         </button>
       </div>
 
-      {/* Liste des farms */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-        {farms.map((farm) => (
-          <div key={farm._id} className="bg-gray-900 border border-white/20 rounded-xl p-6">
-            <div className="flex items-start justify-between mb-4">
-              <h3 className="font-bold text-white text-xl">{farm.name}</h3>
-              <span className={`px-2 py-1 rounded text-xs ${
-                farm.isActive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
-              }`}>
-                {farm.isActive ? 'Actif' : 'Inactif'}
-              </span>
-            </div>
+      {/* Liste des farms avec scroll */}
+      <div className="max-h-[70vh] overflow-y-auto pr-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+          {farms.map((farm) => (
+            <div key={farm._id} className="bg-gray-900 border border-white/20 rounded-xl p-6">
+              <div className="flex items-start justify-between mb-4">
+                <h3 className="font-bold text-white text-xl">{farm.name}</h3>
+              </div>
             
             {farm.description && (
               <p className="text-gray-400 text-sm mb-4">{farm.description}</p>
@@ -155,6 +150,7 @@ export default function FarmsManager() {
             </div>
           </div>
         ))}
+        </div>
       </div>
 
       {/* Modal d'édition */}
@@ -185,18 +181,6 @@ export default function FarmsManager() {
                   className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 h-20"
                   placeholder="Description de la farm..."
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Statut</label>
-                <select
-                  value={formData.isActive ? 'true' : 'false'}
-                  onChange={(e) => updateFormField('isActive', e.target.value === 'true')}
-                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2"
-                >
-                  <option value="true">Actif</option>
-                  <option value="false">Inactif</option>
-                </select>
               </div>
             </div>
 

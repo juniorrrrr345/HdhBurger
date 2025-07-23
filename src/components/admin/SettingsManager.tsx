@@ -9,6 +9,11 @@ interface Settings {
   canalLink: string;
   deliveryInfo: string;
   qualityInfo: string;
+  titleEffect: string;
+  backgroundImage: string;
+  backgroundOpacity: number;
+  backgroundBlur: number;
+  scrollingText: string;
 }
 
 export default function SettingsManager() {
@@ -19,7 +24,12 @@ export default function SettingsManager() {
     telegramLink: '',
     canalLink: '',
     deliveryInfo: '',
-    qualityInfo: ''
+    qualityInfo: '',
+    titleEffect: 'none',
+    backgroundImage: '',
+    backgroundOpacity: 20,
+    backgroundBlur: 5,
+    scrollingText: ''
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -87,13 +97,14 @@ export default function SettingsManager() {
   }
 
   return (
-    <div className="p-8 max-w-4xl">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-white">Configuration de la Boutique</h1>
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl">
+      {/* Header avec bouton de sauvegarde */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sticky top-0 bg-black/90 backdrop-blur-sm p-4 -m-4 rounded-xl border border-white/10 z-10">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Configuration de la Boutique</h1>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="bg-white hover:bg-gray-100 disabled:bg-gray-600 text-black font-bold py-2 px-4 rounded-lg flex items-center space-x-2"
+          className="bg-white hover:bg-gray-100 disabled:bg-gray-600 text-black font-bold py-2 px-4 rounded-lg flex items-center space-x-2 w-full sm:w-auto text-sm sm:text-base"
         >
           <span>💾</span>
           <span>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</span>
@@ -106,7 +117,9 @@ export default function SettingsManager() {
         </div>
       )}
 
-      <div className="space-y-8">
+      {/* Contenu scrollable */}
+      <div className="max-h-[70vh] overflow-y-auto pr-2 pb-8">
+        <div className="space-y-6 lg:space-y-8">
         {/* Informations générales */}
         <div className="bg-gray-900 border border-white/20 rounded-xl p-6">
           <h2 className="text-xl font-bold text-white mb-6 flex items-center">
@@ -195,6 +208,138 @@ export default function SettingsManager() {
           </div>
         </div>
 
+        {/* Style du titre */}
+        <div className="bg-gray-900 border border-white/20 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-white mb-6 flex items-center">
+            <span className="mr-2">🎨</span>
+            Style du titre HashBurger
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Effet du titre
+              </label>
+              <select
+                value={settings.titleEffect}
+                onChange={(e) => updateField('titleEffect', e.target.value)}
+                className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white"
+              >
+                <option value="none">Aucun effet</option>
+                <option value="gradient">Dégradé coloré</option>
+                <option value="neon">Effet néon</option>
+                <option value="rainbow">Arc-en-ciel</option>
+                <option value="glow">Lueur</option>
+                <option value="shadow">Ombre portée</option>
+                <option value="bounce">Animation rebond</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Texte défilant (bannière)
+              </label>
+              <input
+                type="text"
+                value={settings.scrollingText}
+                onChange={(e) => updateField('scrollingText', e.target.value)}
+                className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white"
+                placeholder="NOUVEAU ! Livraison express disponible..."
+              />
+              <p className="text-gray-500 text-xs mt-1">
+                Texte qui défile de droite à gauche en haut de la page
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Arrière-plan personnalisé */}
+        <div className="bg-gray-900 border border-white/20 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-white mb-6 flex items-center">
+            <span className="mr-2">🖼️</span>
+            Arrière-plan personnalisé
+          </h2>
+          
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Image d'arrière-plan
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    try {
+                      const response = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData,
+                      });
+                      if (response.ok) {
+                        const data = await response.json();
+                        updateField('backgroundImage', data.url);
+                      }
+                    } catch (error) {
+                      console.error('Erreur upload:', error);
+                    }
+                  }
+                }}
+                className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white file:text-black hover:file:bg-gray-100"
+              />
+              {settings.backgroundImage && (
+                <div className="mt-2">
+                  <img 
+                    src={settings.backgroundImage} 
+                    alt="Aperçu" 
+                    className="w-32 h-20 object-cover rounded-lg border border-white/20"
+                  />
+                  <button
+                    onClick={() => updateField('backgroundImage', '')}
+                    className="ml-2 text-red-400 hover:text-red-300 text-sm"
+                  >
+                    🗑️ Supprimer
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Opacité (0-100%)
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={settings.backgroundOpacity}
+                  onChange={(e) => updateField('backgroundOpacity', parseInt(e.target.value))}
+                  className="w-full"
+                />
+                <span className="text-gray-400 text-sm">{settings.backgroundOpacity}%</span>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Flou (0-20px)
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="20"
+                  value={settings.backgroundBlur}
+                  onChange={(e) => updateField('backgroundBlur', parseInt(e.target.value))}
+                  className="w-full"
+                />
+                <span className="text-gray-400 text-sm">{settings.backgroundBlur}px</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Informations livraison */}
         <div className="bg-gray-900 border border-white/20 rounded-xl p-6">
           <h2 className="text-xl font-bold text-white mb-6 flex items-center">
@@ -256,6 +401,7 @@ export default function SettingsManager() {
               </p>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

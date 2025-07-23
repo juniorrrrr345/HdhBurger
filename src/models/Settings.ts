@@ -50,6 +50,10 @@ const SettingsSchema = new mongoose.Schema({
     max: 20,
     default: 5
   },
+  scrollingText: {
+    type: String,
+    default: ''
+  },
   updatedAt: {
     type: Date,
     default: Date.now
