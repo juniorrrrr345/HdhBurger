@@ -1,37 +1,22 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 
-const categories = [
-  "Toutes les catégories",
-  "120U ++ 🇲🇦",
-  "FROZEN SIFT ❄️",
-  "105U 🇲🇦",
-  "90U PREMIUM 🇲🇦",
-  "WEED NL 🇳🇱",
-  "CALI ITALIENNE 🇮🇹"
-];
-
-const farms = [
-  "Toutes les farms",
-  "REAL FARMZ",
-  "GREEN HOUSE",
-  "ROYAL SEEDS",
-  "BLUE DREAM FARM",
-  "GOLDEN LEAF"
-];
-
 interface CategoryFilterProps {
   selectedCategory: string;
   selectedFarm: string;
   onCategoryChange: (category: string) => void;
   onFarmChange: (farm: string) => void;
+  categories: string[];
+  farms: string[];
 }
 
 export default function CategoryFilter({ 
   selectedCategory, 
   selectedFarm, 
   onCategoryChange, 
-  onFarmChange 
+  onFarmChange,
+  categories,
+  farms
 }: CategoryFilterProps) {
   const [showCategories, setShowCategories] = useState(false);
   const [showFarms, setShowFarms] = useState(false);

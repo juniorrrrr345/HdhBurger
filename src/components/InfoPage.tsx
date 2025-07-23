@@ -1,10 +1,51 @@
 'use client';
+import { useState, useEffect } from 'react';
 
 interface InfoPageProps {
   onClose: () => void;
 }
 
 export default function InfoPage({ onClose }: InfoPageProps) {
+  const [content, setContent] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadContent() {
+      try {
+        const response = await fetch('/api/pages/info');
+        if (response.ok) {
+          const data = await response.json();
+          setContent(data.content || defaultContent);
+        } else {
+          setContent(defaultContent);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement:', error);
+        setContent(defaultContent);
+      }
+      setLoading(false);
+    }
+
+    loadContent();
+  }, []);
+
+  const defaultContent = `
+# À propos de HashBurger
+
+**HashBurger** est la référence absolue pour les concentrés premium à Bordeaux et dans toute la France.
+
+## Nos Spécialités
+- 🇲🇦 Hash Marocain (120U++, 105U, 90U Premium)
+- ❄️ Frozen Sift (Extraction à froid)
+- 🇳🇱 Weed NL (Variétés néerlandaises premium)
+- 🇮🇹 Cali Italienne (Génétiques californiennes)
+
+## Nos Services
+- ✅ Livraison Bordeaux
+- ✅ Envoi Postal France
+- ✅ Qualité Garantie
+- ✅ Support 24/7
+  `;
   return (
     <div className="fixed inset-0 gradient-bg z-50 overflow-y-auto">
       {/* Header avec bouton retour */}

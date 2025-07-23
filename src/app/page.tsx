@@ -1,10 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import CategoryFilter from '../components/CategoryFilter';
 import ProductCard, { Product } from '../components/ProductCard';
 import ProductDetail from '../components/ProductDetail';
 import BottomNav from '../components/BottomNav';
+import InfoPage from '../components/InfoPage';
+import ContactPage from '../components/ContactPage';
 
 // Données statiques des produits
 const sampleProducts: Product[] = [
@@ -111,9 +113,50 @@ export default function HomePage() {
   const [selectedFarm, setSelectedFarm] = useState('Toutes les farms');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState('menu');
+  const [products, setProducts] = useState<Product[]>(sampleProducts);
+  const [categories, setCategories] = useState<string[]>(['Toutes les catégories']);
+  const [farms, setFarms] = useState<string[]>(['Toutes les farms']);
+  const [loading, setLoading] = useState(false);
+
+  // Charger les données depuis l'API
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      try {
+        // Charger les produits
+        const productsRes = await fetch('/api/products');
+        if (productsRes.ok) {
+          const productsData = await productsRes.json();
+          setProducts(productsData.length > 0 ? productsData : sampleProducts);
+        }
+
+        // Charger les catégories
+        const categoriesRes = await fetch('/api/categories');
+        if (categoriesRes.ok) {
+          const categoriesData = await categoriesRes.json();
+          const categoryNames = ['Toutes les catégories', ...categoriesData.map((c: any) => c.name)];
+          setCategories(categoryNames);
+        }
+
+        // Charger les farms
+        const farmsRes = await fetch('/api/farms');
+        if (farmsRes.ok) {
+          const farmsData = await farmsRes.json();
+          const farmNames = ['Toutes les farms', ...farmsData.map((f: any) => f.name)];
+          setFarms(farmNames);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement:', error);
+        // Utiliser les données statiques en cas d'erreur
+      }
+      setLoading(false);
+    }
+
+    loadData();
+  }, []);
 
   // Filtrer les produits selon les sélections
-  const filteredProducts = sampleProducts.filter(product => {
+  const filteredProducts = products.filter(product => {
     const categoryMatch = selectedCategory === 'Toutes les catégories' || product.category === selectedCategory;
     const farmMatch = selectedFarm === 'Toutes les farms' || product.farm === selectedFarm;
     return categoryMatch && farmMatch;
@@ -126,6 +169,20 @@ export default function HomePage() {
   const handleCloseDetail = () => {
     setSelectedProduct(null);
   };
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    setSelectedProduct(null); // Fermer le détail produit si ouvert
+  };
+
+  // Affichage conditionnel selon l'onglet actif
+  if (activeTab === 'infos') {
+    return <InfoPage onClose={() => setActiveTab('menu')} />;
+  }
+
+  if (activeTab === 'contact') {
+    return <ContactPage onClose={() => setActiveTab('menu')} />;
+  }
 
   return (
     <div className="min-h-screen bg-black">
@@ -140,6 +197,8 @@ export default function HomePage() {
           selectedFarm={selectedFarm}
           onCategoryChange={setSelectedCategory}
           onFarmChange={setSelectedFarm}
+          categories={categories}
+          farms={farms}
         />
         
         {/* Grille de produits */}
@@ -166,7 +225,7 @@ export default function HomePage() {
       </div>
 
       {/* Bottom Navigation */}
-      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
       
       {/* Modal détail produit */}
       {selectedProduct && (
