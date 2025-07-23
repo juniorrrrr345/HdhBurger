@@ -151,17 +151,17 @@ export default function PagesManager() {
             {/* Contenu du modal */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6">
               <div className="space-y-6 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Titre</label>
-                <input
-                  type="text"
-                  value={editingPage.title}
-                  onChange={(e) => updateField('title', e.target.value)}
-                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Titre</label>
+                  <input
+                    type="text"
+                    value={editingPage.title}
+                    onChange={(e) => updateField('title', e.target.value)}
+                    className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white"
+                  />
+                </div>
 
-                              <div>
+                <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">Contenu</label>
                   <textarea
                     value={editingPage.content}
@@ -171,18 +171,17 @@ export default function PagesManager() {
                   />
                 </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Statut</label>
-                <select
-                  value={editingPage.isActive ? 'true' : 'false'}
-                  onChange={(e) => updateField('isActive', e.target.value === 'true')}
-                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3"
-                >
-                  <option value="true">Actif</option>
-                  <option value="false">Inactif</option>
-                </select>
-              </div>
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Statut</label>
+                  <select
+                    value={editingPage.isActive ? 'true' : 'false'}
+                    onChange={(e) => updateField('isActive', e.target.value === 'true')}
+                    className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3"
+                  >
+                    <option value="true">Actif</option>
+                    <option value="false">Inactif</option>
+                  </select>
+                </div>
 
                 {/* Aperçu */}
                 <div className="mb-6">
