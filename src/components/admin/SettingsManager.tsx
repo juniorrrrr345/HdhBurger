@@ -56,6 +56,11 @@ export default function SettingsManager() {
       if (response.ok) {
         setMessage('✅ Paramètres sauvegardés avec succès !');
         setTimeout(() => setMessage(''), 3000);
+        
+        // Recharger les données pour s'assurer de la synchronisation
+        setTimeout(() => {
+          loadSettings();
+        }, 1000);
       } else {
         setMessage('❌ Erreur lors de la sauvegarde');
       }
