@@ -152,10 +152,26 @@ export default function ProductsManager() {
       const url = editingProduct ? `/api/products/${editingProduct._id}` : '/api/products';
       const method = editingProduct ? 'PUT' : 'POST';
       
+      // Vérifier la taille de la requête avant envoi
+      const requestSize = JSON.stringify(cleanedFormData).length;
+      const requestSizeMB = requestSize / 1024 / 1024;
+      
+      console.log('📏 Taille requête:', {
+        bytes: requestSize,
+        MB: Math.round(requestSizeMB * 100) / 100,
+        hasImage: !!cleanedFormData.image,
+        hasVideo: !!cleanedFormData.video
+      });
+      
+      if (requestSizeMB > 45) { // Limite à 45MB pour laisser de la marge
+        alert(`Requête trop volumineuse (${Math.round(requestSizeMB)}MB). Réduisez la taille des images/vidéos.`);
+        return;
+      }
+
       console.log('💾 Sauvegarde produit:', {
         url,
         method,
-        data: cleanedFormData
+        dataSizeMB: Math.round(requestSizeMB * 100) / 100
       });
 
       const response = await fetch(url, {

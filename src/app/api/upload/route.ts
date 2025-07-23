@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb-fixed';
 
+// Configuration pour augmenter la limite de taille des requêtes
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb',
+    },
+  },
+};
+
 export async function POST(request: NextRequest) {
   try {
     console.log('🚀 Début upload (Vercel compatible)...');

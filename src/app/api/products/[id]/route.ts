@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb-fixed';
 
+// Configuration pour augmenter la limite de taille des requêtes
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb',
+    },
+  },
+};
+
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     console.log('🔍 API Products PUT - Request pour ID:', params.id);
