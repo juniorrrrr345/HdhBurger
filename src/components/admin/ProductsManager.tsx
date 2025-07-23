@@ -192,11 +192,30 @@ export default function ProductsManager() {
       return;
     }
     
-    // Synchroniser les états locaux avant sauvegarde
-    syncLocalStatesWithFormData();
+    // RÉCUPÉRER LES PRIX DIRECTEMENT ICI POUR LA SAUVEGARDE
+    const finalPrices: { [key: string]: number } = {};
     
-    // Petit délai pour s'assurer que formData est mis à jour
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Récupérer TOUS les inputs de prix et quantité dans le modal
+    const modal = document.querySelector('[role="dialog"], .modal, .fixed');
+    if (modal) {
+      const priceInputs = modal.querySelectorAll('input[type="number"]');
+      const quantityInputs = modal.querySelectorAll('input[type="text"]');
+      
+      // Parcourir chaque ligne de prix
+      quantityInputs.forEach((quantityInput, index) => {
+        const quantity = (quantityInput as HTMLInputElement).value.trim();
+        const priceInput = priceInputs[index] as HTMLInputElement;
+        
+        if (quantity && priceInput && priceInput.value !== '') {
+          const numericValue = parseFloat(priceInput.value);
+          if (!isNaN(numericValue) && numericValue > 0) {
+            finalPrices[quantity] = numericValue;
+          }
+        }
+      });
+    }
+    
+    console.log('💾 Prix à sauvegarder:', finalPrices);
 
     console.log('🔍 Debug handleSave:', {
       editingProduct: editingProduct,
@@ -205,17 +224,8 @@ export default function ProductsManager() {
     });
 
     try {
-      // Nettoyer les prix avant sauvegarde - enlever les valeurs undefined/null/0
-      const cleanedPrices: { [key: string]: number } = {};
-      
-      if (formData.prices) {
-        Object.entries(formData.prices).forEach(([key, value]) => {
-          const numValue = Number(value);
-          if (!isNaN(numValue) && numValue > 0) {
-            cleanedPrices[key] = numValue;
-          }
-        });
-      }
+      // Utiliser les prix récupérés directement depuis les inputs
+      const cleanedPrices = finalPrices;
 
       const cleanedFormData = {
         ...formData,
