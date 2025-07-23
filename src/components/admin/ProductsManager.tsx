@@ -293,12 +293,12 @@ export default function ProductsManager() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const updatePrice = (priceKey: string, value: number) => {
+  const updatePrice = (priceKey: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       prices: {
         ...prev.prices,
-        [priceKey]: value
+        [priceKey]: value === '' ? 0 : (parseFloat(value) || 0)
       }
     }));
   };
@@ -306,7 +306,7 @@ export default function ProductsManager() {
   const addCustomPrice = () => {
     const customKey = prompt('Entrez la quantité (ex: 1kg, 250g, etc.):');
     if (customKey && customKey.trim()) {
-      updatePrice(customKey.trim(), 0);
+      updatePrice(customKey.trim(), '0');
     }
   };
 
@@ -319,10 +319,14 @@ export default function ProductsManager() {
   };
 
   const handlePriceKeyChange = (oldKey: string, newKey: string) => {
-    if (newKey.trim() === '' || newKey === oldKey) return;
+    if (newKey === oldKey) return;
     
     setFormData(prev => {
       const updatedPrices = { ...prev.prices };
+      if (newKey.trim() === '') {
+        // Si la nouvelle clé est vide, on garde l'ancienne
+        return prev;
+      }
       updatedPrices[newKey.trim()] = updatedPrices[oldKey];
       delete updatedPrices[oldKey];
       return { ...prev, prices: updatedPrices };
@@ -817,7 +821,7 @@ export default function ProductsManager() {
                         <input
                           type="number"
                           value={value}
-                          onChange={(e) => updatePrice(priceKey, parseFloat(e.target.value) || 0)}
+                          onChange={(e) => updatePrice(priceKey, e.target.value)}
                           className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
                           placeholder="0"
                           step="0.01"
@@ -998,7 +1002,7 @@ export default function ProductsManager() {
                                 <input
                                   type="number"
                                   value={value}
-                                  onChange={(e) => updatePrice(priceKey, parseFloat(e.target.value) || 0)}
+                                  onChange={(e) => updatePrice(priceKey, e.target.value)}
                                   className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
                                   placeholder="0"
                                   step="0.01"
