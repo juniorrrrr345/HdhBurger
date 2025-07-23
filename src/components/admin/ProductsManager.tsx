@@ -243,6 +243,17 @@ export default function ProductsManager() {
       });
 
       if (response.ok) {
+        // Afficher un message de succès
+        const successMsg = document.createElement('div');
+        successMsg.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999] transition-all duration-300';
+        successMsg.textContent = '✅ Produit supprimé avec succès!';
+        document.body.appendChild(successMsg);
+        
+        setTimeout(() => {
+          successMsg.remove();
+        }, 3000);
+        
+        // Recharger automatiquement les données
         loadData();
       } else {
         alert('Erreur lors de la suppression');
@@ -279,6 +290,17 @@ export default function ProductsManager() {
       const newPrices = { ...prev.prices };
       delete newPrices[priceKey];
       return { ...prev, prices: newPrices };
+    });
+  };
+
+  const handlePriceKeyChange = (oldKey: string, newKey: string) => {
+    if (newKey.trim() === '' || newKey === oldKey) return;
+    
+    setFormData(prev => {
+      const updatedPrices = { ...prev.prices };
+      updatedPrices[newKey.trim()] = updatedPrices[oldKey];
+      delete updatedPrices[oldKey];
+      return { ...prev, prices: updatedPrices };
     });
   };
 
@@ -647,19 +669,30 @@ export default function ProductsManager() {
                   {Object.entries(formData.prices || {}).map(([priceKey, value]) => (
                     <div key={priceKey} className="flex items-center gap-3">
                       <div className="flex-1">
-                        <label className="block text-xs text-gray-400 mb-1">{priceKey}</label>
+                        <label className="block text-xs text-gray-400 mb-1">Quantité</label>
+                        <input
+                          type="text"
+                          value={priceKey}
+                          onChange={(e) => handlePriceKeyChange(priceKey, e.target.value)}
+                          className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
+                          placeholder="3g, 5G, 10g..."
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-xs text-gray-400 mb-1">Prix (€)</label>
                         <input
                           type="number"
                           value={value}
                           onChange={(e) => updatePrice(priceKey, parseFloat(e.target.value) || 0)}
                           className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
                           placeholder="0"
+                          step="0.01"
                         />
                       </div>
                       <button
                         type="button"
                         onClick={() => removePrice(priceKey)}
-                        className="text-red-400 hover:text-red-300 p-2 transition-colors"
+                        className="text-red-400 hover:text-red-300 p-2 transition-colors mt-5"
                         title="Supprimer ce prix"
                       >
                         🗑️
