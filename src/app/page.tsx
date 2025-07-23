@@ -119,13 +119,14 @@ export default function HomePage() {
   const [categories, setCategories] = useState<string[]>(['Toutes les catégories']);
   const [farms, setFarms] = useState<string[]>(['Toutes les farms']);
   const [loading, setLoading] = useState(true);
+  // Initialiser avec un background par défaut pour éviter le noir
   const [backgroundSettings, setBackgroundSettings] = useState({
-    backgroundImage: '',
+    backgroundImage: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=1920&h=1080&fit=crop',
     backgroundOpacity: 20,
     backgroundBlur: 5
   });
 
-  // Charger les settings de background immédiatement au montage
+  // Charger les vrais settings immédiatement
   useEffect(() => {
     const loadBackgroundImmediately = async () => {
       try {
@@ -133,7 +134,7 @@ export default function HomePage() {
         if (settingsRes.ok) {
           const settingsData = await settingsRes.json();
           setBackgroundSettings({
-            backgroundImage: settingsData.backgroundImage || '',
+            backgroundImage: settingsData.backgroundImage || 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=1920&h=1080&fit=crop',
             backgroundOpacity: settingsData.backgroundOpacity || 20,
             backgroundBlur: settingsData.backgroundBlur || 5
           });
@@ -179,23 +180,22 @@ export default function HomePage() {
     }
   };
 
-  // Charger les données depuis l'API en arrière-plan
+  // Charger les données depuis l'API
   useEffect(() => {
     async function loadData() {
+      setLoading(true);
       try {
-        // Utiliser d'abord les données statiques pour affichage immédiat
-        setProducts(sampleProducts);
-        
-        // Charger les produits en arrière-plan
+        // Charger les produits
         const productsRes = await fetch('/api/products');
         if (productsRes.ok) {
           const productsData = await productsRes.json();
-          if (productsData.length > 0) {
-            setProducts(productsData);
-          }
+          setProducts(productsData.length > 0 ? productsData : sampleProducts);
+        } else {
+          // En cas d'erreur API, utiliser les données statiques
+          setProducts(sampleProducts);
         }
 
-        // Charger les catégories en arrière-plan
+        // Charger les catégories
         const categoriesRes = await fetch('/api/categories');
         if (categoriesRes.ok) {
           const categoriesData = await categoriesRes.json();
@@ -203,7 +203,7 @@ export default function HomePage() {
           setCategories(categoryNames);
         }
 
-        // Charger les farms en arrière-plan
+        // Charger les farms
         const farmsRes = await fetch('/api/farms');
         if (farmsRes.ok) {
           const farmsData = await farmsRes.json();
@@ -212,12 +212,14 @@ export default function HomePage() {
         }
       } catch (error) {
         console.error('Erreur lors du chargement:', error);
-        // Garder les données statiques en cas d'erreur
+        // Utiliser les données statiques en cas d'erreur
         setProducts(sampleProducts);
       }
+      setLoading(false);
     }
 
-    loadData();
+    // Petit délai pour laisser le background se charger d'abord
+    setTimeout(loadData, 100);
   }, []);
 
   // Filtrer les produits selon les sélections
