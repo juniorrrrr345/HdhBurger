@@ -9,10 +9,57 @@
   box-sizing: border-box;
 }
 
+/* Background global robuste - appliqué plusieurs fois pour éviter les problèmes de zoom */
+html {
+  background-color: black !important;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100%;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: black !important;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
+
+/* Conteneur principal - background en cascade */
+.main-container {
+  background-color: black;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Couche d'overlay globale */
+.global-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(2px);
+}
+
+/* Contenu principal par-dessus l'overlay */
+.content-layer {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
 }
 
 .hashburger-title {

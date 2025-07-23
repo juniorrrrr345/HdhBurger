@@ -8,10 +8,14 @@ import BottomNav from '../components/BottomNav';
 import InfoPageFixed from '../components/InfoPageFixed';
 import ContactPageFixed from '../components/ContactPageFixed';
 import { instantContent } from '../lib/contentCache';
+import { useGlobalBackground } from '../hooks/useGlobalBackground';
 
 // PLUS de produits par défaut - SEULEMENT ceux du panel admin
 
 export default function HomePage() {
+  // Appliquer le background global robuste
+  useGlobalBackground();
+  
   const [selectedCategory, setSelectedCategory] = useState('Toutes les catégories');
   const [selectedFarm, setSelectedFarm] = useState('Toutes les farms');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -255,14 +259,12 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen" style={getBackgroundStyle()}>
-      {/* Overlay pour opacity et blur */}
-      {backgroundSettings.backgroundImage && (
-        <div style={getOverlayStyle()}></div>
-      )}
+    <div className="main-container">
+      {/* Overlay global */}
+      <div className="global-overlay"></div>
       
       {/* Contenu principal */}
-      <div className="relative z-10">
+      <div className="content-layer">
         <Header />
         
         {selectedProduct ? (

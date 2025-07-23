@@ -3,8 +3,12 @@ import { useState, useEffect } from 'react';
 import AdminLogin from '../../components/admin/AdminLogin';
 import AdminDashboard from '../../components/admin/AdminDashboard';
 import { instantContent } from '../../lib/contentCache';
+import { useGlobalBackground } from '../../hooks/useGlobalBackground';
 
 export default function AdminPage() {
+  // Appliquer le background global robuste
+  useGlobalBackground();
+  
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [backgroundSettings, setBackgroundSettings] = useState({
@@ -76,13 +80,11 @@ export default function AdminPage() {
     : {};
 
   return (
-    <div className="min-h-screen" style={getBackgroundStyle()}>
-      {/* Overlay pour l'opacité et le flou */}
-      {backgroundSettings.backgroundImage && (
-        <div className="fixed inset-0 pointer-events-none z-0" style={overlayStyle}></div>
-      )}
+    <div className="main-container">
+      {/* Overlay global */}
+      <div className="global-overlay"></div>
       
-      <div className="relative z-10 min-h-screen">
+      <div className="content-layer">
         {isAuthenticated ? (
           <AdminDashboard onLogout={handleLogout} />
         ) : (
