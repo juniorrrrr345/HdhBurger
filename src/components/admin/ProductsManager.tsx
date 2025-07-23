@@ -9,16 +9,13 @@ interface Product {
   image: string;
   video?: string;
   prices: {
-    '5g': number;
-    '10g': number;
-    '25g': number;
-    '50g': number;
-    '100g': number;
-    '200g': number;
+    [key: string]: number;
   };
   description?: string;
   isActive: boolean;
 }
+
+const defaultPriceKeys = ['3g', '5g', '10g', '25g', '50g', '100g', '200g', '500g'];
 
 export default function ProductsManager() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -33,14 +30,7 @@ export default function ProductsManager() {
     category: '',
     image: '',
     video: '',
-    prices: {
-      '5g': 0,
-      '10g': 0,
-      '25g': 0,
-      '50g': 0,
-      '100g': 0,
-      '200g': 0
-    },
+    prices: {},
     description: '',
     isActive: true
   });
@@ -94,26 +84,26 @@ export default function ProductsManager() {
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
-    setFormData(product);
+    setFormData({
+      ...product,
+      prices: { ...product.prices }
+    });
     setShowModal(true);
   };
 
   const handleAdd = () => {
     setEditingProduct(null);
+    const defaultPrices: { [key: string]: number } = {};
+    defaultPriceKeys.forEach(key => {
+      defaultPrices[key] = 0;
+    });
     setFormData({
       name: '',
       farm: '',
       category: '',
       image: '',
       video: '',
-      prices: {
-        '5g': 0,
-        '10g': 0,
-        '25g': 0,
-        '50g': 0,
-        '100g': 0,
-        '200g': 0
-      },
+      prices: defaultPrices,
       description: '',
       isActive: true
     });
@@ -121,6 +111,11 @@ export default function ProductsManager() {
   };
 
   const handleSave = async () => {
+    if (!formData.name || !formData.farm || !formData.category) {
+      alert('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
     try {
       const url = editingProduct ? `/api/products/${editingProduct._id}` : '/api/products';
       const method = editingProduct ? 'PUT' : 'POST';
@@ -146,89 +141,138 @@ export default function ProductsManager() {
   };
 
   const handleDelete = async (productId: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-      try {
-        const response = await fetch(`/api/products/${productId}`, {
-          method: 'DELETE',
-        });
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) return;
 
-        if (response.ok) {
-          loadData();
-        } else {
-          alert('Erreur lors de la suppression');
-        }
-      } catch (error) {
-        console.error('Erreur:', error);
+    try {
+      const response = await fetch(`/api/products/${productId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        loadData();
+      } else {
         alert('Erreur lors de la suppression');
       }
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('Erreur lors de la suppression');
     }
   };
 
-  const updateFormField = (field: string, value: any) => {
+  const updateField = (field: keyof Product, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const updatePrice = (weight: string, price: number) => {
+  const updatePrice = (priceKey: string, value: number) => {
     setFormData(prev => ({
       ...prev,
-      prices: { ...prev.prices!, [weight]: price }
+      prices: {
+        ...prev.prices,
+        [priceKey]: value
+      }
     }));
+  };
+
+  const addCustomPrice = () => {
+    const customKey = prompt('Entrez la quantité (ex: 1kg, 250g, etc.):');
+    if (customKey && customKey.trim()) {
+      updatePrice(customKey.trim(), 0);
+    }
+  };
+
+  const removePrice = (priceKey: string) => {
+    setFormData(prev => {
+      const newPrices = { ...prev.prices };
+      delete newPrices[priceKey];
+      return { ...prev, prices: newPrices };
+    });
   };
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center">
+      <div className="flex items-center justify-center p-8">
         <div className="text-white">Chargement...</div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 pb-24 lg:pb-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-white">Gestion des Produits</h1>
-        <button
-          onClick={handleAdd}
-          className="bg-white hover:bg-gray-100 text-black font-bold py-2 px-4 rounded-lg flex items-center space-x-2 w-full sm:w-auto"
-        >
-          <span>➕</span>
-          <span className="hidden sm:inline">Ajouter un produit</span>
-          <span className="sm:hidden">Nouveau</span>
-        </button>
+    <div className="p-4 lg:p-6">
+      <div className="mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-white">🛍️ Gestion des Produits</h1>
+            <p className="text-gray-400 mt-2">Gérez votre catalogue de produits HashBurger</p>
+          </div>
+          <button
+            onClick={handleAdd}
+            className="bg-white/10 border border-white/20 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 backdrop-blur-sm shadow-lg hover:scale-[1.02] w-full sm:w-auto"
+          >
+            ➕ Ajouter un produit
+          </button>
+        </div>
       </div>
 
-      {/* Liste des produits */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+      {/* Grid de produits - Plus compact */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {products.map((product) => (
-          <div key={product._id} className="bg-gray-900 border border-white/20 rounded-xl overflow-hidden">
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="font-bold text-white text-lg">{product.name}</h3>
-                <span className={`px-2 py-1 rounded text-xs ${
-                  product.isActive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
-                }`}>
-                  {product.isActive ? 'Actif' : 'Inactif'}
-                </span>
+          <div key={product._id} className="bg-gray-900/50 border border-white/20 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm">
+            <div className="relative h-32">
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute top-2 left-2 bg-white/90 text-black text-xs font-bold px-2 py-1 rounded-md">
+                {product.category}
               </div>
-              <p className="text-gray-400 text-sm mb-1">{product.farm}</p>
-              <p className="text-gray-500 text-xs mb-3">{product.category}</p>
-              <p className="text-white font-medium mb-4">À partir de {product.prices['5g']}€</p>
+              {product.video && (
+                <div className="absolute top-2 right-2 bg-black/80 text-white p-1 rounded-full">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 6a2 2 0 012-2h6l2 2h6a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                  </svg>
+                </div>
+              )}
+              <div className={`absolute bottom-2 right-2 px-2 py-1 rounded-full text-xs font-bold ${
+                product.isActive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+              }`}>
+                {product.isActive ? '✅' : '❌'}
+              </div>
+            </div>
+            
+            <div className="p-3">
+              <h3 className="font-bold text-white text-sm mb-1 uppercase tracking-wide">
+                {product.name}
+              </h3>
+              <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">
+                {product.farm}
+              </p>
               
-              <div className="flex space-x-2">
+              {/* Prix principaux */}
+              <div className="mb-3">
+                <div className="grid grid-cols-2 gap-1 text-xs">
+                  {Object.entries(product.prices).slice(0, 4).map(([key, value]) => (
+                    <div key={key} className="flex justify-between text-gray-300">
+                      <span>{key}</span>
+                      <span className="font-medium">{value}€</span>
+                    </div>
+                  ))}
+                </div>
+                {Object.keys(product.prices).length > 4 && (
+                  <p className="text-gray-500 text-xs mt-1">+{Object.keys(product.prices).length - 4} prix...</p>
+                )}
+              </div>
+              
+              <div className="flex gap-2">
                 <button
                   onClick={() => handleEdit(product)}
-                  className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 px-3 rounded text-sm"
+                  className="flex-1 bg-white/10 hover:bg-white/20 text-white font-medium py-2 px-3 rounded-lg text-xs transition-all duration-200 border border-white/10"
                 >
                   ✏️ Modifier
                 </button>
                 <button
-                  onClick={() => handleDelete(product._id!)}
-                  className="bg-red-600 hover:bg-red-500 text-white py-2 px-3 rounded text-sm"
+                  onClick={() => product._id && handleDelete(product._id)}
+                  className="bg-red-900/20 border border-red-400/20 hover:bg-red-900/40 text-red-400 font-medium py-2 px-3 rounded-lg text-xs transition-all duration-200"
                 >
                   🗑️
                 </button>
@@ -241,123 +285,149 @@ export default function ProductsManager() {
       {/* Modal d'édition */}
       {showModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-900 border border-white/20 rounded-xl p-4 md:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-gray-900 border border-white/20 rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto backdrop-blur-sm">
             <h2 className="text-xl font-bold text-white mb-6">
-              {editingProduct ? 'Modifier le produit' : 'Ajouter un produit'}
+              {editingProduct ? '✏️ Modifier le produit' : '➕ Ajouter un produit'}
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Nom</label>
-                <input
-                  type="text"
-                  value={formData.name || ''}
-                  onChange={(e) => updateFormField('name', e.target.value)}
-                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2"
-                />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              {/* Informations de base */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-white">Informations de base</h3>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Nom du produit</label>
+                  <input
+                    type="text"
+                    value={formData.name || ''}
+                    onChange={(e) => updateField('name', e.target.value)}
+                    className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
+                    placeholder="COOKIES GELATO"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Catégorie</label>
+                  <select
+                    value={formData.category || ''}
+                    onChange={(e) => updateField('category', e.target.value)}
+                    className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
+                  >
+                    <option value="">Sélectionner une catégorie</option>
+                    {categories.map((category) => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Farm</label>
+                  <select
+                    value={formData.farm || ''}
+                    onChange={(e) => updateField('farm', e.target.value)}
+                    className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
+                  >
+                    <option value="">Sélectionner une farm</option>
+                    {farms.map((farm) => (
+                      <option key={farm} value={farm}>{farm}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">URL Image</label>
+                  <input
+                    type="url"
+                    value={formData.image || ''}
+                    onChange={(e) => updateField('image', e.target.value)}
+                    className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
+                    placeholder="https://..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">URL Vidéo (optionnel)</label>
+                  <input
+                    type="url"
+                    value={formData.video || ''}
+                    onChange={(e) => updateField('video', e.target.value)}
+                    className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
+                    placeholder="https://..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                  <textarea
+                    value={formData.description || ''}
+                    onChange={(e) => updateField('description', e.target.value)}
+                    className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50 h-20"
+                    placeholder="Description du produit..."
+                  />
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="isActive"
+                    checked={formData.isActive || false}
+                    onChange={(e) => updateField('isActive', e.target.checked)}
+                    className="mr-2"
+                  />
+                  <label htmlFor="isActive" className="text-sm text-gray-300">Produit actif</label>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Farm</label>
-                <select
-                  value={formData.farm || ''}
-                  onChange={(e) => updateFormField('farm', e.target.value)}
-                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2"
-                >
-                  <option value="">Sélectionner une farm</option>
-                  {farms.map(farm => (
-                    <option key={farm} value={farm}>{farm}</option>
+              {/* Gestion des prix */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-white">Prix</h3>
+                  <button
+                    type="button"
+                    onClick={addCustomPrice}
+                    className="bg-white/10 border border-white/20 hover:bg-white/20 text-white text-sm py-2 px-4 rounded-lg transition-all duration-200"
+                  >
+                    ➕ Ajouter prix
+                  </button>
+                </div>
+                
+                <div className="space-y-3 max-h-80 overflow-y-auto">
+                  {Object.entries(formData.prices || {}).map(([priceKey, value]) => (
+                    <div key={priceKey} className="flex items-center gap-3">
+                      <div className="flex-1">
+                        <label className="block text-xs text-gray-400 mb-1">{priceKey}</label>
+                        <input
+                          type="number"
+                          value={value}
+                          onChange={(e) => updatePrice(priceKey, parseFloat(e.target.value) || 0)}
+                          className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
+                          placeholder="0"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removePrice(priceKey)}
+                        className="text-red-400 hover:text-red-300 p-2 transition-colors"
+                        title="Supprimer ce prix"
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Catégorie</label>
-                <select
-                  value={formData.category || ''}
-                  onChange={(e) => updateFormField('category', e.target.value)}
-                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2"
-                >
-                  <option value="">Sélectionner une catégorie</option>
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Statut</label>
-                <select
-                  value={formData.isActive ? 'true' : 'false'}
-                  onChange={(e) => updateFormField('isActive', e.target.value === 'true')}
-                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2"
-                >
-                  <option value="true">Actif</option>
-                  <option value="false">Inactif</option>
-                </select>
+                </div>
               </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">URL Image</label>
-              <input
-                type="url"
-                value={formData.image || ''}
-                onChange={(e) => updateFormField('image', e.target.value)}
-                className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2"
-                placeholder="https://example.com/image.jpg"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">URL Vidéo (optionnel)</label>
-              <input
-                type="url"
-                value={formData.video || ''}
-                onChange={(e) => updateFormField('video', e.target.value)}
-                className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2"
-                placeholder="https://example.com/video.mp4"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
-              <textarea
-                value={formData.description || ''}
-                onChange={(e) => updateFormField('description', e.target.value)}
-                className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 h-20"
-                placeholder="Description du produit..."
-              />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-300 mb-4">Prix par quantité</label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {Object.entries(formData.prices || {}).map(([weight, price]) => (
-                  <div key={weight}>
-                    <label className="block text-xs text-gray-400 mb-1">{weight}</label>
-                    <input
-                      type="number"
-                      value={price}
-                      onChange={(e) => updatePrice(weight, Number(e.target.value))}
-                      className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2"
-                      placeholder="Prix en €"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex space-x-4">
+            <div className="flex gap-4">
               <button
                 onClick={handleSave}
-                className="bg-white hover:bg-gray-100 text-black font-bold py-2 px-4 rounded-lg flex-1"
+                className="flex-1 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300"
               >
                 💾 Sauvegarder
               </button>
               <button
                 onClick={() => setShowModal(false)}
-                className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg"
+                className="bg-gray-700/50 border border-white/20 hover:bg-gray-600/50 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300"
               >
                 ❌ Annuler
               </button>
