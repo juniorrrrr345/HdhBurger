@@ -125,6 +125,27 @@ export default function HomePage() {
     backgroundBlur: 5
   });
 
+  // Charger les settings de background immédiatement au montage
+  useEffect(() => {
+    const loadBackgroundImmediately = async () => {
+      try {
+        const settingsRes = await fetch('/api/settings');
+        if (settingsRes.ok) {
+          const settingsData = await settingsRes.json();
+          setBackgroundSettings({
+            backgroundImage: settingsData.backgroundImage || '',
+            backgroundOpacity: settingsData.backgroundOpacity || 20,
+            backgroundBlur: settingsData.backgroundBlur || 5
+          });
+        }
+      } catch (error) {
+        console.error('Erreur chargement background:', error);
+      }
+    };
+    
+    loadBackgroundImmediately();
+  }, []);
+
   // Fonction pour recharger les settings uniquement
   const reloadSettings = async () => {
     try {
@@ -158,21 +179,11 @@ export default function HomePage() {
     }
   };
 
-  // Charger les données depuis l'API avec cache instantané
+  // Charger les données depuis l'API
   useEffect(() => {
     async function loadData() {
       setLoading(true);
       try {
-        // Initialiser le cache et charger les settings immédiatement
-        await instantContent.initialize();
-        const settings = instantContent.getSettings();
-        
-        setBackgroundSettings({
-          backgroundImage: settings?.backgroundImage || '',
-          backgroundOpacity: settings?.backgroundOpacity || 20,
-          backgroundBlur: settings?.backgroundBlur || 5
-        });
-
         // Charger les produits
         const productsRes = await fetch('/api/products');
         if (productsRes.ok) {
@@ -206,7 +217,8 @@ export default function HomePage() {
       setLoading(false);
     }
 
-    loadData();
+    // Petit délai pour laisser le background se charger d'abord
+    setTimeout(loadData, 100);
   }, []);
 
   // Filtrer les produits selon les sélections
