@@ -5,7 +5,6 @@ interface Farm {
   _id?: string;
   name: string;
   description?: string;
-  isActive: boolean;
 }
 
 export default function FarmsManager() {
@@ -15,8 +14,7 @@ export default function FarmsManager() {
   const [editingFarm, setEditingFarm] = useState<Farm | null>(null);
   const [formData, setFormData] = useState<Partial<Farm>>({
     name: '',
-    description: '',
-    isActive: true
+    description: ''
   });
 
   useEffect(() => {
