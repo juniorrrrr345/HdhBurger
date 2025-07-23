@@ -9,11 +9,11 @@ export default function Header() {
       </div>
       
       {/* Logo HashBurger */}
-      <div className="bg-black py-6 px-4 text-center border-b border-white/20">
-        <h1 className="hashburger-title">
+      <div className="bg-black py-3 px-4 text-center border-b border-white/20">
+        <h1 className="text-2xl font-black text-white tracking-wider">
           HashBurger
         </h1>
-        <p className="text-gray-400 text-xs mt-3 uppercase tracking-[0.3em] font-medium">
+        <p className="text-gray-400 text-xs mt-1 uppercase tracking-[0.2em] font-medium">
           Premium Concentrés
         </p>
       </div>

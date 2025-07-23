@@ -133,7 +133,7 @@ export default function HomePage() {
       <Header />
       
       {/* Espacement pour le header fixe */}
-      <div className="pt-28">
+      <div className="pt-20">
         {/* Filtres */}
         <CategoryFilter
           selectedCategory={selectedCategory}
