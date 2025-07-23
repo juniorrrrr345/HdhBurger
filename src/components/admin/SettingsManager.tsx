@@ -306,16 +306,41 @@ export default function SettingsManager() {
                     const formData = new FormData();
                     formData.append('file', file);
                     try {
+                      console.log('🔍 Upload background image...');
                       const response = await fetch('/api/upload', {
                         method: 'POST',
                         body: formData,
                       });
                       if (response.ok) {
                         const data = await response.json();
-                        updateField('backgroundImage', data.url);
+                        console.log('✅ Image uploadée:', data.url);
+                        
+                        // Mettre à jour l'état local
+                        const newSettings = { ...settings, backgroundImage: data.url };
+                        setSettings(newSettings);
+                        
+                        // Sauvegarder automatiquement
+                        console.log('🔄 Sauvegarde automatique du background...');
+                        const saveResponse = await fetch('/api/settings', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify(newSettings),
+                        });
+                        
+                        if (saveResponse.ok) {
+                          console.log('✅ Background sauvegardé automatiquement');
+                          setMessage('✅ Image de fond mise à jour avec succès !');
+                          setTimeout(() => setMessage(''), 3000);
+                        } else {
+                          console.error('❌ Erreur sauvegarde background');
+                          setMessage('❌ Erreur lors de la sauvegarde');
+                        }
                       }
                     } catch (error) {
-                      console.error('Erreur upload:', error);
+                      console.error('❌ Erreur upload:', error);
+                      setMessage('❌ Erreur lors de l\'upload');
                     }
                   }
                 }}

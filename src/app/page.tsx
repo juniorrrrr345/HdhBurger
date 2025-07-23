@@ -156,14 +156,22 @@ export default function HomePage() {
         }
 
         // Charger les paramètres d'arrière-plan
-        const settingsRes = await fetch('/api/settings');
+        console.log('🔍 Chargement settings initial...');
+        const settingsRes = await fetch('/api/settings?t=' + Date.now()); // Cache busting
         if (settingsRes.ok) {
           const settingsData = await settingsRes.json();
+          console.log('✅ Settings chargés:', {
+            backgroundImage: settingsData.backgroundImage,
+            backgroundOpacity: settingsData.backgroundOpacity,
+            backgroundBlur: settingsData.backgroundBlur
+          });
           setBackgroundSettings({
             backgroundImage: settingsData.backgroundImage || '',
             backgroundOpacity: settingsData.backgroundOpacity || 20,
             backgroundBlur: settingsData.backgroundBlur || 5
           });
+        } else {
+          console.error('❌ Erreur chargement settings:', settingsRes.status);
         }
       } catch (error) {
         console.error('Erreur lors du chargement:', error);
@@ -191,9 +199,35 @@ export default function HomePage() {
     setSelectedProduct(null);
   };
 
-  const handleTabChange = (tabId: string) => {
+  const handleTabChange = async (tabId: string) => {
     setActiveTab(tabId);
     setSelectedProduct(null); // Fermer le détail produit si ouvert
+    
+    // Rafraîchir le background quand on revient au menu principal
+    if (tabId === 'menu') {
+      try {
+        console.log('🔄 Rafraîchissement background...');
+        const settingsRes = await fetch('/api/settings?t=' + Date.now()); // Cache busting
+        if (settingsRes.ok) {
+          const settingsData = await settingsRes.json();
+          console.log('🔍 Nouvelles données settings:', {
+            backgroundImage: settingsData.backgroundImage,
+            backgroundOpacity: settingsData.backgroundOpacity,
+            backgroundBlur: settingsData.backgroundBlur
+          });
+          setBackgroundSettings({
+            backgroundImage: settingsData.backgroundImage || '',
+            backgroundOpacity: settingsData.backgroundOpacity || 20,
+            backgroundBlur: settingsData.backgroundBlur || 5
+          });
+          console.log('✅ Background rafraîchi avec:', settingsData.backgroundImage);
+        } else {
+          console.error('❌ Erreur response settings:', settingsRes.status);
+        }
+      } catch (error) {
+        console.error('❌ Erreur rafraîchissement background:', error);
+      }
+    }
   };
 
   // Rendu conditionnel des pages
@@ -219,10 +253,17 @@ export default function HomePage() {
   }
 
   const getBackgroundStyle = () => {
+    console.log('🎨 Application du style background:', {
+      backgroundImage: backgroundSettings.backgroundImage,
+      hasImage: !!backgroundSettings.backgroundImage
+    });
+    
     if (!backgroundSettings.backgroundImage) {
+      console.log('🎨 Pas d\'image background, fond noir');
       return { backgroundColor: 'black' };
     }
     
+    console.log('🎨 Application image background:', backgroundSettings.backgroundImage);
     return {
       backgroundColor: 'black',
       backgroundImage: `url(${backgroundSettings.backgroundImage})`,
