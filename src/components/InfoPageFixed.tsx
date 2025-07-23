@@ -14,26 +14,62 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
     backgroundOpacity: 20,
     backgroundBlur: 5
   });
+  const [pageContent, setPageContent] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadBackgroundSettings = async () => {
+    const loadData = async () => {
       try {
-        const response = await fetch('/api/settings');
-        if (response.ok) {
-          const data = await response.json();
+        // Charger les paramètres de background
+        const settingsResponse = await fetch('/api/settings');
+        if (settingsResponse.ok) {
+          const settingsData = await settingsResponse.json();
           setBackgroundSettings({
-            backgroundImage: data.backgroundImage || '',
-            backgroundOpacity: data.backgroundOpacity || 20,
-            backgroundBlur: data.backgroundBlur || 5
+            backgroundImage: settingsData.backgroundImage || '',
+            backgroundOpacity: settingsData.backgroundOpacity || 20,
+            backgroundBlur: settingsData.backgroundBlur || 5
           });
         }
+
+        // Charger le contenu de la page Info depuis l'API
+        console.log('🔍 Chargement contenu page Info...');
+        const pageResponse = await fetch('/api/pages/info');
+        if (pageResponse.ok) {
+          const pageData = await pageResponse.json();
+          console.log('✅ Contenu page Info chargé:', pageData);
+          setPageContent(pageData.content || defaultContent);
+        } else {
+          console.warn('⚠️ API page Info non accessible, contenu par défaut');
+          setPageContent(defaultContent);
+        }
       } catch (error) {
-        console.error('Erreur lors du chargement des paramètres:', error);
+        console.error('❌ Erreur lors du chargement:', error);
+        setPageContent(defaultContent);
+      } finally {
+        setLoading(false);
       }
     };
 
-    loadBackgroundSettings();
+    loadData();
   }, []);
+
+  const defaultContent = `
+# À propos de HashBurger
+
+**HashBurger** est la référence absolue pour les concentrés premium à Bordeaux et dans toute la France.
+
+## Nos Spécialités
+- 🇲🇦 Hash Marocain (120U++, 105U, 90U Premium)
+- ❄️ Frozen Sift (Extraction à froid)
+- 🇳🇱 Weed NL (Variétés néerlandaises premium)
+- 🇮🇹 Cali Italienne (Génétiques californiennes)
+
+## Nos Services
+- ✅ Livraison Bordeaux
+- ✅ Envoi Postal France
+- ✅ Qualité Garantie
+- ✅ Support 24/7
+  `;
 
   const getBackgroundStyle = () => {
     if (!backgroundSettings.backgroundImage) {
@@ -91,24 +127,63 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
       </div>
 
       <div className="p-6 max-w-2xl mx-auto pb-32">
-        {/* Logo et titre */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-black text-white mb-2">HashBurger</h2>
-          <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
-            Premium Concentrés • Bordeaux
-          </p>
-        </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-white text-lg">Chargement...</div>
+          </div>
+        ) : (
+          <>
+            {/* Logo et titre */}
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-black text-white mb-2">HashBurger</h2>
+              <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
+                Premium Concentrés • Bordeaux
+              </p>
+            </div>
 
-        {/* À propos */}
-        <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-6 shadow-lg hover:bg-black/50 transition-all duration-300">
-          <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-            <span className="mr-3 text-2xl">🍃</span>
-            À propos de HashBurger
-          </h3>
-          <p className="text-gray-200 leading-relaxed">
-            <strong>HashBurger</strong> est la référence absolue pour les concentrés premium à Bordeaux et dans toute la France.
-          </p>
-        </div>
+                         {/* Contenu dynamique de la page */}
+             <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-6 shadow-lg hover:bg-black/50 transition-all duration-300">
+               <div className="prose prose-invert max-w-none">
+                 {pageContent.split('\n').map((line, index) => {
+                   // Titres H1
+                   if (line.startsWith('# ')) {
+                     return (
+                       <h1 key={index} className="text-2xl font-bold text-white mb-4 mt-6 first:mt-0">
+                         {line.substring(2)}
+                       </h1>
+                     );
+                   }
+                   // Titres H2
+                   if (line.startsWith('## ')) {
+                     return (
+                       <h2 key={index} className="text-xl font-bold text-gray-200 mb-3 mt-4">
+                         {line.substring(3)}
+                       </h2>
+                     );
+                   }
+                   // Listes
+                   if (line.startsWith('- ')) {
+                     return (
+                       <li key={index} className="text-gray-200 ml-4 mb-2 list-disc">
+                         {line.substring(2)}
+                       </li>
+                     );
+                   }
+                   // Lignes vides
+                   if (line.trim() === '') {
+                     return <br key={index} />;
+                   }
+                   // Texte normal
+                   return (
+                     <p key={index} className="text-gray-200 leading-relaxed mb-3">
+                       {line.split('**').map((part, i) => 
+                         i % 2 === 1 ? <strong key={i} className="text-white font-bold">{part}</strong> : part
+                       )}
+                     </p>
+                   );
+                 })}
+               </div>
+             </div>
 
         {/* Nos Spécialités */}
         <div className="bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl p-6 mb-6 shadow-lg hover:bg-black/50 transition-all duration-300">
