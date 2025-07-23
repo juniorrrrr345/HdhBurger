@@ -410,7 +410,7 @@ export default function ProductsManager() {
   const addNewPrice = (quantity: string) => {
     const key = quantity.trim();
     if (key) {
-      // Ajouter dans les états locaux pour affichage immédiat
+      // Mettre à jour les états pour l'affichage des nouvelles lignes
       setPriceInputs(prev => ({
         ...prev,
         [key]: ''
