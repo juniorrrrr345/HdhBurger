@@ -260,12 +260,20 @@ export default function ProductsManager() {
             <h1 className="text-2xl lg:text-3xl font-bold text-white">🛍️ Gestion des Produits</h1>
             <p className="text-gray-400 mt-2">Gérez votre catalogue de produits HashBurger</p>
           </div>
+                  <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={handleAdd}
             className="bg-white/10 border border-white/20 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 backdrop-blur-sm shadow-lg hover:scale-[1.02] w-full sm:w-auto"
           >
             ➕ Ajouter un produit
           </button>
+          <button
+            onClick={cleanAllPrices}
+            className="bg-yellow-600/10 border border-yellow-500/20 hover:bg-yellow-600/20 text-yellow-300 font-bold py-3 px-6 rounded-xl transition-all duration-300 backdrop-blur-sm shadow-lg hover:scale-[1.02] w-full sm:w-auto"
+          >
+            🧹 Nettoyer les prix
+          </button>
+        </div>
         </div>
       </div>
 
