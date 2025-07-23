@@ -1,19 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    unoptimized: true,
-    domains: ['images.unsplash.com', 'commondatastorage.googleapis.com'],
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
-  // serverActions est activé par défaut maintenant
+  // Force la configuration MongoDB pour Vercel
   env: {
-    MONGODB_URI: process.env.MONGODB_URI,
+    MONGODB_URI: process.env.MONGODB_URI || 'mongodb+srv://Junior:Junior50@hshburgeer.59w7g4q.mongodb.net/hashburger?retryWrites=true&w=majority&appName=HshBurgeer'
   },
+  // Configuration optimisée pour Vercel
+  experimental: {
+    serverComponentsExternalPackages: ['mongoose']
+  }
 }
 
 module.exports = nextConfig
