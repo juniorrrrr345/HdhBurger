@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import BottomNav from './BottomNav';
+import { instantContent } from '@/lib/contentCache';
 
 interface ContactPageProps {
   onClose: () => void;
@@ -16,67 +17,27 @@ interface SocialLink {
 }
 
 export default function ContactPageFixed({ onClose, activeTab = 'contact', onTabChange }: ContactPageProps) {
+  // Utiliser directement les données du cache instantané
+  const settings = instantContent.getSettings();
+  const pageContent = instantContent.getContactContent();
+  const socialLinks = instantContent.getSocialLinks();
+  
   const [backgroundSettings, setBackgroundSettings] = useState({
-    backgroundImage: '',
-    backgroundOpacity: 20,
-    backgroundBlur: 5
+    backgroundImage: settings.backgroundImage || '',
+    backgroundOpacity: settings.backgroundOpacity || 20,
+    backgroundBlur: settings.backgroundBlur || 5
   });
-  const [pageContent, setPageContent] = useState(''); // Vide au départ
-  const [settings, setSettings] = useState({
-    shopTitle: '',
-    shopSubtitle: '',
-    telegramLink: ''
-  });
-  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
-  const [loading, setLoading] = useState(true); // Chargement jusqu'à réception des données admin
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        // Charger en parallèle pour plus de rapidité
-        const [settingsResponse, pageResponse, socialResponse] = await Promise.all([
-          fetch('/api/settings'),
-          fetch('/api/pages/contact'),
-          fetch('/api/social-links')
-        ]);
-
-        // Charger les paramètres du panel admin
-        if (settingsResponse.ok) {
-          const settingsData = await settingsResponse.json();
-          setBackgroundSettings({
-            backgroundImage: settingsData.backgroundImage || '',
-            backgroundOpacity: settingsData.backgroundOpacity || 20,
-            backgroundBlur: settingsData.backgroundBlur || 5
-          });
-          setSettings({
-            shopTitle: settingsData.shopTitle || 'HashBurger',
-            shopSubtitle: settingsData.shopSubtitle || 'Premium Concentrés',
-            telegramLink: settingsData.telegramLink || 'https://t.me/hashburgerchannel'
-          });
-        }
-
-        // Charger le contenu de la page depuis le panel admin
-        if (pageResponse.ok) {
-          const pageData = await pageResponse.json();
-          setPageContent(pageData.content || '# Contenu contact non configuré\n\nVeuillez configurer le contenu dans le panel admin.');
-        } else {
-          setPageContent('# Contenu contact non disponible\n\nImpossible de charger le contenu. Vérifiez la configuration du panel admin.');
-        }
-
-        // Charger les liens sociaux
-        if (socialResponse.ok) {
-          const socialData = await socialResponse.json();
-          setSocialLinks(socialData);
-        }
-      } catch (error) {
-        console.log('📱 Erreur chargement contenu admin');
-        setPageContent('# Erreur de chargement\n\nImpossible de se connecter au panel admin.');
-      } finally {
-        setLoading(false); // Arrêter le chargement une fois les données admin reçues
-      }
-    };
-
-    loadData();
+    // Rafraîchir en arrière-plan si nécessaire
+    instantContent.refresh().then(() => {
+      const freshSettings = instantContent.getSettings();
+      setBackgroundSettings({
+        backgroundImage: freshSettings.backgroundImage || '',
+        backgroundOpacity: freshSettings.backgroundOpacity || 20,
+        backgroundBlur: freshSettings.backgroundBlur || 5
+      });
+    });
   }, []);
 
   const getBackgroundStyle = () => {

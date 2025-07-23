@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { instantContent } from '@/lib/contentCache';
 
 interface Settings {
   shopTitle: string;
@@ -10,42 +11,16 @@ interface Settings {
 }
 
 export default function Header() {
-  const [settings, setSettings] = useState({
-    shopTitle: 'HashBurger',
-    shopSubtitle: 'Premium Concentrés',
-    titleStyle: 'glow',
-    bannerText: '',
-    scrollingText: '',
-    backgroundImage: '',
-    backgroundOpacity: 20,
-    backgroundBlur: 5
-  });
+  // Utiliser directement les données du cache instantané
+  const cachedSettings = instantContent.getSettings();
+  const [settings, setSettings] = useState(cachedSettings);
 
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const response = await fetch('/api/settings');
-        if (response.ok) {
-          const data = await response.json();
-          // Charger directement les settings du panel admin
-          setSettings({
-            shopTitle: data.shopTitle || 'HashBurger',
-            shopSubtitle: data.shopSubtitle || 'Premium Concentrés',
-            titleStyle: data.titleStyle || 'glow',
-            bannerText: data.bannerText || '',
-            scrollingText: data.scrollingText || '',
-            backgroundImage: data.backgroundImage || '',
-            backgroundOpacity: data.backgroundOpacity || 20,
-            backgroundBlur: data.backgroundBlur || 5
-          });
-        }
-      } catch (error) {
-        console.error('Erreur lors du chargement des paramètres:', error);
-        // Garder les valeurs par défaut en cas d'erreur
-      }
-    };
-
-    loadSettings();
+    // Rafraîchir en arrière-plan sans changer l'affichage
+    instantContent.refresh().then(() => {
+      const freshSettings = instantContent.getSettings();
+      setSettings(freshSettings);
+    });
   }, []);
 
   const getTitleClass = () => {

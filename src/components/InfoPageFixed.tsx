@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import BottomNav from './BottomNav';
+import { instantContent } from '@/lib/contentCache';
 
 interface InfoPageProps {
   onClose: () => void;
@@ -9,58 +10,26 @@ interface InfoPageProps {
 }
 
 export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChange }: InfoPageProps) {
+  // Utiliser directement les données du cache instantané
+  const settings = instantContent.getSettings();
+  const pageContent = instantContent.getInfoContent();
+  
   const [backgroundSettings, setBackgroundSettings] = useState({
-    backgroundImage: '',
-    backgroundOpacity: 20,
-    backgroundBlur: 5
+    backgroundImage: settings.backgroundImage || '',
+    backgroundOpacity: settings.backgroundOpacity || 20,
+    backgroundBlur: settings.backgroundBlur || 5
   });
-  const [pageContent, setPageContent] = useState(''); // Vide au départ
-  const [settings, setSettings] = useState({
-    shopTitle: '',
-    shopSubtitle: ''
-  });
-  const [loading, setLoading] = useState(true); // Chargement jusqu'à réception des données admin
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        // Charger en parallèle les settings et le contenu du panel admin
-        const [settingsResponse, pageResponse] = await Promise.all([
-          fetch('/api/settings'),
-          fetch('/api/pages/info')
-        ]);
-
-        // Charger les paramètres du panel admin
-        if (settingsResponse.ok) {
-          const settingsData = await settingsResponse.json();
-          setBackgroundSettings({
-            backgroundImage: settingsData.backgroundImage || '',
-            backgroundOpacity: settingsData.backgroundOpacity || 20,
-            backgroundBlur: settingsData.backgroundBlur || 5
-          });
-          setSettings({
-            shopTitle: settingsData.shopTitle || 'HashBurger',
-            shopSubtitle: settingsData.shopSubtitle || 'Premium Concentrés'
-          });
-        }
-
-        // Charger le contenu de la page depuis le panel admin
-        if (pageResponse.ok) {
-          const pageData = await pageResponse.json();
-          setPageContent(pageData.content || '# Contenu non configuré\n\nVeuillez configurer le contenu dans le panel admin.');
-        } else {
-          setPageContent('# Contenu non disponible\n\nImpossible de charger le contenu. Vérifiez la configuration du panel admin.');
-        }
-        
-      } catch (error) {
-        console.log('📱 Erreur chargement contenu admin');
-        setPageContent('# Erreur de chargement\n\nImpossible de se connecter au panel admin.');
-      } finally {
-        setLoading(false); // Arrêter le chargement une fois les données admin reçues
-      }
-    };
-
-    loadData();
+    // Rafraîchir en arrière-plan si nécessaire
+    instantContent.refresh().then(() => {
+      const freshSettings = instantContent.getSettings();
+      setBackgroundSettings({
+        backgroundImage: freshSettings.backgroundImage || '',
+        backgroundOpacity: freshSettings.backgroundOpacity || 20,
+        backgroundBlur: freshSettings.backgroundBlur || 5
+      });
+    });
   }, []);
 
   const getBackgroundStyle = () => {
@@ -135,83 +104,72 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
         </div>
 
         <div className="p-6 max-w-4xl mx-auto pb-32 min-h-screen">
-          {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-                <p className="text-white text-lg">Chargement du contenu admin...</p>
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* Logo et titre dynamiques */}
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-black text-white mb-2">{settings.shopTitle}</h2>
-                <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
-                  {settings.shopSubtitle} • Bordeaux
-                </p>
-              </div>
+          {/* Logo et titre dynamiques */}
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-black text-white mb-2">{settings.shopTitle}</h2>
+            <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
+              {settings.shopSubtitle} • Bordeaux
+            </p>
+          </div>
 
-              {/* Contenu dynamique de la page */}
+          {/* Contenu dynamique de la page */}
           <div className="bg-black/60 backdrop-blur-sm border border-white/20 rounded-xl p-6 mb-6 shadow-2xl hover:bg-black/70 transition-all duration-300">
-                <div className="prose prose-invert max-w-none">
-                  {pageContent.split('\n').map((line, index) => {
-                    // Titres H1
-                    if (line.startsWith('# ')) {
-                      return (
-                        <h1 key={index} className="text-2xl font-bold text-white mb-4 mt-6 first:mt-0">
-                          {line.substring(2)}
-                        </h1>
-                      );
-                    }
-                    // Titres H2
-                    if (line.startsWith('## ')) {
-                      return (
-                        <h2 key={index} className="text-xl font-bold text-gray-200 mb-3 mt-4">
-                          {line.substring(3)}
-                        </h2>
-                      );
-                    }
-                    // Titres H3
-                    if (line.startsWith('### ')) {
-                      return (
-                        <h3 key={index} className="text-lg font-bold text-gray-300 mb-2 mt-3">
-                          {line.substring(4)}
-                        </h3>
-                      );
-                    }
-                    // Listes
-                    if (line.startsWith('- ')) {
-                      return (
-                        <li key={index} className="text-gray-200 ml-4 mb-2 list-disc">
-                          {line.substring(2)}
-                        </li>
-                      );
-                    }
-                    // Lignes vides
-                    if (line.trim() === '') {
-                      return <br key={index} />;
-                    }
-                    // Texte normal
-                    return (
-                      <p key={index} className="text-gray-200 leading-relaxed mb-3">
-                        {line.split('**').map((part, i) => 
-                          i % 2 === 1 ? <strong key={i} className="text-white font-bold">{part}</strong> : part
-                        )}
-                      </p>
-                    );
-                  })}
-                </div>
-              </div>
+            <div className="prose prose-invert max-w-none">
+              {pageContent.split('\n').map((line, index) => {
+                // Titres H1
+                if (line.startsWith('# ')) {
+                  return (
+                    <h1 key={index} className="text-2xl font-bold text-white mb-4 mt-6 first:mt-0">
+                      {line.substring(2)}
+                    </h1>
+                  );
+                }
+                // Titres H2
+                if (line.startsWith('## ')) {
+                  return (
+                    <h2 key={index} className="text-xl font-bold text-gray-200 mb-3 mt-4">
+                      {line.substring(3)}
+                    </h2>
+                  );
+                }
+                // Titres H3
+                if (line.startsWith('### ')) {
+                  return (
+                    <h3 key={index} className="text-lg font-bold text-gray-300 mb-2 mt-3">
+                      {line.substring(4)}
+                    </h3>
+                  );
+                }
+                // Listes
+                if (line.startsWith('- ')) {
+                  return (
+                    <li key={index} className="text-gray-200 ml-4 mb-2 list-disc">
+                      {line.substring(2)}
+                    </li>
+                  );
+                }
+                // Lignes vides
+                if (line.trim() === '') {
+                  return <br key={index} />;
+                }
+                // Texte normal
+                return (
+                  <p key={index} className="text-gray-200 leading-relaxed mb-3">
+                    {line.split('**').map((part, i) => 
+                      i % 2 === 1 ? <strong key={i} className="text-white font-bold">{part}</strong> : part
+                    )}
+                  </p>
+                );
+              })}
+            </div>
+          </div>
 
-              {/* Avertissement légal */}
-              <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-4 text-center">
-                <p className="text-red-300 text-xs">
-                  ⚠️ Réservé à un usage adulte responsable • Respect de la législation en vigueur
-                </p>
-              </div>
-            </>
-          )}
+          {/* Avertissement légal */}
+          <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-4 text-center">
+            <p className="text-red-300 text-xs">
+              ⚠️ Réservé à un usage adulte responsable • Respect de la législation en vigueur
+            </p>
+          </div>
         </div>
       </div>
 

@@ -1,61 +1,113 @@
-// Cache pour précharger le contenu admin et éviter les flashs
-class ContentCache {
-  private cache: Map<string, any> = new Map();
-  private loading: Set<string> = new Set();
+// Cache global pour avoir les données admin instantanément disponibles
+interface CachedData {
+  settings?: any;
+  infoPage?: any;
+  contactPage?: any;
+  socialLinks?: any[];
+}
 
-  async get(key: string, fetcher: () => Promise<any>): Promise<any> {
-    // Si déjà en cache, retourner immédiatement
-    if (this.cache.has(key)) {
-      return this.cache.get(key);
-    }
+class InstantContentManager {
+  private data: CachedData = {};
+  private isInitialized = false;
+  private initPromise: Promise<void> | null = null;
 
-    // Si déjà en cours de chargement, attendre
-    if (this.loading.has(key)) {
-      return new Promise((resolve) => {
-        const checkCache = () => {
-          if (this.cache.has(key)) {
-            resolve(this.cache.get(key));
-          } else {
-            setTimeout(checkCache, 10);
-          }
-        };
-        checkCache();
-      });
-    }
+  // Initialiser le cache au démarrage de l'app
+  async initialize(): Promise<void> {
+    if (this.isInitialized) return;
+    if (this.initPromise) return this.initPromise;
 
-    // Marquer comme en cours de chargement
-    this.loading.add(key);
+    this.initPromise = this.loadAllData();
+    await this.initPromise;
+    this.isInitialized = true;
+  }
 
+  private async loadAllData(): Promise<void> {
     try {
-      const data = await fetcher();
-      this.cache.set(key, data);
-      return data;
-    } finally {
-      this.loading.delete(key);
+      const [settingsRes, infoRes, contactRes, socialRes] = await Promise.all([
+        fetch('/api/settings').catch(() => null),
+        fetch('/api/pages/info').catch(() => null),
+        fetch('/api/pages/contact').catch(() => null),
+        fetch('/api/social-links').catch(() => null)
+      ]);
+
+      if (settingsRes?.ok) {
+        this.data.settings = await settingsRes.json();
+      }
+      if (infoRes?.ok) {
+        this.data.infoPage = await infoRes.json();
+      }
+      if (contactRes?.ok) {
+        this.data.contactPage = await contactRes.json();
+      }
+      if (socialRes?.ok) {
+        this.data.socialLinks = await socialRes.json();
+      }
+    } catch (error) {
+      console.error('Erreur chargement cache admin:', error);
     }
   }
 
-  // Précharger les données essentielles
-  async preload() {
-    const promises = [
-      this.get('settings', () => fetch('/api/settings').then(r => r.json())),
-      this.get('page-info', () => fetch('/api/pages/info').then(r => r.json())),
-      this.get('page-contact', () => fetch('/api/pages/contact').then(r => r.json())),
-      this.get('social-links', () => fetch('/api/social-links').then(r => r.json()))
-    ];
-
-    await Promise.allSettled(promises);
+  // Obtenir les settings instantanément
+  getSettings() {
+    return this.data.settings || {
+      shopTitle: 'HashBurger',
+      shopSubtitle: 'Premium Concentrés',
+      titleStyle: 'glow',
+      bannerText: '',
+      scrollingText: '',
+      backgroundImage: '',
+      backgroundOpacity: 20,
+      backgroundBlur: 5,
+      telegramLink: 'https://t.me/hashburgerchannel'
+    };
   }
 
-  clear() {
-    this.cache.clear();
-    this.loading.clear();
+  // Obtenir le contenu info instantanément
+  getInfoContent() {
+    return this.data.infoPage?.content || `# À propos de HashBurger
+
+**HashBurger** est votre référence premium pour les concentrés de cannabis.
+
+## Nos Spécialités
+- Hash Marocain Premium
+- Extractions à froid
+- Génétiques premium
+
+## Nos Services
+- Livraison Bordeaux
+- Expédition France
+- Support 24/7`;
+  }
+
+  // Obtenir le contenu contact instantanément
+  getContactContent() {
+    return this.data.contactPage?.content || `# Contactez HashBurger
+
+## Contact
+**Telegram:** @hashburgerchannel  
+**Disponibilité:** 24h/24
+
+## Livraison
+**Bordeaux:** Livraison rapide  
+**France:** Expédition sécurisée`;
+  }
+
+  // Obtenir les liens sociaux instantanément
+  getSocialLinks() {
+    return this.data.socialLinks || [];
+  }
+
+  // Rafraîchir les données en arrière-plan
+  async refresh(): Promise<void> {
+    this.isInitialized = false;
+    this.initPromise = null;
+    await this.initialize();
   }
 }
 
-export const contentCache = new ContentCache();
+export const instantContent = new InstantContentManager();
 
-// Précharger dès le démarrage
+// Initialiser dès que possible
 if (typeof window !== 'undefined') {
-  contentCache.preload().catch(console.error);
+  instantContent.initialize();
 }
