@@ -1047,6 +1047,18 @@ export default function ProductsManager() {
                       </button>
                     ))}
                   </div>
+                  <button
+  type="button"
+  onClick={() => {
+    console.log('🔍 DEBUG MANUAL - priceInputs:', priceInputs);
+    console.log('🔍 DEBUG MANUAL - quantityInputs:', quantityInputs);
+    console.log('🔍 DEBUG MANUAL - getAllPriceEntries():', getAllPriceEntries());
+    setRefreshCounter(prev => prev + 1);
+  }}
+  className="bg-red-600/20 border border-red-400/30 hover:bg-red-600/40 text-red-300 text-xs py-1 px-2 rounded"
+>
+  🔍 DEBUG
+</button>
                 </div>
                 
                 <div className="space-y-3 max-h-80 overflow-y-auto">
@@ -1054,6 +1066,7 @@ export default function ProductsManager() {
                     <div className="text-center py-8 text-gray-400">
                       <p className="mb-2">Aucun prix défini</p>
                       <p className="text-sm">Cliquez sur "➕ Ajouter prix" pour commencer</p>
+                      <p className="text-xs mt-2">Debug refresh: {refreshCounter}</p>
                     </div>
                   ) : (
                     getAllPriceEntries().map(([priceKey, value]) => (
@@ -1247,6 +1260,7 @@ export default function ProductsManager() {
                         <div className="text-center py-8 text-gray-400">
                           <p className="mb-2">Aucun prix défini</p>
                           <p className="text-sm">Cliquez sur "➕ Ajouter prix" pour commencer</p>
+                          <p className="text-xs mt-2">Debug refresh mobile: {refreshCounter}</p>
                         </div>
                       ) : (
                         getAllPriceEntries().map(([priceKey, value]) => (
