@@ -16,9 +16,14 @@ export default function HomePage() {
   const [selectedFarm, setSelectedFarm] = useState('Toutes les farms');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState('menu');
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>(['Toutes les catégories']);
-  const [farms, setFarms] = useState<string[]>(['Toutes les farms']);
+  // Charger depuis le cache instantané dès le début
+  const cachedProducts = instantContent.getProducts();
+  const cachedCategories = instantContent.getCategories();
+  const cachedFarms = instantContent.getFarms();
+  
+  const [products, setProducts] = useState<Product[]>(cachedProducts);
+  const [categories, setCategories] = useState<string[]>(['Toutes les catégories', ...cachedCategories.map((c: { name: string }) => c.name)]);
+  const [farms, setFarms] = useState<string[]>(['Toutes les farms', ...cachedFarms.map((f: { name: string }) => f.name)]);
   const [loading, setLoading] = useState(false);
   // Utiliser EXACTEMENT la même méthode que InfoPageFixed
   const settings = instantContent.getSettings();
@@ -81,15 +86,18 @@ export default function HomePage() {
       try {
         console.log('🚀 Chargement EXCLUSIF depuis panel admin...');
         
-        // Charger SEULEMENT les produits du panel admin
+        // Charger SEULEMENT les produits du panel admin et mettre à jour le cache
         const productsRes = await fetch('/api/products');
         if (productsRes.ok) {
           const productsData = await productsRes.json();
           console.log('📦 Produits panel admin:', productsData.length);
-          setProducts(productsData); // SEULEMENT les produits du panel admin
+          setProducts(productsData);
+          // Mettre à jour le cache
+          instantContent.updateProducts(productsData);
         } else {
           console.log('⚠️ Aucun produit dans panel admin');
-          setProducts([]); // Vide si pas de produits dans l'admin
+          setProducts([]);
+          instantContent.updateProducts([]);
         }
 
         // Charger les catégories du panel admin
@@ -98,6 +106,7 @@ export default function HomePage() {
           const categoriesData = await categoriesRes.json();
           const categoryNames = ['Toutes les catégories', ...categoriesData.map((c: { name: string }) => c.name)];
           setCategories(categoryNames);
+          instantContent.updateCategories(categoriesData);
         }
 
         // Charger les farms du panel admin  
@@ -106,6 +115,7 @@ export default function HomePage() {
           const farmsData = await farmsRes.json();
           const farmNames = ['Toutes les farms', ...farmsData.map((f: { name: string }) => f.name)];
           setFarms(farmNames);
+          instantContent.updateFarms(farmsData);
         }
       } catch (error) {
         console.error('❌ Erreur chargement panel admin:', error);

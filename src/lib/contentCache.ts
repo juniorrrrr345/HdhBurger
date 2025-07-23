@@ -4,6 +4,9 @@ interface CachedData {
   infoPage?: any;
   contactPage?: any;
   socialLinks?: any[];
+  products?: any[];
+  categories?: any[];
+  farms?: any[];
 }
 
 class InstantContentManager {
@@ -60,11 +63,14 @@ class InstantContentManager {
 
   private async loadAllData(): Promise<void> {
     try {
-      const [settingsRes, infoRes, contactRes, socialRes] = await Promise.all([
+      const [settingsRes, infoRes, contactRes, socialRes, productsRes, categoriesRes, farmsRes] = await Promise.all([
         fetch('/api/settings').catch(() => null),
         fetch('/api/pages/info').catch(() => null),
         fetch('/api/pages/contact').catch(() => null),
-        fetch('/api/social-links').catch(() => null)
+        fetch('/api/social-links').catch(() => null),
+        fetch('/api/products').catch(() => null),
+        fetch('/api/categories').catch(() => null),
+        fetch('/api/farms').catch(() => null)
       ]);
 
       if (settingsRes?.ok) {
@@ -79,9 +85,19 @@ class InstantContentManager {
       if (socialRes?.ok) {
         this.data.socialLinks = await socialRes.json();
       }
+      if (productsRes?.ok) {
+        this.data.products = await productsRes.json();
+      }
+      if (categoriesRes?.ok) {
+        this.data.categories = await categoriesRes.json();
+      }
+      if (farmsRes?.ok) {
+        this.data.farms = await farmsRes.json();
+      }
 
       // Sauvegarder les nouvelles données
       this.saveToLocalStorage();
+      console.log('🔄 Cache mis à jour avec produits:', this.data.products?.length || 0);
     } catch (error) {
       console.error('Erreur chargement cache admin:', error);
     }
@@ -137,6 +153,21 @@ class InstantContentManager {
     return this.data.socialLinks || [];
   }
 
+  // Obtenir les produits instantanément
+  getProducts() {
+    return this.data.products || [];
+  }
+
+  // Obtenir les catégories instantanément
+  getCategories() {
+    return this.data.categories || [];
+  }
+
+  // Obtenir les farms instantanément
+  getFarms() {
+    return this.data.farms || [];
+  }
+
   // Rafraîchir les données en arrière-plan
   async refresh(): Promise<void> {
     this.isInitialized = false;
@@ -157,6 +188,21 @@ class InstantContentManager {
 
   updateContactContent(content: string): void {
     this.data.contactPage = { content };
+    this.saveToLocalStorage();
+  }
+
+  updateProducts(products: any[]): void {
+    this.data.products = products;
+    this.saveToLocalStorage();
+  }
+
+  updateCategories(categories: any[]): void {
+    this.data.categories = categories;
+    this.saveToLocalStorage();
+  }
+
+  updateFarms(farms: any[]): void {
+    this.data.farms = farms;
     this.saveToLocalStorage();
   }
 }
