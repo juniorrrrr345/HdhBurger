@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { getMongoDBURI, getMongoDBOptions } from './mongodb-config';
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -16,10 +17,12 @@ if (!cached) {
 }
 
 async function connectDB() {
-  const MONGODB_URI = process.env.MONGODB_URI;
+  // Configuration MongoDB directe pour éviter les problèmes de variables d'environnement
+  const MONGODB_URI = process.env.MONGODB_URI || 
+    'mongodb+srv://Junior:Junior50@hshburgeer.59w7g4q.mongodb.net/hashburger?retryWrites=true&w=majority&appName=HshBurgeer';
 
   if (!MONGODB_URI) {
-    throw new Error('⚠️ MONGODB_URI non définie. Ajoutez-la dans Vercel: Settings > Environment Variables');
+    throw new Error('⚠️ Impossible de se connecter à MongoDB');
   }
 
   if (cached.conn) {
