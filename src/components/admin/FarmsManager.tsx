@@ -111,20 +111,21 @@ export default function FarmsManager() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-white">Gestion des Farms</h1>
+    <div className="p-4 md:p-6 lg:p-8 pb-24 lg:pb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-white">Gestion des Farms</h1>
         <button
           onClick={handleAdd}
-          className="bg-white hover:bg-gray-100 text-black font-bold py-2 px-4 rounded-lg flex items-center space-x-2"
+          className="bg-white hover:bg-gray-100 text-black font-bold py-2 px-4 rounded-lg flex items-center space-x-2 w-full sm:w-auto"
         >
           <span>➕</span>
-          <span>Ajouter une farm</span>
+          <span className="hidden sm:inline">Ajouter une farm</span>
+          <span className="sm:hidden">Nouvelle</span>
         </button>
       </div>
 
       {/* Liste des farms */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
         {farms.map((farm) => (
           <div key={farm._id} className="bg-gray-900 border border-white/20 rounded-xl p-6">
             <div className="flex items-start justify-between mb-4">

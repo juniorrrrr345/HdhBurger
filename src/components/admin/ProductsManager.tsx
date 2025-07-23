@@ -172,20 +172,21 @@ export default function ProductsManager() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-white">Gestion des Produits</h1>
+    <div className="p-4 md:p-6 lg:p-8 pb-24 lg:pb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-white">Gestion des Produits</h1>
         <button
           onClick={handleAdd}
-          className="bg-white hover:bg-gray-100 text-black font-bold py-2 px-4 rounded-lg flex items-center space-x-2"
+          className="bg-white hover:bg-gray-100 text-black font-bold py-2 px-4 rounded-lg flex items-center space-x-2 w-full sm:w-auto"
         >
           <span>➕</span>
-          <span>Ajouter un produit</span>
+          <span className="hidden sm:inline">Ajouter un produit</span>
+          <span className="sm:hidden">Nouveau</span>
         </button>
       </div>
 
       {/* Liste des produits */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
         {products.map((product) => (
           <div key={product._id} className="bg-gray-900 border border-white/20 rounded-xl overflow-hidden">
             <img
@@ -228,7 +229,7 @@ export default function ProductsManager() {
       {/* Modal d'édition */}
       {showModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-900 border border-white/20 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-gray-900 border border-white/20 rounded-xl p-4 md:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold text-white mb-6">
               {editingProduct ? 'Modifier le produit' : 'Ajouter un produit'}
             </h2>
