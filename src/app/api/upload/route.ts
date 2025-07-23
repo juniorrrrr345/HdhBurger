@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb-fixed';
 
-// Configuration pour augmenter la limite de taille des requêtes
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '50mb',
-    },
-  },
-};
+// Configuration Next.js 14 pour les limites de requête
+export const maxDuration = 30; // 30 secondes timeout
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {

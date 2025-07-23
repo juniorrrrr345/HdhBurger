@@ -1,14 +1,9 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb-fixed';
 
-// Configuration pour augmenter la limite de taille des requêtes
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '50mb',
-    },
-  },
-};
+// Configuration Next.js 14 pour les limites de requête
+export const maxDuration = 30; // 30 secondes timeout
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -34,6 +29,21 @@ export async function POST(request: Request) {
   try {
     console.log('🔍 API Products - POST Request');
     
+    // Vérifier la taille de la requête
+    const contentLength = request.headers.get('content-length');
+    if (contentLength) {
+      const sizeMB = parseInt(contentLength) / 1024 / 1024;
+      console.log('📏 Taille requête reçue:', sizeMB.toFixed(2), 'MB');
+      
+      if (sizeMB > 45) {
+        console.log('❌ Requête trop volumineuse:', sizeMB, 'MB');
+        return NextResponse.json({ 
+          error: 'Requête trop volumineuse',
+          details: `Taille: ${sizeMB.toFixed(2)}MB. Maximum autorisé: 45MB`
+        }, { status: 413 });
+      }
+    }
+    
     const { db } = await connectToDatabase();
     const productsCollection = db.collection('products');
     
@@ -49,6 +59,15 @@ export async function POST(request: Request) {
     return NextResponse.json(newProduct, { status: 201 });
   } catch (error) {
     console.error('❌ Erreur API Products POST:', error);
+    
+    // Gérer spécifiquement l'erreur de taille
+    if (error instanceof Error && error.message.includes('entity too large')) {
+      return NextResponse.json({ 
+        error: 'Fichier trop volumineux',
+        details: 'Réduisez la taille de vos images/vidéos'
+      }, { status: 413 });
+    }
+    
     return NextResponse.json({ 
       error: 'Erreur lors de la création du produit',
       details: error instanceof Error ? error.message : 'Erreur inconnue'
