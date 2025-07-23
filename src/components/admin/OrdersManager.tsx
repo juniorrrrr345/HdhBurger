@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { instantContent } from '../../lib/contentCache';
 
 export default function OrdersManager() {
   const [telegramLink, setTelegramLink] = useState('');
@@ -35,6 +36,10 @@ export default function OrdersManager() {
       if (response.ok) {
         setTelegramLink(newTelegramLink);
         setEditingLink(false);
+        
+        // Rafraîchir le cache pour maintenir le background
+        await instantContent.refresh();
+        
         alert('Lien Telegram mis à jour avec succès !');
       }
     } catch (error) {
