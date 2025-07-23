@@ -49,8 +49,13 @@ Rejoignez-nous sur **@hashburgerchannel** pour découvrir nos dernières arrivé
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Charger SEULEMENT les paramètres de background sûrs
-        const settingsResponse = await fetch('/api/settings');
+        // Charger en parallèle les settings et le contenu pour plus de rapidité
+        const [settingsResponse, pageResponse] = await Promise.all([
+          fetch('/api/settings'),
+          fetch('/api/pages/info')
+        ]);
+
+        // Charger les paramètres de background
         if (settingsResponse.ok) {
           const settingsData = await settingsResponse.json();
           setBackgroundSettings({
@@ -58,20 +63,24 @@ Rejoignez-nous sur **@hashburgerchannel** pour découvrir nos dernières arrivé
             backgroundOpacity: settingsData.backgroundOpacity || 20,
             backgroundBlur: settingsData.backgroundBlur || 5
           });
+          // Charger les settings du panel admin
+          setSettings({
+            shopTitle: settingsData.shopTitle || 'HashBurger',
+            shopSubtitle: settingsData.shopSubtitle || 'Premium Concentrés'
+          });
         }
-        // Forcer TOUJOURS les paramètres HashBurger actuels
-        setSettings({
-          shopTitle: 'HashBurger',
-          shopSubtitle: 'Premium Concentrés'
-        });
 
-        // NE JAMAIS charger le contenu de la base de données
-        // pour éviter TOUT risque d'affichage d'ancien contenu
-        // Le contenu defaultContent HashBurger reste TOUJOURS affiché
+        // Charger le contenu de la page depuis le panel admin
+        if (pageResponse.ok) {
+          const pageData = await pageResponse.json();
+          if (pageData.content && pageData.content.trim() !== '') {
+            setPageContent(pageData.content);
+          }
+        }
         
       } catch (error) {
-        console.log('📱 Mode hors ligne - contenu HashBurger garanti');
-        // En cas d'erreur, les valeurs HashBurger par défaut restent
+        console.log('📱 Mode hors ligne - contenu par défaut');
+        // En cas d'erreur, garder les valeurs par défaut
       }
     };
 
@@ -98,10 +107,18 @@ Rejoignez-nous sur **@hashburgerchannel** pour découvrir nos dernières arrivé
       backgroundImage: `url(${backgroundSettings.backgroundImage})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      backgroundAttachment: 'fixed',
+      backgroundRepeat: 'no-repeat',
       position: 'relative' as const
     };
   };
+
+  // Précharger l'image de background pour un affichage instantané
+  useEffect(() => {
+    if (backgroundSettings.backgroundImage) {
+      const img = new Image();
+      img.src = backgroundSettings.backgroundImage;
+    }
+  }, [backgroundSettings.backgroundImage]);
 
   const getOverlayStyle = () => {
     if (!backgroundSettings.backgroundImage) {

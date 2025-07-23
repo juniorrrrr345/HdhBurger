@@ -53,19 +53,28 @@ Tous nos envois sont sécurisés et expédiés en toute discrétion pour garanti
   useEffect(() => {
     async function loadData() {
       try {
-        // NE JAMAIS charger le contenu de la base de données
-        // pour éviter TOUT risque d'affichage d'ancien contenu
-        // Le contenu defaultContent HashBurger reste TOUJOURS affiché
+        // Charger en parallèle pour plus de rapidité
+        const [pageRes, socialRes] = await Promise.all([
+          fetch('/api/pages/contact'),
+          fetch('/api/social-links')
+        ]);
 
-        // Charger les réseaux sociaux SEULEMENT (sûrs)
-        const socialRes = await fetch('/api/social-links');
+        // Charger le contenu de la page depuis le panel admin
+        if (pageRes.ok) {
+          const pageData = await pageRes.json();
+          if (pageData.content && pageData.content.trim() !== '') {
+            setContent(pageData.content);
+          }
+        }
+
+        // Charger les réseaux sociaux
         if (socialRes.ok) {
           const socialData = await socialRes.json();
           setSocialLinks(socialData);
         }
       } catch (error) {
-        console.log('📱 Mode hors ligne - contenu HashBurger garanti');
-        // En cas d'erreur, les valeurs HashBurger par défaut restent
+        console.log('📱 Mode hors ligne - contenu par défaut');
+        // En cas d'erreur, garder les valeurs par défaut
       }
     }
 

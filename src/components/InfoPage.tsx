@@ -42,8 +42,13 @@ Rejoignez-nous sur **@hashburgerchannel** pour découvrir nos dernières arrivé
   useEffect(() => {
     async function loadContent() {
       try {
-        // Charger SEULEMENT les settings de background sûrs
-        const settingsRes = await fetch('/api/settings');
+        // Charger en parallèle pour plus de rapidité
+        const [settingsRes, pageRes] = await Promise.all([
+          fetch('/api/settings'),
+          fetch('/api/pages/info')
+        ]);
+
+        // Charger les settings de background
         if (settingsRes.ok) {
           const settingsData = await settingsRes.json();
           setBackgroundSettings({
@@ -53,13 +58,17 @@ Rejoignez-nous sur **@hashburgerchannel** pour découvrir nos dernières arrivé
           });
         }
 
-        // NE JAMAIS charger le contenu de la base de données
-        // pour éviter TOUT risque d'affichage d'ancien contenu
-        // Le contenu defaultContent HashBurger reste TOUJOURS affiché
+        // Charger le contenu de la page depuis le panel admin
+        if (pageRes.ok) {
+          const data = await pageRes.json();
+          if (data.content && data.content.trim() !== '') {
+            setContent(data.content);
+          }
+        }
         
       } catch (error) {
-        console.log('📱 Mode hors ligne - contenu HashBurger garanti');
-        // En cas d'erreur, les valeurs HashBurger par défaut restent
+        console.log('📱 Mode hors ligne - contenu par défaut');
+        // En cas d'erreur, garder les valeurs par défaut
       }
     }
 

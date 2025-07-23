@@ -13,7 +13,7 @@ export default function Header() {
   const [settings, setSettings] = useState({
     shopTitle: 'HashBurger',
     shopSubtitle: 'Premium Concentrés',
-    titleStyle: 'graffiti',
+    titleStyle: 'glow',
     bannerText: '',
     scrollingText: '',
     backgroundImage: '',
@@ -27,18 +27,11 @@ export default function Header() {
         const response = await fetch('/api/settings');
         if (response.ok) {
           const data = await response.json();
-          // Charger les settings admin, mais seulement s'ils ne contiennent pas d'anciens termes
-          const shopTitle = (data.shopTitle && !data.shopTitle.toLowerCase().includes('boutique')) 
-            ? data.shopTitle 
-            : 'HashBurger';
-          const shopSubtitle = (data.shopSubtitle && !data.shopSubtitle.toLowerCase().includes('cannabis')) 
-            ? data.shopSubtitle 
-            : 'Premium Concentrés';
-          
+          // Charger directement les settings du panel admin
           setSettings({
-            shopTitle,
-            shopSubtitle,
-            titleStyle: data.titleStyle || 'graffiti',
+            shopTitle: data.shopTitle || 'HashBurger',
+            shopSubtitle: data.shopSubtitle || 'Premium Concentrés',
+            titleStyle: data.titleStyle || 'glow',
             bannerText: data.bannerText || '',
             scrollingText: data.scrollingText || '',
             backgroundImage: data.backgroundImage || '',
@@ -48,7 +41,7 @@ export default function Header() {
         }
       } catch (error) {
         console.error('Erreur lors du chargement des paramètres:', error);
-        // Garder les valeurs HashBurger par défaut en cas d'erreur
+        // Garder les valeurs par défaut en cas d'erreur
       }
     };
 
