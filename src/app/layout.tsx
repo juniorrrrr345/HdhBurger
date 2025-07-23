@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'HASHTAG BOT - Black Farm',
-  description: 'HASHTAG BOT mini-application',
+  title: 'HashBurger - #1 Concentrés Bordeaux',
+  description: 'HashBurger - La meilleure boutique de concentrés, hash et rosin. Livraison Bordeaux et envoi postal.',
 }
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body>{children}</body>
+      <body className="bg-gray-900 text-white min-h-screen">{children}</body>
     </html>
   )
 }
