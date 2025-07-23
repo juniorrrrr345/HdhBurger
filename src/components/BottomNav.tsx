@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect } from 'react';
 
 const navItems = [
   {
@@ -45,10 +46,28 @@ interface BottomNavProps {
 }
 
 export default function BottomNav({ activeTab = 'menu', onTabChange }: BottomNavProps) {
+  const [canalLink, setCanalLink] = useState('https://t.me/hashburgerchannel');
+
+  useEffect(() => {
+    const loadCanalLink = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        if (response.ok) {
+          const data = await response.json();
+          setCanalLink(data.canalLink || 'https://t.me/hashburgerchannel');
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement du lien canal:', error);
+      }
+    };
+
+    loadCanalLink();
+  }, []);
+
   const handleTabClick = (tabId: string) => {
     if (tabId === 'canal') {
-      // Ouvrir Telegram
-      window.open('https://t.me/hashburgerchannel', '_blank');
+      // Ouvrir le lien du canal configuré
+      window.open(canalLink, '_blank');
     } else if (onTabChange) {
       onTabChange(tabId);
     }

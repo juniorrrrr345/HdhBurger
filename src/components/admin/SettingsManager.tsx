@@ -6,6 +6,7 @@ interface Settings {
   shopSubtitle: string;
   bannerText: string;
   telegramLink: string;
+  canalLink: string;
   deliveryInfo: string;
   qualityInfo: string;
 }
@@ -16,6 +17,7 @@ export default function SettingsManager() {
     shopSubtitle: '',
     bannerText: '',
     telegramLink: '',
+    canalLink: '',
     deliveryInfo: '',
     qualityInfo: ''
   });
