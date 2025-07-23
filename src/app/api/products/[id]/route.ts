@@ -15,12 +15,16 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const data = await request.json();
     console.log('📝 Données reçues pour mise à jour:', data);
     
-    data.updatedAt = new Date();
+    // Supprimer les champs immutables avant mise à jour
+    const { _id, createdAt, __v, ...updateData } = data;
+    updateData.updatedAt = new Date();
+    
+    console.log('🔄 Données nettoyées pour update:', updateData);
     
     const { ObjectId } = require('mongodb');
     const result = await productsCollection.findOneAndUpdate(
       { _id: new ObjectId(params.id) },
-      { $set: data },
+      { $set: updateData },
       { returnDocument: 'after' }
     );
 
