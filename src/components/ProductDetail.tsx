@@ -1,57 +1,26 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-
-interface Product {
-  _id: string;
-  name: string;
-  description: string;
-  category: string;
-  farm: string;
-  image: string;
-  video?: string;
-  prices: {
-    [key: string]: number;
-  };
-}
+import { Product } from './ProductCard';
 
 interface ProductDetailProps {
-  productId: string;
+  product: Product | null;
+  onClose: () => void;
 }
 
-export default function ProductDetail({ productId }: ProductDetailProps) {
-  const [product, setProduct] = useState<Product | null>(null);
+export default function ProductDetail({ product, onClose }: ProductDetailProps) {
   const [telegramLink, setTelegramLink] = useState('https://t.me/hashburgerchannel');
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
-    loadProduct();
     loadTelegramLink();
-  }, [productId]);
-
-  const loadProduct = async () => {
-    try {
-      const response = await fetch(`/api/products/${productId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setProduct(data);
-      }
-    } catch (error) {
-      console.error('Erreur chargement produit:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, []);
 
   const loadTelegramLink = async () => {
     try {
       const response = await fetch('/api/settings');
       if (response.ok) {
         const data = await response.json();
-        if (data.telegramOrderLink) {
-          setTelegramLink(data.telegramOrderLink);
+        if (data.telegramOrderLink || data.telegramLink) {
+          setTelegramLink(data.telegramOrderLink || data.telegramLink);
         }
       }
     } catch (error) {
@@ -59,21 +28,7 @@ export default function ProductDetail({ productId }: ProductDetailProps) {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
-        <div className="text-white">Chargement...</div>
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
-        <div className="text-white">Produit non trouvé</div>
-      </div>
-    );
-  }
+  if (!product) return null;
 
   // Créer une liste des prix disponibles seulement (filtre les undefined/null/vides)
   const priceList = Object.entries(product.prices || {})
@@ -102,7 +57,7 @@ export default function ProductDetail({ productId }: ProductDetailProps) {
       {/* Header avec bouton retour */}
       <div className="sticky top-0 bg-black p-4 flex items-center justify-between border-b border-white/20 z-10">
         <button
-          onClick={() => router.back()}
+          onClick={onClose}
           className="text-white hover:text-gray-300 transition-colors"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,58 +1,117 @@
 import { NextResponse } from 'next/server';
-import { connectDB } from '@/lib/mongodb';
-import { MongoClient } from 'mongodb';
-
-// Collection pour les paramètres globaux
-const SETTINGS_COLLECTION = 'settings';
+import { connectToDatabase } from '@/lib/mongodb-fixed';
 
 export async function GET() {
   try {
-    const { db } = await connectDB();
+    console.log('🔍 API Settings - GET Request');
     
-    // Récupérer les paramètres
-    const settings = await db.collection(SETTINGS_COLLECTION).findOne({ type: 'global' });
+    const { db } = await connectToDatabase();
+    const settingsCollection = db.collection('settings');
     
-    return NextResponse.json({
-      telegramOrderLink: settings?.telegramOrderLink || '',
-      ...settings
+    let settings = await settingsCollection.findOne({});
+    
+    // Si aucun paramètre n'existe, créer les valeurs par défaut
+    if (!settings) {
+      console.log('📦 Aucun settings trouvé, création des défauts');
+      const defaultSettings = {
+        shopTitle: 'HashBurger',
+        shopSubtitle: 'Premium Concentrés',
+        backgroundImage: '',
+        backgroundOpacity: 20,
+        backgroundBlur: 5,
+        telegramLink: 'https://t.me/hashburgerchannel',
+        telegramOrderLink: 'https://t.me/hashburgerchannel',
+        email: 'contact@hashburger.fr',
+        address: 'Bordeaux, France',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      await settingsCollection.insertOne(defaultSettings);
+      settings = defaultSettings;
+    }
+    
+    console.log('✅ Settings récupérés de DB:', {
+      backgroundImage: settings.backgroundImage,
+      backgroundOpacity: settings.backgroundOpacity,
+      backgroundBlur: settings.backgroundBlur,
+      hasBackgroundImage: !!settings.backgroundImage,
+      telegramOrderLink: settings.telegramOrderLink
     });
+    
+    return NextResponse.json(settings);
   } catch (error) {
-    console.error('Erreur GET settings:', error);
-    return NextResponse.json(
-      { error: 'Erreur lors de la récupération des paramètres' },
-      { status: 500 }
+    console.error('❌ Erreur API Settings GET:', error);
+    
+    // Fallback settings si erreur DB
+    const fallbackSettings = {
+      shopTitle: 'HashBurger',
+      shopSubtitle: 'Premium Concentrés',
+      backgroundImage: '',
+      backgroundOpacity: 20,
+      backgroundBlur: 5,
+      telegramLink: 'https://t.me/hashburgerchannel',
+      telegramOrderLink: 'https://t.me/hashburgerchannel',
+      email: 'contact@hashburger.fr',
+      address: 'Bordeaux, France'
+    };
+    
+    console.log('⚠️ Utilisation fallback settings');
+    return NextResponse.json(fallbackSettings);
+  }
+}
+
+async function updateSettings(request: Request) {
+  try {
+    console.log('🔧 API Settings - POST/PUT Request');
+    
+    const { db } = await connectToDatabase();
+    const settingsCollection = db.collection('settings');
+    
+    const data = await request.json();
+    console.log('📝 Données reçues pour sauvegarde:', {
+      backgroundImage: data.backgroundImage,
+      backgroundOpacity: data.backgroundOpacity,
+      backgroundBlur: data.backgroundBlur,
+      hasBackgroundImage: !!data.backgroundImage,
+      telegramOrderLink: data.telegramOrderLink
+    });
+    
+    // Ajouter la date de mise à jour
+    data.updatedAt = new Date();
+    
+    // Upsert : mise à jour si existe, création sinon
+    const result = await settingsCollection.replaceOne(
+      {}, // Critère de recherche (vide = premier document)
+      data,
+      { upsert: true } // Créer si n'existe pas
     );
+    
+    console.log('✅ Paramètres sauvegardés en DB:', result);
+    
+    // Récupérer les paramètres mis à jour pour vérification
+    const updatedSettings = await settingsCollection.findOne({});
+    console.log('🔍 Vérification après sauvegarde:', {
+      backgroundImage: updatedSettings?.backgroundImage,
+      backgroundOpacity: updatedSettings?.backgroundOpacity,
+      backgroundBlur: updatedSettings?.backgroundBlur,
+      telegramOrderLink: updatedSettings?.telegramOrderLink
+    });
+    
+    return NextResponse.json(updatedSettings);
+  } catch (error) {
+    console.error('❌ Erreur API Settings POST/PUT:', error);
+    return NextResponse.json({ 
+      error: 'Erreur lors de la mise à jour des paramètres',
+      details: error instanceof Error ? error.message : 'Erreur inconnue'
+    }, { status: 500 });
   }
 }
 
 export async function PUT(request: Request) {
-  try {
-    const { db } = await connectDB();
-    const body = await request.json();
-    
-    // Mettre à jour ou créer les paramètres
-    const result = await db.collection(SETTINGS_COLLECTION).updateOne(
-      { type: 'global' },
-      { 
-        $set: { 
-          ...body,
-          type: 'global',
-          updatedAt: new Date()
-        } 
-      },
-      { upsert: true }
-    );
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Paramètres mis à jour avec succès',
-      result 
-    });
-  } catch (error) {
-    console.error('Erreur PUT settings:', error);
-    return NextResponse.json(
-      { error: 'Erreur lors de la sauvegarde des paramètres' },
-      { status: 500 }
-    );
-  }
+  return updateSettings(request);
+}
+
+export async function POST(request: Request) {
+  return updateSettings(request);
 }
