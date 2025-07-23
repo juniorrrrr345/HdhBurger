@@ -45,7 +45,20 @@ export default function SettingsManager() {
       const response = await fetch('/api/settings');
       if (response.ok) {
         const data = await response.json();
-        setSettings(data);
+        setSettings({
+          shopTitle: data.shopTitle || '',
+          shopSubtitle: data.shopSubtitle || '',
+          bannerText: data.bannerText || '',
+          telegramLink: data.telegramLink || '',
+          canalLink: data.canalLink || '',
+          deliveryInfo: data.deliveryInfo || '',
+          qualityInfo: data.qualityInfo || '',
+          titleEffect: data.titleEffect || 'none',
+          backgroundImage: data.backgroundImage || '',
+          backgroundOpacity: data.backgroundOpacity || 20,
+          backgroundBlur: data.backgroundBlur || 5,
+          scrollingText: data.scrollingText || ''
+        });
       }
     } catch (error) {
       console.error('Erreur lors du chargement:', error);
@@ -57,6 +70,8 @@ export default function SettingsManager() {
   const handleSave = async () => {
     try {
       setSaving(true);
+      console.log('Tentative de sauvegarde avec:', settings);
+      
       const response = await fetch('/api/settings', {
         method: 'PUT',
         headers: {
@@ -65,20 +80,28 @@ export default function SettingsManager() {
         body: JSON.stringify(settings),
       });
 
+      console.log('Réponse API:', response.status);
+      
       if (response.ok) {
+        const savedData = await response.json();
+        console.log('Données sauvegardées:', savedData);
         setMessage('✅ Paramètres sauvegardés avec succès !');
-        setTimeout(() => setMessage(''), 3000);
+        setTimeout(() => setMessage(''), 5000);
         
         // Recharger les données pour s'assurer de la synchronisation
         setTimeout(() => {
           loadSettings();
         }, 1000);
       } else {
-        setMessage('❌ Erreur lors de la sauvegarde');
+        const errorText = await response.text();
+        console.error('Erreur API:', errorText);
+        setMessage(`❌ Erreur lors de la sauvegarde: ${response.status}`);
+        setTimeout(() => setMessage(''), 5000);
       }
     } catch (error) {
       console.error('Erreur:', error);
-      setMessage('❌ Erreur lors de la sauvegarde');
+      setMessage(`❌ Erreur lors de la sauvegarde: ${error.message}`);
+      setTimeout(() => setMessage(''), 5000);
     } finally {
       setSaving(false);
     }
@@ -117,9 +140,18 @@ export default function SettingsManager() {
         </div>
       )}
 
-      {/* Contenu scrollable */}
-      <div className="max-h-[70vh] overflow-y-auto pr-2 pb-8">
-        <div className="space-y-6 lg:space-y-8">
+      {/* Contenu scrollable avec indicateur de scroll */}
+      <div className="max-h-[70vh] overflow-y-auto pr-2 pb-8 border border-white/10 rounded-lg">
+        <div className="space-y-6 lg:space-y-8 p-2">
+          
+          {/* Debug info - visible seulement en dev */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 text-yellow-200 text-xs">
+              <p>Debug: titleEffect = {settings.titleEffect}</p>
+              <p>Debug: backgroundImage = {settings.backgroundImage || 'vide'}</p>
+              <p>Debug: scrollingText = {settings.scrollingText || 'vide'}</p>
+            </div>
+          )}
         {/* Informations générales */}
         <div className="bg-gray-900 border border-white/20 rounded-xl p-6">
           <h2 className="text-xl font-bold text-white mb-6 flex items-center">

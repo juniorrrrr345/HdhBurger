@@ -143,7 +143,7 @@ export default function HomePage() {
         const categoriesRes = await fetch('/api/categories');
         if (categoriesRes.ok) {
           const categoriesData = await categoriesRes.json();
-          const categoryNames = ['Toutes les catégories', ...categoriesData.map((c: any) => c.name)];
+          const categoryNames = ['Toutes les catégories', ...categoriesData.map((c: { name: string }) => c.name)];
           setCategories(categoryNames);
         }
 
@@ -151,7 +151,7 @@ export default function HomePage() {
         const farmsRes = await fetch('/api/farms');
         if (farmsRes.ok) {
           const farmsData = await farmsRes.json();
-          const farmNames = ['Toutes les farms', ...farmsData.map((f: any) => f.name)];
+          const farmNames = ['Toutes les farms', ...farmsData.map((f: { name: string }) => f.name)];
           setFarms(farmNames);
         }
 

@@ -11,7 +11,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
 
   // Créer une liste des prix disponibles seulement (filtre les undefined/null)
   const priceList = Object.entries(product.prices || {})
-    .filter(([_, price]) => price !== undefined && price !== null && price !== 0)
+    .filter(([, price]) => price !== undefined && price !== null && price !== 0)
     .map(([weight, price]) => ({
       weight,
       price: `${price}€`

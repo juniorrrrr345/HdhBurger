@@ -302,8 +302,8 @@ export default function ProductsManager() {
 
       {/* Modal d'édition */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-start justify-center p-2 sm:p-4 z-50 overflow-y-auto">
-          <div className="bg-gray-900 border border-white/20 rounded-xl w-full max-w-4xl my-4 backdrop-blur-sm max-h-[95vh] flex flex-col">
+        <div className="fixed inset-0 bg-black/90 flex items-start justify-center p-2 sm:p-4 z-[9999] overflow-y-auto lg:items-center">
+          <div className="bg-gray-900 border border-white/20 rounded-xl w-full max-w-4xl my-2 lg:my-4 backdrop-blur-sm max-h-[98vh] lg:max-h-[95vh] flex flex-col">
             {/* Header fixe */}
             <div className="p-4 sm:p-6 border-b border-white/20 flex-shrink-0">
               <h2 className="text-xl font-bold text-white">
@@ -442,18 +442,18 @@ export default function ProductsManager() {
             </div>
             </div>
 
-            {/* Boutons fixes en bas */}
-            <div className="p-4 sm:p-6 border-t border-white/20 bg-gray-900 flex-shrink-0 rounded-b-xl">
-              <div className="flex gap-4">
+            {/* Boutons fixes en bas - optimisés mobile */}
+            <div className="p-3 sm:p-4 lg:p-6 border-t border-white/20 bg-gray-900 flex-shrink-0 rounded-b-xl sticky bottom-0">
+              <div className="flex gap-2 sm:gap-4">
                 <button
                   onClick={handleSave}
-                  className="flex-1 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-bold py-3 px-4 sm:px-6 rounded-xl transition-all duration-300 shadow-lg text-sm sm:text-base"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 sm:py-3 px-3 sm:px-4 lg:px-6 rounded-lg lg:rounded-xl transition-all duration-300 shadow-lg text-xs sm:text-sm lg:text-base"
                 >
                   💾 Sauvegarder
                 </button>
                 <button
                   onClick={() => setShowModal(false)}
-                  className="bg-gray-700/50 border border-white/20 hover:bg-gray-600/50 text-white font-bold py-3 px-4 sm:px-6 rounded-xl transition-all duration-300 text-sm sm:text-base"
+                  className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 sm:py-3 px-3 sm:px-4 lg:px-6 rounded-lg lg:rounded-xl transition-all duration-300 text-xs sm:text-sm lg:text-base"
                 >
                   ❌ Annuler
                 </button>
