@@ -39,12 +39,12 @@ export default function CategoryFilter({
   }, []);
 
   return (
-    <div className="flex gap-3 p-4 bg-black border-b border-white/10">
+    <div className="flex gap-3 p-4 bg-black/20 backdrop-blur-sm border-b border-white/10">
       {/* Dropdown Catégories */}
       <div className="relative flex-1" ref={categoryRef}>
         <button
           onClick={() => setShowCategories(!showCategories)}
-          className="w-full bg-gray-900 hover:bg-gray-800 border border-white/20 text-white py-3 px-4 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-between"
+          className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 text-white py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-between shadow-lg"
         >
           <span className="truncate">{selectedCategory}</span>
           <svg className={`w-4 h-4 transition-transform ${showCategories ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 20 20">
@@ -53,16 +53,16 @@ export default function CategoryFilter({
         </button>
         
         {showCategories && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 rounded-lg shadow-xl z-[9999] border-2 border-white/40 shadow-2xl backdrop-blur-sm">
+          <div className="absolute top-full left-0 right-0 mt-1 bg-black/30 backdrop-blur-md rounded-lg shadow-xl z-[9999] border border-white/40 shadow-2xl">
             {categories.map((category) => (
-                              <button
-                  key={category}
-                  onClick={() => {
-                    onCategoryChange(category);
-                    setShowCategories(false);
-                  }}
-                  className="w-full text-left px-4 py-3 text-sm hover:bg-gray-800 first:rounded-t-lg last:rounded-b-lg transition-colors"
-                >
+              <button
+                key={category}
+                onClick={() => {
+                  onCategoryChange(category);
+                  setShowCategories(false);
+                }}
+                className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/20 first:rounded-t-lg last:rounded-b-lg transition-all duration-200"
+              >
                 {category}
               </button>
             ))}
@@ -74,7 +74,7 @@ export default function CategoryFilter({
       <div className="relative flex-1" ref={farmRef}>
         <button
           onClick={() => setShowFarms(!showFarms)}
-          className="w-full bg-gray-900 hover:bg-gray-800 border border-white/20 text-white py-3 px-4 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-between"
+          className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 text-white py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-between shadow-lg"
         >
           <span className="truncate">{selectedFarm}</span>
           <svg className={`w-4 h-4 transition-transform ${showFarms ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 20 20">
@@ -83,16 +83,16 @@ export default function CategoryFilter({
         </button>
         
         {showFarms && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 rounded-lg shadow-xl z-[9999] border-2 border-white/40 shadow-2xl backdrop-blur-sm">
+          <div className="absolute top-full left-0 right-0 mt-1 bg-black/30 backdrop-blur-md rounded-lg shadow-xl z-[9999] border border-white/40 shadow-2xl">
             {farms.map((farm) => (
-                              <button
-                  key={farm}
-                  onClick={() => {
-                    onFarmChange(farm);
-                    setShowFarms(false);
-                  }}
-                  className="w-full text-left px-4 py-3 text-sm hover:bg-gray-800 first:rounded-t-lg last:rounded-b-lg transition-colors"
-                >
+              <button
+                key={farm}
+                onClick={() => {
+                  onFarmChange(farm);
+                  setShowFarms(false);
+                }}
+                className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/20 first:rounded-t-lg last:rounded-b-lg transition-all duration-200"
+              >
                 {farm}
               </button>
             ))}
