@@ -188,12 +188,12 @@ export default function SocialLinksManager() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-white">Gestion des Réseaux Sociaux</h1>
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white">Gestion des Réseaux Sociaux</h1>
         <button
           onClick={handleAdd}
-          className="bg-white hover:bg-gray-100 text-black font-bold py-2 px-4 rounded-lg flex items-center space-x-2"
+          className="bg-white hover:bg-gray-100 text-black font-bold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 w-full sm:w-auto"
         >
           <span>➕</span>
           <span>Ajouter un lien</span>
@@ -201,9 +201,9 @@ export default function SocialLinksManager() {
       </div>
 
       {/* Liste des liens */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
         {socialLinks.map((link) => (
-          <div key={link._id} className="bg-gray-900/50 border border-white/20 rounded-xl p-6 hover:bg-gray-900/70 transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm shadow-lg">
+          <div key={link._id} className="bg-gray-900/50 border border-white/20 rounded-xl p-4 sm:p-6 hover:bg-gray-900/70 transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm shadow-lg">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center space-x-3 flex-1">
                 <div 
@@ -273,17 +273,25 @@ export default function SocialLinksManager() {
 
       {/* Modal d'édition */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/90 flex items-start justify-center p-4 z-[9999] overflow-y-auto lg:items-center">
-          <div className="bg-gray-900 border border-white/20 rounded-xl w-full max-w-lg my-4 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black/90 flex items-start justify-center p-2 sm:p-4 z-[9999] overflow-y-auto lg:items-center">
+          <div className="bg-gray-900 border-0 sm:border border-white/20 rounded-none sm:rounded-xl w-full max-w-lg my-0 sm:my-4 backdrop-blur-sm min-h-screen sm:min-h-0">
             {/* Header */}
-            <div className="p-6 border-b border-white/20">
-              <h2 className="text-xl font-bold text-white">
+            <div className="p-4 sm:p-6 border-b border-white/20 flex items-center justify-between">
+              <h2 className="text-lg sm:text-xl font-bold text-white">
                 {editingLink ? '✏️ Modifier le réseau social' : '➕ Ajouter un réseau social'}
               </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="sm:hidden p-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-all duration-200"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
 
             {/* Content */}
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
               {/* Nom */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -412,7 +420,7 @@ export default function SocialLinksManager() {
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-white/20 flex space-x-4">
+            <div className="p-4 sm:p-6 border-t border-white/20 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
               <button
                 onClick={handleSave}
                 className="bg-white hover:bg-gray-100 text-black font-bold py-3 px-6 rounded-lg flex-1 transition-all duration-200 shadow-lg hover:shadow-xl"

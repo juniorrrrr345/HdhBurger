@@ -15,6 +15,7 @@ type SectionType = 'products' | 'categories' | 'farms' | 'settings' | 'pages' | 
 
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [activeSection, setActiveSection] = useState<SectionType>('products');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const menuItems = [
     { id: 'products' as SectionType, label: 'Produits', icon: '🛍️' },
@@ -91,14 +92,92 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         </main>
       </div>
 
-      {/* Mobile & Tablet: Sidebar comme sur desktop */}
+      {/* Mobile & Tablet: Interface adaptée */}
       <div className="lg:hidden">
-        {/* Sidebar Mobile avec menu hamburger */}
-        <div className="flex h-screen">
-          {/* Sidebar Mobile - identique au desktop mais adaptée */}
-          <aside className="w-64 sm:w-72 bg-black/90 backdrop-blur-sm border-r border-white/20 min-h-screen overflow-y-auto">
+        {/* Mobile: Sidebar coulissante */}
+        <div className="sm:hidden">
+          {/* Header Mobile avec menu hamburger */}
+          <header className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/20">
+            <div className="flex items-center justify-between p-4">
+              <div>
+                <h1 className="text-lg font-black text-white tracking-wider">HashBurger</h1>
+                <p className="text-gray-400 text-xs uppercase tracking-[0.2em] font-medium">Panel Admin</p>
+              </div>
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 rounded-lg bg-white/10 border border-white/20 text-white"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {mobileMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+            </div>
+          </header>
+
+          {/* Sidebar coulissante Mobile */}
+          <aside className={`fixed top-0 left-0 z-40 w-80 h-screen bg-black/95 backdrop-blur-sm border-r border-white/20 transform transition-transform duration-300 ${
+            mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}>
+            <div className="p-4 pt-20 border-b border-white/20">
+              <h2 className="text-lg font-bold text-white mb-2">Navigation</h2>
+            </div>
+            <nav className="p-4">
+              <div className="space-y-3">
+                {menuItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveSection(item.id);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full text-left p-4 rounded-xl transition-all duration-300 flex items-center gap-4 shadow-lg ${
+                      activeSection === item.id
+                        ? 'bg-white/20 border border-white/30 text-white font-medium backdrop-blur-sm shadow-xl scale-105'
+                        : 'bg-gray-900/50 border border-white/10 text-gray-300 hover:bg-white/10 hover:text-white hover:border-white/20'
+                    }`}
+                  >
+                    <span className="text-xl">{item.icon}</span>
+                    <span className="font-medium">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-8 pt-6 border-t border-white/20">
+                <button
+                  onClick={onLogout}
+                  className="w-full text-left p-4 rounded-xl text-red-400 bg-red-900/20 border border-red-400/30 hover:bg-red-900/30 hover:text-red-300 transition-all duration-300 flex items-center gap-4 shadow-lg"
+                >
+                  <span className="text-xl">🚪</span>
+                  <span className="font-medium">Déconnexion</span>
+                </button>
+              </div>
+            </nav>
+          </aside>
+
+          {/* Overlay pour fermer le menu */}
+          {mobileMenuOpen && (
+            <div 
+              className="fixed inset-0 z-30 bg-black/50" 
+              onClick={() => setMobileMenuOpen(false)}
+            />
+          )}
+
+          {/* Contenu Mobile */}
+          <main className="pt-20 min-h-screen">
+            <div className="p-3">
+              {renderActiveSection()}
+            </div>
+          </main>
+        </div>
+
+        {/* Tablette: Sidebar fixe mais plus petite */}
+        <div className="hidden sm:flex lg:hidden h-screen">
+          <aside className="w-64 bg-black/90 backdrop-blur-sm border-r border-white/20 min-h-screen overflow-y-auto">
             <div className="p-4 border-b border-white/20">
-              <h1 className="text-xl font-black text-white tracking-wider">HashBurger</h1>
+              <h1 className="text-lg font-black text-white tracking-wider">HashBurger</h1>
               <p className="text-gray-400 text-xs mt-1 uppercase tracking-[0.2em] font-medium">Panel Admin</p>
             </div>
             <nav className="p-3">
@@ -130,7 +209,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             </nav>
           </aside>
 
-          {/* Content Mobile */}
+          {/* Contenu Tablette */}
           <main className="flex-1 overflow-y-auto">
             <div className="p-4 min-h-screen">
               {renderActiveSection()}
