@@ -28,13 +28,15 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Limites différentes pour images et vidéos
+    // Limites plus strictes pour éviter les erreurs MongoDB
     const isVideo = file.type.startsWith('video/');
-    const maxSize = isVideo ? 100 * 1024 * 1024 : 20 * 1024 * 1024; // 100MB pour vidéos, 20MB pour images
-    const maxSizeText = isVideo ? '100MB' : '20MB';
+    // MongoDB a une limite de 16MB par document
+    // Une vidéo en base64 fait ~33% plus gros que le fichier original
+    const maxSize = isVideo ? 10 * 1024 * 1024 : 5 * 1024 * 1024; // 10MB pour vidéos, 5MB pour images
+    const maxSizeText = isVideo ? '10MB' : '5MB';
     
     if (file.size > maxSize) {
-      console.log('❌ Fichier trop gros:', file.size);
+      console.log('❌ Fichier trop gros:', file.size, 'max:', maxSize);
       return NextResponse.json({ 
         error: `Fichier trop volumineux: ${Math.round(file.size / 1024 / 1024)}MB. Maximum ${maxSizeText} pour ${isVideo ? 'les vidéos' : 'les images'}` 
       }, { status: 400 });
@@ -47,6 +49,22 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
     const base64 = buffer.toString('base64');
     const dataUrl = `data:${file.type};base64,${base64}`;
+    
+    console.log('📏 Taille base64:', {
+      originalSize: file.size,
+      base64Size: base64.length,
+      dataUrlSize: dataUrl.length,
+      ratio: Math.round(dataUrl.length / file.size * 100) / 100
+    });
+    
+    // Vérifier que la taille finale ne dépasse pas 15MB (limite MongoDB)
+    const maxBase64Size = 15 * 1024 * 1024;
+    if (dataUrl.length > maxBase64Size) {
+      console.log('❌ Data URL trop volumineux:', dataUrl.length);
+      return NextResponse.json({ 
+        error: `Fichier trop volumineux après conversion (${Math.round(dataUrl.length / 1024 / 1024)}MB). Essayez un fichier plus petit.` 
+      }, { status: 400 });
+    }
     
     console.log('💾 Sauvegarde en base de données...');
     
@@ -83,7 +101,24 @@ export async function POST(request: NextRequest) {
     } catch (dbError) {
       console.error('❌ Erreur base de données:', dbError);
       
-      // Même si la DB échoue, on retourne le base64
+      // Analyser le type d'erreur
+      const errorMessage = dbError instanceof Error ? dbError.message : String(dbError);
+      
+      if (errorMessage.includes('pattern') || errorMessage.includes('validation')) {
+        console.error('❌ Erreur de validation MongoDB - format base64 invalide');
+        return NextResponse.json({ 
+          error: 'Format de fichier invalide. Essayez un fichier plus petit ou un format différent (JPG, PNG, MP4).' 
+        }, { status: 400 });
+      }
+      
+      if (errorMessage.includes('size') || errorMessage.includes('too large')) {
+        console.error('❌ Document MongoDB trop volumineux');
+        return NextResponse.json({ 
+          error: 'Fichier trop volumineux pour la base de données. Réduisez la taille du fichier.' 
+        }, { status: 400 });
+      }
+      
+      // Même si la DB échoue pour une autre raison, on retourne le base64
       const response = {
         url: dataUrl,
         filename: file.name,

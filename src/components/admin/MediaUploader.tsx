@@ -11,7 +11,7 @@ interface MediaUploaderProps {
 export default function MediaUploader({ 
   onMediaSelected, 
   acceptedTypes = "image/*,video/*",
-  maxSize = 100,
+  maxSize = 10, // Limite par défaut réduite
   className = ""
 }: MediaUploaderProps) {
   const [uploading, setUploading] = useState(false);
@@ -21,10 +21,19 @@ export default function MediaUploader({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Vérifier la taille
-    const maxBytes = maxSize * 1024 * 1024;
+    // Vérifier la taille selon le type de fichier
+    const isVideo = file.type.startsWith('video/');
+    const actualMaxSize = isVideo ? 10 : 5; // 10MB pour vidéos, 5MB pour images
+    const maxBytes = actualMaxSize * 1024 * 1024;
+    
     if (file.size > maxBytes) {
-      setError(`Fichier trop volumineux. Maximum ${maxSize}MB`);
+      setError(`Fichier trop volumineux: ${Math.round(file.size / 1024 / 1024)}MB. Maximum ${actualMaxSize}MB pour ${isVideo ? 'les vidéos' : 'les images'}.`);
+      return;
+    }
+    
+    // Vérification supplémentaire pour éviter les erreurs MongoDB
+    if (isVideo && file.size > 8 * 1024 * 1024) {
+      setError(`Vidéo trop volumineuse (${Math.round(file.size / 1024 / 1024)}MB). Utilisez max 8MB pour éviter les erreurs de base de données.`);
       return;
     }
 
@@ -101,10 +110,10 @@ export default function MediaUploader({
         
         <span className="text-sm text-gray-400">
           {acceptedTypes.includes('video') && acceptedTypes.includes('image') 
-            ? 'Images (20MB) & Vidéos (100MB)'
+            ? 'Images (5MB) & Vidéos (10MB)'
             : acceptedTypes.includes('video')
-            ? 'Vidéos (max 100MB)'
-            : 'Images (max 20MB)'
+            ? 'Vidéos (max 10MB)'
+            : 'Images (max 5MB)'
           }
         </span>
       </div>
