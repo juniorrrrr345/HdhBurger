@@ -176,16 +176,11 @@ export default function HomePage() {
 
             {/* Affichage avec chargement pour première visite */}
             {isFirstLoad ? (
-              <div className="min-h-screen" style={backgroundStyle}>
-                {/* Overlay */}
-                {settings?.backgroundImage && <div style={overlayStyle}></div>}
-                
-                <div className="relative z-10 flex items-center justify-center min-h-screen">
-                  <div className="text-center">
-                    <h1 className="text-4xl font-bold text-white mb-4 animate-pulse">
-                      Bienvenu(e)s sur Notre Mini App 📲
-                    </h1>
-                  </div>
+              <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
+                <div className="text-center">
+                  <h1 className="text-4xl font-bold text-white mb-4 animate-pulse">
+                    Bienvenu(e)s sur Notre Mini App 📲
+                  </h1>
                 </div>
               </div>
             ) : products.length === 0 ? (
