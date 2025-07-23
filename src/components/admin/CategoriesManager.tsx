@@ -26,13 +26,18 @@ export default function CategoriesManager() {
   const loadCategories = async () => {
     try {
       setLoading(true);
+      console.log('🏷️ Admin: Chargement des catégories...');
       const response = await fetch('/api/categories');
+      console.log('🏷️ Admin: Réponse catégories:', response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log('🏷️ Admin: Catégories chargées:', data.length);
         setCategories(data);
+      } else {
+        console.error('🏷️ Admin: Erreur HTTP:', response.status);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement:', error);
+      console.error('❌ Admin: Erreur lors du chargement des catégories:', error);
     } finally {
       setLoading(false);
     }
