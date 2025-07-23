@@ -9,10 +9,18 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🚀 Upload Cloudinary démarré...');
     
+    // Vérifier la configuration Cloudinary
+    console.log('🔧 Configuration Cloudinary:', {
+      cloud_name: cloudinary.config().cloud_name,
+      api_key: cloudinary.config().api_key ? 'OK' : 'MANQUANT',
+      api_secret: cloudinary.config().api_secret ? 'OK' : 'MANQUANT'
+    });
+    
     const formData = await request.formData();
     const file = formData.get('file') as File;
     
     if (!file) {
+      console.log('❌ Aucun fichier dans la requête');
       return NextResponse.json({ error: 'Aucun fichier fourni' }, { status: 400 });
     }
 
@@ -54,45 +62,73 @@ export async function POST(request: NextRequest) {
     console.log('☁️ Upload vers Cloudinary...');
 
     // Convertir le fichier en buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    let bytes, buffer;
+    try {
+      bytes = await file.arrayBuffer();
+      buffer = Buffer.from(bytes);
+      console.log('📋 Buffer créé:', buffer.length, 'bytes');
+    } catch (error) {
+      console.error('❌ Erreur création buffer:', error);
+      throw new Error('Impossible de lire le fichier');
+    }
 
-    // Upload vers Cloudinary
-    const uploadResult = await new Promise((resolve, reject) => {
-      const uploadOptions = {
+    // Upload vers Cloudinary avec timeout
+    console.log('⚡ Début upload vers Cloudinary...');
+    const uploadResult = await Promise.race([
+      new Promise((resolve, reject) => {
+      // Configuration simplifiée pour éviter les erreurs
+      const uploadOptions: any = {
         resource_type: isVideo ? 'video' : 'image',
-        folder: isVideo ? 'hashburger/videos' : 'hashburger/images',
-        public_id: `${Date.now()}_${file.name.replace(/\.[^/.]+$/, '')}`, // Nom unique
-        overwrite: true,
-        // Optimisations pour vidéos
-        ...(isVideo && {
-          quality: 'auto',
-          fetch_format: 'auto',
-          video_codec: 'auto',
-        }),
-        // Optimisations pour images
-        ...(!isVideo && {
-          quality: 'auto',
-          fetch_format: 'auto',
-          width: 800,
-          height: 600,
-          crop: 'limit'
-        })
+        folder: isVideo ? 'hashburger_videos' : 'hashburger_images', // Pas de slash pour éviter erreurs
+        public_id: `upload_${Date.now()}`, // Nom simplifié
+        overwrite: true
       };
 
-      cloudinary.uploader.upload_stream(
+      // Ajouter optimisations seulement si nécessaire
+      if (!isVideo) {
+        uploadOptions.quality = 'auto';
+        uploadOptions.width = 800;
+        uploadOptions.crop = 'limit';
+      }
+
+      console.log('☁️ Options upload:', uploadOptions);
+
+      const uploadStream = cloudinary.uploader.upload_stream(
         uploadOptions,
         (error, result) => {
           if (error) {
-            console.error('❌ Erreur Cloudinary:', error);
+            console.error('❌ Erreur Cloudinary détaillée:', {
+              message: error.message,
+              http_code: error.http_code,
+              name: error.name,
+              error: error
+            });
             reject(error);
           } else {
-            console.log('✅ Upload Cloudinary réussi:', result?.public_id);
+            console.log('✅ Upload Cloudinary réussi:', {
+              public_id: result?.public_id,
+              url: result?.secure_url,
+              format: result?.format,
+              bytes: result?.bytes
+            });
             resolve(result);
           }
         }
-      ).end(buffer);
-    });
+      );
+
+      if (!uploadStream) {
+        console.error('❌ Impossible de créer le stream upload');
+        reject(new Error('Upload stream creation failed'));
+        return;
+      }
+
+      uploadStream.end(buffer);
+    }),
+    // Timeout de 50 secondes
+    new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Upload timeout - 50 secondes dépassées')), 50000)
+    )
+  ]);
 
     const result = uploadResult as any;
     
