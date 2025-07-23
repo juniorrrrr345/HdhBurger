@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import MediaUploader from './MediaUploader';
+import CloudinaryUploader from './CloudinaryUploader';
 
 interface Product {
   _id?: string;
@@ -473,17 +474,38 @@ export default function ProductsManager() {
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Image du produit</label>
                     
-                    {/* Upload d'image */}
-                                                              <MediaUploader
-                       onMediaSelected={(url, type) => {
-                         if (type === 'image') {
-                           updateField('image', url);
-                         }
-                       }}
-                       acceptedTypes="image/*"
-                       maxSize={20}
-                       className="mb-3"
-                     />
+                    <div className="bg-gray-800/50 border border-white/10 rounded-lg p-4 mb-3">
+                      <div className="text-sm text-gray-300 mb-3 font-medium">Choisir la méthode d'upload :</div>
+                      
+                      {/* Upload Cloudinary (recommandé) */}
+                      <div className="mb-3">
+                        <div className="text-xs text-green-400 mb-2">✅ Recommandé - Hébergement cloud</div>
+                        <CloudinaryUploader
+                          onMediaSelected={(url, type) => {
+                            if (type === 'image') {
+                              updateField('image', url);
+                            }
+                          }}
+                          acceptedTypes="image/*"
+                          className="mb-2"
+                        />
+                      </div>
+                      
+                      {/* Upload base64 (pour petites images) */}
+                      <div className="mb-3">
+                        <div className="text-xs text-yellow-400 mb-2">⚠️ Base64 - Petites images seulement</div>
+                        <MediaUploader
+                          onMediaSelected={(url, type) => {
+                            if (type === 'image') {
+                              updateField('image', url);
+                            }
+                          }}
+                          acceptedTypes="image/*"
+                          maxSize={5}
+                          className="mb-2"
+                        />
+                      </div>
+                    </div>
                     
                     {/* Champ URL manuel */}
                     <div className="text-sm text-gray-400 mb-2">Ou entrer une URL manuellement :</div>
@@ -514,17 +536,38 @@ export default function ProductsManager() {
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Vidéo du produit (optionnel)</label>
                     
-                    {/* Upload de vidéo */}
-                                                              <MediaUploader
-                       onMediaSelected={(url, type) => {
-                         if (type === 'video') {
-                           updateField('video', url);
-                         }
-                       }}
-                       acceptedTypes="video/*"
-                       maxSize={100}
-                       className="mb-3"
-                     />
+                    <div className="bg-gray-800/50 border border-white/10 rounded-lg p-4 mb-3">
+                      <div className="text-sm text-gray-300 mb-3 font-medium">Choisir la méthode d'upload :</div>
+                      
+                      {/* Upload Cloudinary (recommandé pour vidéos) */}
+                      <div className="mb-3">
+                        <div className="text-xs text-green-400 mb-2">✅ Recommandé - Hébergement cloud illimité</div>
+                        <CloudinaryUploader
+                          onMediaSelected={(url, type) => {
+                            if (type === 'video') {
+                              updateField('video', url);
+                            }
+                          }}
+                          acceptedTypes="video/*,.mov,.avi,.3gp"
+                          className="mb-2"
+                        />
+                      </div>
+                      
+                      {/* Upload base64 (très limité) */}
+                      <div className="mb-3">
+                        <div className="text-xs text-red-400 mb-2">❌ Base64 - Cause erreur 413 (non recommandé)</div>
+                        <MediaUploader
+                          onMediaSelected={(url, type) => {
+                            if (type === 'video') {
+                              updateField('video', url);
+                            }
+                          }}
+                          acceptedTypes="video/*"
+                          maxSize={5} // Très réduit pour éviter erreur 413
+                          className="mb-2"
+                        />
+                      </div>
+                    </div>
                     
                     {/* Champ URL manuel */}
                     <div className="text-sm text-gray-400 mb-2">Ou entrer une URL manuellement :</div>
