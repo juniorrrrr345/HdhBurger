@@ -90,7 +90,7 @@ async function initializeDatabase() {
       shopTitle: 'HashBurger',
       shopSubtitle: 'Premium Cannabis',
       bannerText: '',
-      titleStyle: 'glow',
+      titleStyle: 'graffiti',
       scrollingText: '',
       backgroundImage: '',
       backgroundOpacity: 20,
