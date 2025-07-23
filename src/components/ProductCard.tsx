@@ -64,7 +64,7 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
         
         {/* Prix de base */}
         <div className="mt-3 flex items-center justify-end">
-          <span className="text-white font-bold text-base">{product.prices["5g"]}€</span>
+          <span className="text-white font-bold text-base">{product.prices["5g"]}</span>
         </div>
       </div>
     </div>
