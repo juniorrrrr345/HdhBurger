@@ -174,23 +174,24 @@ export default function HomePage() {
     }
   };
 
-  // Charger les données depuis l'API en arrière-plan
+  // Charger les données depuis l'API - JAMAIS d'affichage de l'ancien contenu
   useEffect(() => {
     async function loadData() {
       try {
-        // Afficher d'abord les produits statiques pour un affichage immédiat
-        setProducts(sampleProducts);
+        console.log('🚀 Chargement produits pour menu...');
         
-        // Charger les produits depuis l'API en arrière-plan
+        // Charger SEULEMENT les vrais produits du panel admin - PAS de produits d'exemple
         const productsRes = await fetch('/api/products');
         if (productsRes.ok) {
           const productsData = await productsRes.json();
-          if (productsData.length > 0) {
-            setProducts(productsData);
-          }
+          console.log('📦 Produits API reçus:', productsData.length);
+          setProducts(productsData); // Même si vide, on affiche ce qu'il y a dans l'admin
+        } else {
+          console.log('⚠️ Pas de produits API, affichage vide');
+          setProducts([]); // Affichage vide plutôt que les anciens produits
         }
 
-        // Charger les catégories en arrière-plan
+        // Charger les catégories du panel admin
         const categoriesRes = await fetch('/api/categories');
         if (categoriesRes.ok) {
           const categoriesData = await categoriesRes.json();
@@ -198,7 +199,7 @@ export default function HomePage() {
           setCategories(categoryNames);
         }
 
-        // Charger les farms en arrière-plan
+        // Charger les farms du panel admin  
         const farmsRes = await fetch('/api/farms');
         if (farmsRes.ok) {
           const farmsData = await farmsRes.json();
@@ -207,8 +208,8 @@ export default function HomePage() {
         }
       } catch (error) {
         console.error('Erreur lors du chargement:', error);
-        // Garder les données statiques en cas d'erreur
-        setProducts(sampleProducts);
+        // En cas d'erreur, affichage vide plutôt que les anciens produits
+        setProducts([]);
       }
     }
 

@@ -11,15 +11,34 @@ interface Settings {
 }
 
 export default function Header() {
-  // Utiliser directement les données du cache instantané
+  // Forcer les données du cache instantané - JAMAIS d'ancien contenu
   const cachedSettings = instantContent.getSettings();
-  const [settings, setSettings] = useState(cachedSettings);
+  const [settings, setSettings] = useState(() => {
+    // Forcer les vraies données du cache, pas de fallback sur l'ancien
+    return cachedSettings || {
+      shopTitle: 'HashBurger',
+      shopSubtitle: 'Premium Concentrés',
+      bannerText: '',
+      titleStyle: 'glow',
+      scrollingText: ''
+    };
+  });
 
   useEffect(() => {
-    // Rafraîchir en arrière-plan sans changer l'affichage
+    // Forcer la mise à jour immédiate avec les vraies données du cache
+    const currentSettings = instantContent.getSettings();
+    if (currentSettings) {
+      setSettings(currentSettings);
+      console.log('🔄 Header mis à jour avec cache:', currentSettings);
+    }
+    
+    // Rafraîchir en arrière-plan
     instantContent.refresh().then(() => {
       const freshSettings = instantContent.getSettings();
-      setSettings(freshSettings);
+      if (freshSettings) {
+        setSettings(freshSettings);
+        console.log('🔄 Header mis à jour après refresh:', freshSettings);
+      }
     });
   }, []);
 
