@@ -37,19 +37,19 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 w-full z-40 bg-black/95 backdrop-blur-sm">
-      {/* Bandeau blanc promotionnel */}
-      <div className="bg-white text-black py-2 px-4 text-center">
+      {/* Bandeau blanc promotionnel - réduit */}
+      <div className="bg-white text-black py-1 px-4 text-center">
         <p className="text-black text-xs font-bold tracking-wide">
           {settings.bannerText}
         </p>
       </div>
       
-      {/* Logo HashBurger */}
-      <div className="bg-black py-3 px-4 text-center border-b border-white/20">
-        <h1 className="text-2xl font-black text-white tracking-wider">
+      {/* Logo HashBurger - réduit */}
+      <div className="bg-black py-2 px-4 text-center border-b border-white/20">
+        <h1 className="text-xl font-black text-white tracking-wider">
           {settings.shopTitle}
         </h1>
-        <p className="text-gray-400 text-xs mt-1 uppercase tracking-[0.2em] font-medium">
+        <p className="text-gray-400 text-xs uppercase tracking-[0.2em] font-medium">
           {settings.shopSubtitle}
         </p>
       </div>

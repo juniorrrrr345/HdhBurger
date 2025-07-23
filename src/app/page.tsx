@@ -207,8 +207,8 @@ export default function HomePage() {
       {/* Header fixe */}
       <Header />
       
-      {/* Espacement pour le header fixe */}
-      <div className="pt-20">
+      {/* Espacement pour le header fixe - réduit */}
+      <div className="pt-16">
         {/* Filtres */}
         <CategoryFilter
           selectedCategory={selectedCategory}
