@@ -21,6 +21,26 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     
     console.log('🔄 Données nettoyées pour update:', updateData);
     
+    // Validation des données avant update
+    try {
+      if (updateData.image && typeof updateData.image !== 'string') {
+        console.log('⚠️ Type image invalide:', typeof updateData.image);
+        updateData.image = String(updateData.image);
+      }
+      if (updateData.video && typeof updateData.video !== 'string') {
+        console.log('⚠️ Type video invalide:', typeof updateData.video);
+        updateData.video = String(updateData.video);
+      }
+      if (updateData.prices && typeof updateData.prices !== 'object') {
+        console.log('⚠️ Type prices invalide:', typeof updateData.prices);
+        return NextResponse.json({ error: 'Format prices invalide' }, { status: 400 });
+      }
+      console.log('✅ Validation données OK');
+    } catch (validationError) {
+      console.error('❌ Erreur validation données:', validationError);
+      return NextResponse.json({ error: 'Données invalides' }, { status: 400 });
+    }
+    
     const { ObjectId } = require('mongodb');
     
     // Vérifier la validité de l'ID
@@ -46,15 +66,30 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
     
     console.log('✅ Produit existe, tentative mise à jour...');
-    const result = await productsCollection.findOneAndUpdate(
-      { _id: objectId },
-      { $set: updateData },
-      { returnDocument: 'after' }
-    );
+    
+    let result;
+    try {
+      result = await productsCollection.findOneAndUpdate(
+        { _id: objectId },
+        { $set: updateData },
+        { returnDocument: 'after' }
+      );
+      console.log('🔄 Résultat brut findOneAndUpdate:', result);
+    } catch (updateError) {
+      console.error('❌ Erreur MongoDB lors de l\'update:', {
+        error: updateError,
+        message: updateError instanceof Error ? updateError.message : 'Erreur inconnue',
+        updateData: updateData
+      });
+      return NextResponse.json({ 
+        error: 'Erreur base de données lors de la mise à jour',
+        details: updateError instanceof Error ? updateError.message : 'Erreur inconnue'
+      }, { status: 500 });
+    }
 
-    if (!result.value) {
-      console.log('❌ Échec mise à jour malgré produit existant');
-      return NextResponse.json({ error: 'Échec mise à jour' }, { status: 500 });
+    if (!result || !result.value) {
+      console.log('❌ Échec mise à jour malgré produit existant - result:', result);
+      return NextResponse.json({ error: 'Échec mise à jour - produit non retourné' }, { status: 500 });
     }
 
     console.log('✅ Produit mis à jour:', result.value);
