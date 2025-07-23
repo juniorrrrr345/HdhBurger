@@ -14,18 +14,17 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
     backgroundOpacity: 20,
     backgroundBlur: 5
   });
-  const [pageContent, setPageContent] = useState('');
+  const [pageContent, setPageContent] = useState(defaultContent); // Contenu par défaut immédiat
   const [settings, setSettings] = useState({
     shopTitle: 'HashBurger',
     shopSubtitle: 'Premium Concentrés'
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Plus de chargement initial
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Charger les paramètres globaux (background + titre)
-        console.log('🔍 Chargement paramètres globaux...');
+        // Charger les paramètres globaux (background + titre) en arrière-plan
         const settingsResponse = await fetch('/api/settings');
         if (settingsResponse.ok) {
           const settingsData = await settingsResponse.json();
@@ -40,22 +39,18 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
           });
         }
 
-        // Charger le contenu de la page Info depuis l'API
-        console.log('🔍 Chargement contenu page Info...');
+        // Charger le contenu de la page Info depuis l'API en arrière-plan
         const pageResponse = await fetch('/api/pages/info');
         if (pageResponse.ok) {
           const pageData = await pageResponse.json();
-          console.log('✅ Contenu page Info chargé:', pageData);
-          setPageContent(pageData.content || defaultContent);
-        } else {
-          console.warn('⚠️ API page Info non accessible, contenu par défaut');
-          setPageContent(defaultContent);
+          if (pageData.content && pageData.content.trim() !== '') {
+            setPageContent(pageData.content);
+          }
+          // Sinon on garde le contenu par défaut déjà affiché
         }
       } catch (error) {
-        console.error('❌ Erreur lors du chargement:', error);
-        setPageContent(defaultContent);
-      } finally {
-        setLoading(false);
+        console.log('📱 Mode hors ligne - contenu par défaut affiché');
+        // En cas d'erreur, on garde le contenu par défaut déjà affiché
       }
     };
 
@@ -144,22 +139,16 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
         </div>
 
         <div className="p-6 max-w-4xl mx-auto pb-32 min-h-screen">
-          {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="text-white text-lg">Chargement...</div>
-            </div>
-          ) : (
-            <>
-              {/* Logo et titre dynamiques */}
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-black text-white mb-2">{settings.shopTitle}</h2>
-                <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
-                  {settings.shopSubtitle} • Bordeaux
-                </p>
-              </div>
+          {/* Logo et titre dynamiques */}
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-black text-white mb-2">{settings.shopTitle}</h2>
+            <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
+              {settings.shopSubtitle} • Bordeaux
+            </p>
+          </div>
 
-              {/* Contenu dynamique de la page */}
-              <div className="bg-black/60 backdrop-blur-sm border border-white/20 rounded-xl p-6 mb-6 shadow-2xl hover:bg-black/70 transition-all duration-300">
+          {/* Contenu dynamique de la page */}
+          <div className="bg-black/60 backdrop-blur-sm border border-white/20 rounded-xl p-6 mb-6 shadow-2xl hover:bg-black/70 transition-all duration-300">
                 <div className="prose prose-invert max-w-none">
                   {pageContent.split('\n').map((line, index) => {
                     // Titres H1
@@ -210,14 +199,12 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
                 </div>
               </div>
 
-              {/* Avertissement légal */}
-              <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-4 text-center">
-                <p className="text-red-300 text-xs">
-                  ⚠️ Réservé à un usage adulte responsable • Respect de la législation en vigueur
-                </p>
-              </div>
-            </>
-          )}
+          {/* Avertissement légal */}
+          <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-4 text-center">
+            <p className="text-red-300 text-xs">
+              ⚠️ Réservé à un usage adulte responsable • Respect de la législation en vigueur
+            </p>
+          </div>
         </div>
       </div>
 

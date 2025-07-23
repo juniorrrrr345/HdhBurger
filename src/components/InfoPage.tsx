@@ -6,8 +6,8 @@ interface InfoPageProps {
 }
 
 export default function InfoPage({ onClose }: InfoPageProps) {
-  const [content, setContent] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState(defaultContent); // Contenu par défaut immédiat
+  const [loading, setLoading] = useState(false); // Plus de chargement initial
   const [backgroundSettings, setBackgroundSettings] = useState({
     backgroundImage: '',
     backgroundOpacity: 20,
@@ -17,9 +17,7 @@ export default function InfoPage({ onClose }: InfoPageProps) {
   useEffect(() => {
     async function loadContent() {
       try {
-        console.log('🔍 Chargement du contenu de la page info...');
-        
-        // Charger les settings de background
+        // Charger les settings de background en arrière-plan
         const settingsRes = await fetch('/api/settings');
         if (settingsRes.ok) {
           const settingsData = await settingsRes.json();
@@ -30,21 +28,19 @@ export default function InfoPage({ onClose }: InfoPageProps) {
           });
         }
 
-        // Charger le contenu de la page
+        // Charger le contenu de la page en arrière-plan
         const response = await fetch('/api/pages/info');
         if (response.ok) {
           const data = await response.json();
-          console.log('✅ Données reçues:', data);
-          setContent(data.content || defaultContent);
-        } else {
-          console.warn('⚠️ API non accessible, utilisation du contenu par défaut');
-          setContent(defaultContent);
+          if (data.content && data.content.trim() !== '') {
+            setContent(data.content);
+          }
+          // Sinon on garde le contenu par défaut déjà affiché
         }
       } catch (error) {
-        console.error('❌ Erreur lors du chargement:', error);
-        setContent(defaultContent);
+        console.log('📱 Mode hors ligne - contenu par défaut affiché');
+        // En cas d'erreur, on garde le contenu par défaut déjà affiché
       }
-      setLoading(false);
     }
 
     loadContent();
@@ -134,22 +130,17 @@ export default function InfoPage({ onClose }: InfoPageProps) {
         </div>
 
         <div className="p-6 max-w-4xl mx-auto pb-8 min-h-screen">
-          {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="text-white text-lg">Chargement...</div>
+          <div className="space-y-6">
+            {/* Logo et titre */}
+            <div className="text-center mb-8">
+              <h2 className="text-4xl graffiti-text mb-2">HashBurger</h2>
+              <p className="text-emerald-400 font-semibold tracking-widest text-sm uppercase">
+                Premium Concentrés • Bordeaux
+              </p>
             </div>
-          ) : (
-            <div className="space-y-6">
-              {/* Logo et titre */}
-              <div className="text-center mb-8">
-                <h2 className="text-4xl graffiti-text mb-2">HashBurger</h2>
-                <p className="text-emerald-400 font-semibold tracking-widest text-sm uppercase">
-                  Premium Concentrés • Bordeaux
-                </p>
-              </div>
 
-              {/* Contenu dynamique de la page */}
-              <div className="bg-black/60 backdrop-blur-sm border border-white/20 rounded-xl p-6 shadow-2xl">
+            {/* Contenu dynamique de la page */}
+            <div className="bg-black/60 backdrop-blur-sm border border-white/20 rounded-xl p-6 shadow-2xl">
                 <div className="prose prose-invert max-w-none">
                   {content.split('\n').map((line, index) => {
                     // Titres H1
@@ -200,14 +191,13 @@ export default function InfoPage({ onClose }: InfoPageProps) {
                 </div>
               </div>
 
-              {/* Avertissement légal */}
-              <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-4 text-center mt-8">
-                <p className="text-red-300 text-xs">
-                  ⚠️ Réservé à un usage adulte responsable • Respect de la législation en vigueur
-                </p>
-              </div>
+            {/* Avertissement légal */}
+            <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-4 text-center mt-8">
+              <p className="text-red-300 text-xs">
+                ⚠️ Réservé à un usage adulte responsable • Respect de la législation en vigueur
+              </p>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
