@@ -176,7 +176,7 @@ export default function HomePage() {
 
             {/* Affichage avec chargement pour première visite */}
             {isFirstLoad ? (
-              <div className="fixed inset-0 z-50" style={backgroundStyle}>
+              <div className="min-h-screen" style={backgroundStyle}>
                 {/* Overlay */}
                 {settings?.backgroundImage && <div style={overlayStyle}></div>}
                 
