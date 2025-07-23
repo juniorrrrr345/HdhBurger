@@ -102,8 +102,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         </header>
 
         {/* Content Mobile avec padding pour header et bottom nav */}
-        <main className="pt-20 pb-20 min-h-screen">
-          <div className="p-4">
+        <main className="pt-20 pb-24 min-h-screen">
+          <div className="p-4 pb-8">
             {renderActiveSection()}
           </div>
         </main>

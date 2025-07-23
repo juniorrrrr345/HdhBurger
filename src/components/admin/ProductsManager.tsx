@@ -303,7 +303,7 @@ export default function ProductsManager() {
       {/* Modal d'édition */}
       {showModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-900 border border-white/20 rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto backdrop-blur-sm">
+          <div className="bg-gray-900 border border-white/20 rounded-xl p-6 w-full max-w-4xl max-h-[85vh] lg:max-h-[90vh] overflow-y-auto backdrop-blur-sm">
             <h2 className="text-xl font-bold text-white mb-6">
               {editingProduct ? '✏️ Modifier le produit' : '➕ Ajouter un produit'}
             </h2>

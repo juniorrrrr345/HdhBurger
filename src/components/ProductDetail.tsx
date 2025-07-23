@@ -9,14 +9,19 @@ interface ProductDetailProps {
 export default function ProductDetail({ product, onClose }: ProductDetailProps) {
   if (!product) return null;
 
-  const priceList = [
-    { weight: "5g", price: `${product.prices["5g"]}€` },
-    { weight: "10g", price: `${product.prices["10g"]}€` },
-    { weight: "25g", price: `${product.prices["25g"]}€` },
-    { weight: "50g", price: `${product.prices["50g"]}€` },
-    { weight: "100g", price: `${product.prices["100g"]}€` },
-    { weight: "200g", price: `${product.prices["200g"]}€` },
-  ];
+  // Créer une liste des prix disponibles seulement (filtre les undefined/null)
+  const priceList = Object.entries(product.prices || {})
+    .filter(([_, price]) => price !== undefined && price !== null && price !== 0)
+    .map(([weight, price]) => ({
+      weight,
+      price: `${price}€`
+    }))
+    .sort((a, b) => {
+      // Tri par ordre numérique des poids
+      const aNum = parseFloat(a.weight.replace(/[^\d.]/g, ''));
+      const bNum = parseFloat(b.weight.replace(/[^\d.]/g, ''));
+      return aNum - bNum;
+    });
 
   return (
     <div className="fixed inset-0 bg-black z-50 overflow-y-auto">
