@@ -9,14 +9,23 @@ export const useGlobalBackground = () => {
       const backgroundOpacity = settings?.backgroundOpacity || 20;
       const backgroundBlur = settings?.backgroundBlur || 5;
 
+      // Configuration mosaïque : 4 répétitions de l'image
+      const mosaicConfig = {
+        backgroundSize: '50% 50%',
+        backgroundPosition: '0% 0%, 50% 0%, 0% 50%, 50% 50%',
+        backgroundRepeat: 'no-repeat, no-repeat, no-repeat, no-repeat',
+        backgroundAttachment: 'fixed'
+      };
+
       // Appliquer le background sur HTML
       const htmlElement = document.documentElement;
       if (backgroundImage) {
-        htmlElement.style.backgroundImage = `url(${backgroundImage})`;
-        htmlElement.style.backgroundSize = 'cover';
-        htmlElement.style.backgroundPosition = 'center';
-        htmlElement.style.backgroundAttachment = 'fixed';
-        htmlElement.style.backgroundRepeat = 'no-repeat';
+        // Mosaïque : 4 fois la même image
+        htmlElement.style.backgroundImage = `url(${backgroundImage}), url(${backgroundImage}), url(${backgroundImage}), url(${backgroundImage})`;
+        htmlElement.style.backgroundSize = mosaicConfig.backgroundSize;
+        htmlElement.style.backgroundPosition = mosaicConfig.backgroundPosition;
+        htmlElement.style.backgroundAttachment = mosaicConfig.backgroundAttachment;
+        htmlElement.style.backgroundRepeat = mosaicConfig.backgroundRepeat;
       } else {
         htmlElement.style.backgroundImage = '';
       }
@@ -25,11 +34,12 @@ export const useGlobalBackground = () => {
       // Appliquer le background sur BODY
       const bodyElement = document.body;
       if (backgroundImage) {
-        bodyElement.style.backgroundImage = `url(${backgroundImage})`;
-        bodyElement.style.backgroundSize = 'cover';
-        bodyElement.style.backgroundPosition = 'center';
-        bodyElement.style.backgroundAttachment = 'fixed';
-        bodyElement.style.backgroundRepeat = 'no-repeat';
+        // Mosaïque : 4 fois la même image
+        bodyElement.style.backgroundImage = `url(${backgroundImage}), url(${backgroundImage}), url(${backgroundImage}), url(${backgroundImage})`;
+        bodyElement.style.backgroundSize = mosaicConfig.backgroundSize;
+        bodyElement.style.backgroundPosition = mosaicConfig.backgroundPosition;
+        bodyElement.style.backgroundAttachment = mosaicConfig.backgroundAttachment;
+        bodyElement.style.backgroundRepeat = mosaicConfig.backgroundRepeat;
       } else {
         bodyElement.style.backgroundImage = '';
       }
@@ -50,11 +60,12 @@ export const useGlobalBackground = () => {
       mainContainers.forEach((container) => {
         const element = container as HTMLElement;
         if (backgroundImage) {
-          element.style.backgroundImage = `url(${backgroundImage})`;
-          element.style.backgroundSize = 'cover';
-          element.style.backgroundPosition = 'center';
-          element.style.backgroundAttachment = 'fixed';
-          element.style.backgroundRepeat = 'no-repeat';
+          // Mosaïque : 4 fois la même image
+          element.style.backgroundImage = `url(${backgroundImage}), url(${backgroundImage}), url(${backgroundImage}), url(${backgroundImage})`;
+          element.style.backgroundSize = mosaicConfig.backgroundSize;
+          element.style.backgroundPosition = mosaicConfig.backgroundPosition;
+          element.style.backgroundAttachment = mosaicConfig.backgroundAttachment;
+          element.style.backgroundRepeat = mosaicConfig.backgroundRepeat;
         } else {
           element.style.backgroundImage = '';
         }
