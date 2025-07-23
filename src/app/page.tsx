@@ -245,43 +245,27 @@ export default function HomePage() {
 
   // Écran de chargement
   if (loading) {
+    const backgroundStyle = backgroundSettings.backgroundImage 
+      ? {
+          backgroundImage: `url(${backgroundSettings.backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }
+      : {};
+
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-black to-slate-800 flex items-center justify-center relative overflow-hidden">
-        {/* Particules d'animation en arrière-plan */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-2 h-2 bg-white/20 rounded-full animate-ping"></div>
-          <div className="absolute top-40 right-20 w-1 h-1 bg-green-400/30 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-40 left-20 w-3 h-3 bg-blue-400/20 rounded-full animate-bounce"></div>
-          <div className="absolute bottom-20 right-10 w-2 h-2 bg-purple-400/20 rounded-full animate-ping"></div>
-        </div>
+      <div className="min-h-screen bg-black flex items-center justify-center relative" style={backgroundStyle}>
+        {/* Overlay pour assurer la lisibilité */}
+        {backgroundSettings.backgroundImage && (
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        )}
         
         <div className="text-center z-10">
-          {/* Logo HashBurger avec style graffiti */}
-          <div className="mb-8">
-            <h1 className="graffiti-text text-6xl mb-4 animate-pulse">
-              HashBurger
-            </h1>
-            <p className="text-white/80 text-lg font-semibold tracking-[0.3em] uppercase">
-              Premium Concentrés
-            </p>
-          </div>
-          
-          {/* Animation de chargement stylée */}
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-3 h-3 bg-gradient-to-r from-red-500 to-yellow-500 rounded-full animate-bounce"></div>
-            <div className="w-3 h-3 bg-gradient-to-r from-yellow-500 to-green-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-            <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-            <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-bounce" style={{animationDelay: '0.3s'}}></div>
-            <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-red-500 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
-          </div>
-          
-          <p className="text-gray-400 text-sm font-medium animate-pulse">
-            Préparation de votre expérience...
-          </p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
+          <h1 className="text-2xl font-black text-white tracking-wider mb-2">HashBurger</h1>
+          <p className="text-gray-400 text-sm">Chargement...</p>
         </div>
-        
-        {/* Effet de brillance qui traverse l'écran */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 animate-pulse"></div>
       </div>
     );
   }

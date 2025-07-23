@@ -53,19 +53,25 @@ Tous nos envois sont sécurisés et expédiés en toute discrétion pour garanti
   useEffect(() => {
     async function loadData() {
       try {
-        // NE PAS charger le contenu de la page contact depuis l'API
-        // pour éviter tout affichage de l'ancien contenu "boutique"
-        // Le contenu par défaut HashBurger reste affiché
+        // Charger le contenu de la page contact depuis l'API pour afficher le contenu du panel admin
+        const pageRes = await fetch('/api/pages/contact');
+        if (pageRes.ok) {
+          const pageData = await pageRes.json();
+          if (pageData.content && pageData.content.trim() !== '') {
+            setContent(pageData.content);
+          }
+          // Sinon on garde le contenu par défaut
+        }
 
-        // Charger les réseaux sociaux en arrière-plan (seulement s'ils existent)
+        // Charger les réseaux sociaux en arrière-plan
         const socialRes = await fetch('/api/social-links');
         if (socialRes.ok) {
           const socialData = await socialRes.json();
           setSocialLinks(socialData);
         }
       } catch (error) {
-        console.log('📱 Mode hors ligne - contenu HashBurger affiché');
-        // En cas d'erreur, on garde le contenu HashBurger par défaut
+        console.log('📱 Mode hors ligne - contenu par défaut affiché');
+        // En cas d'erreur, on garde le contenu par défaut
       }
     }
 

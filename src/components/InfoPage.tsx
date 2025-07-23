@@ -42,7 +42,7 @@ Rejoignez-nous sur **@hashburgerchannel** pour découvrir nos dernières arrivé
   useEffect(() => {
     async function loadContent() {
       try {
-        // Charger SEULEMENT les settings de background en arrière-plan
+        // Charger les settings de background en arrière-plan
         const settingsRes = await fetch('/api/settings');
         if (settingsRes.ok) {
           const settingsData = await settingsRes.json();
@@ -53,13 +53,19 @@ Rejoignez-nous sur **@hashburgerchannel** pour découvrir nos dernières arrivé
           });
         }
 
-        // NE PAS charger le contenu de la page depuis l'API
-        // pour éviter tout affichage de l'ancien contenu "boutique"
-        // Le contenu par défaut HashBurger reste affiché
+        // Charger le contenu de la page depuis l'API pour afficher le contenu du panel admin
+        const response = await fetch('/api/pages/info');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.content && data.content.trim() !== '') {
+            setContent(data.content);
+          }
+          // Sinon on garde le contenu par défaut
+        }
         
       } catch (error) {
-        console.log('📱 Mode hors ligne - contenu HashBurger affiché');
-        // En cas d'erreur, on garde le contenu HashBurger par défaut
+        console.log('📱 Mode hors ligne - contenu par défaut affiché');
+        // En cas d'erreur, on garde le contenu par défaut
       }
     }
 
