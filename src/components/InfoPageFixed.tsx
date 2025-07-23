@@ -9,53 +9,28 @@ interface InfoPageProps {
 }
 
 export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChange }: InfoPageProps) {
-  // Contenu par défaut défini en premier
-  const defaultContent = `
-# À propos de HashBurger
-
-**HashBurger** est votre référence premium pour les concentrés de cannabis à Bordeaux et partout en France.
-
-## 🎯 Notre Mission
-Fournir les meilleurs concentrés, hash et extractions avec une qualité irréprochable et un service client exceptionnel.
-
-## 🌟 Nos Spécialités
-- 🇲🇦 **Hash Marocain Premium** (120U++, 105U, 90U)
-- ❄️ **Frozen Sift** - Extractions à froid
-- 🇳🇱 **Weed Netherlands** - Génétiques premium
-- 🇮🇹 **Cali Italienne** - Qualité californienne
-
-## ⚡ Nos Services
-- 🚚 **Livraison Bordeaux** - Service rapide et discret
-- 📦 **Expédition France** - Envoi postal sécurisé
-- ✅ **Qualité Garantie** - Produits testés et vérifiés
-- 💬 **Support 24/7** - Équipe disponible via Telegram
-
-## 📞 Contact Rapide
-Rejoignez-nous sur **@hashburgerchannel** pour découvrir nos dernières arrivées !
-  `;
-
   const [backgroundSettings, setBackgroundSettings] = useState({
     backgroundImage: '',
     backgroundOpacity: 20,
     backgroundBlur: 5
   });
-  const [pageContent, setPageContent] = useState(defaultContent); // Contenu par défaut immédiat
+  const [pageContent, setPageContent] = useState(''); // Vide au départ
   const [settings, setSettings] = useState({
-    shopTitle: 'HashBurger',
-    shopSubtitle: 'Premium Concentrés'
+    shopTitle: '',
+    shopSubtitle: ''
   });
-  const [loading, setLoading] = useState(false); // Plus de chargement initial
+  const [loading, setLoading] = useState(true); // Chargement jusqu'à réception des données admin
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Charger en parallèle les settings et le contenu pour plus de rapidité
+        // Charger en parallèle les settings et le contenu du panel admin
         const [settingsResponse, pageResponse] = await Promise.all([
           fetch('/api/settings'),
           fetch('/api/pages/info')
         ]);
 
-        // Charger les paramètres de background
+        // Charger les paramètres du panel admin
         if (settingsResponse.ok) {
           const settingsData = await settingsResponse.json();
           setBackgroundSettings({
@@ -63,7 +38,6 @@ Rejoignez-nous sur **@hashburgerchannel** pour découvrir nos dernières arrivé
             backgroundOpacity: settingsData.backgroundOpacity || 20,
             backgroundBlur: settingsData.backgroundBlur || 5
           });
-          // Charger les settings du panel admin
           setSettings({
             shopTitle: settingsData.shopTitle || 'HashBurger',
             shopSubtitle: settingsData.shopSubtitle || 'Premium Concentrés'
@@ -73,14 +47,16 @@ Rejoignez-nous sur **@hashburgerchannel** pour découvrir nos dernières arrivé
         // Charger le contenu de la page depuis le panel admin
         if (pageResponse.ok) {
           const pageData = await pageResponse.json();
-          if (pageData.content && pageData.content.trim() !== '') {
-            setPageContent(pageData.content);
-          }
+          setPageContent(pageData.content || '# Contenu non configuré\n\nVeuillez configurer le contenu dans le panel admin.');
+        } else {
+          setPageContent('# Contenu non disponible\n\nImpossible de charger le contenu. Vérifiez la configuration du panel admin.');
         }
         
       } catch (error) {
-        console.log('📱 Mode hors ligne - contenu par défaut');
-        // En cas d'erreur, garder les valeurs par défaut
+        console.log('📱 Erreur chargement contenu admin');
+        setPageContent('# Erreur de chargement\n\nImpossible de se connecter au panel admin.');
+      } finally {
+        setLoading(false); // Arrêter le chargement une fois les données admin reçues
       }
     };
 
@@ -159,15 +135,24 @@ Rejoignez-nous sur **@hashburgerchannel** pour découvrir nos dernières arrivé
         </div>
 
         <div className="p-6 max-w-4xl mx-auto pb-32 min-h-screen">
-          {/* Logo et titre dynamiques */}
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-black text-white mb-2">{settings.shopTitle}</h2>
-            <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
-              {settings.shopSubtitle} • Bordeaux
-            </p>
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                <p className="text-white text-lg">Chargement du contenu admin...</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Logo et titre dynamiques */}
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-black text-white mb-2">{settings.shopTitle}</h2>
+                <p className="text-gray-400 font-semibold tracking-widest text-sm uppercase">
+                  {settings.shopSubtitle} • Bordeaux
+                </p>
+              </div>
 
-          {/* Contenu dynamique de la page */}
+              {/* Contenu dynamique de la page */}
           <div className="bg-black/60 backdrop-blur-sm border border-white/20 rounded-xl p-6 mb-6 shadow-2xl hover:bg-black/70 transition-all duration-300">
                 <div className="prose prose-invert max-w-none">
                   {pageContent.split('\n').map((line, index) => {
@@ -219,12 +204,14 @@ Rejoignez-nous sur **@hashburgerchannel** pour découvrir nos dernières arrivé
                 </div>
               </div>
 
-          {/* Avertissement légal */}
-          <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-4 text-center">
-            <p className="text-red-300 text-xs">
-              ⚠️ Réservé à un usage adulte responsable • Respect de la législation en vigueur
-            </p>
-          </div>
+              {/* Avertissement légal */}
+              <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-4 text-center">
+                <p className="text-red-300 text-xs">
+                  ⚠️ Réservé à un usage adulte responsable • Respect de la législation en vigueur
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

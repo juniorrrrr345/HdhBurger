@@ -16,52 +16,19 @@ interface SocialLink {
 }
 
 export default function ContactPageFixed({ onClose, activeTab = 'contact', onTabChange }: ContactPageProps) {
-  // Contenu par défaut défini en premier
-  const defaultContent = `
-# Contactez HashBurger
-
-## 📱 Informations de Contact
-
-**Telegram Principal :** @hashburgerchannel  
-**Email Pro :** contact@hashburger.fr  
-**Disponibilité :** 24h/24 - 7j/7
-
-## 🚚 Zones de Livraison
-
-**🏙️ Bordeaux Métropole**  
-Livraison rapide et discrète dans toute la métropole bordelaise
-
-**🇫🇷 France Entière**  
-Expédition postal sécurisée partout en France métropolitaine
-
-## 💬 Support Client Premium
-
-Notre équipe dédiée est disponible 24h/24 via Telegram pour :
-- Conseils produits personnalisés
-- Suivi de commandes
-- Support technique
-- Recommandations qualité
-
-## 🔐 Sécurité & Discrétion
-
-Tous nos envois sont sécurisés et expédiés en toute discrétion pour garantir votre confidentialité.
-
-**Rejoignez @hashburgerchannel maintenant !**
-  `;
-
   const [backgroundSettings, setBackgroundSettings] = useState({
     backgroundImage: '',
     backgroundOpacity: 20,
     backgroundBlur: 5
   });
-  const [pageContent, setPageContent] = useState(defaultContent); // Contenu par défaut immédiat
+  const [pageContent, setPageContent] = useState(''); // Vide au départ
   const [settings, setSettings] = useState({
-    shopTitle: 'HashBurger',
-    shopSubtitle: 'Premium Concentrés',
-    telegramLink: 'https://t.me/hashburgerchannel'
+    shopTitle: '',
+    shopSubtitle: '',
+    telegramLink: ''
   });
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
-  const [loading, setLoading] = useState(false); // Plus de chargement initial
+  const [loading, setLoading] = useState(true); // Chargement jusqu'à réception des données admin
 
   useEffect(() => {
     const loadData = async () => {
@@ -73,7 +40,7 @@ Tous nos envois sont sécurisés et expédiés en toute discrétion pour garanti
           fetch('/api/social-links')
         ]);
 
-        // Charger les paramètres
+        // Charger les paramètres du panel admin
         if (settingsResponse.ok) {
           const settingsData = await settingsResponse.json();
           setBackgroundSettings({
@@ -81,7 +48,6 @@ Tous nos envois sont sécurisés et expédiés en toute discrétion pour garanti
             backgroundOpacity: settingsData.backgroundOpacity || 20,
             backgroundBlur: settingsData.backgroundBlur || 5
           });
-          // Charger les settings du panel admin
           setSettings({
             shopTitle: settingsData.shopTitle || 'HashBurger',
             shopSubtitle: settingsData.shopSubtitle || 'Premium Concentrés',
@@ -92,9 +58,9 @@ Tous nos envois sont sécurisés et expédiés en toute discrétion pour garanti
         // Charger le contenu de la page depuis le panel admin
         if (pageResponse.ok) {
           const pageData = await pageResponse.json();
-          if (pageData.content && pageData.content.trim() !== '') {
-            setPageContent(pageData.content);
-          }
+          setPageContent(pageData.content || '# Contenu contact non configuré\n\nVeuillez configurer le contenu dans le panel admin.');
+        } else {
+          setPageContent('# Contenu contact non disponible\n\nImpossible de charger le contenu. Vérifiez la configuration du panel admin.');
         }
 
         // Charger les liens sociaux
@@ -103,8 +69,10 @@ Tous nos envois sont sécurisés et expédiés en toute discrétion pour garanti
           setSocialLinks(socialData);
         }
       } catch (error) {
-        console.log('📱 Mode hors ligne - contenu par défaut');
-        // En cas d'erreur, garder les valeurs par défaut
+        console.log('📱 Erreur chargement contenu admin');
+        setPageContent('# Erreur de chargement\n\nImpossible de se connecter au panel admin.');
+      } finally {
+        setLoading(false); // Arrêter le chargement une fois les données admin reçues
       }
     };
 
