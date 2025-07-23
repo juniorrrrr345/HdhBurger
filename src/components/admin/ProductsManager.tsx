@@ -465,19 +465,33 @@ export default function ProductsManager() {
     return Object.entries(allPrices);
   };
 
-  // Fonction utilitaire pour ajouter un nouveau prix
+  // Fonction utilitaire pour ajouter un nouveau prix - AUCUNE LIMITE
   const addNewPrice = (quantity: string) => {
     const key = quantity.trim();
     if (key) {
-      // Mettre à jour les états pour l'affichage des nouvelles lignes
-      setPriceInputs(prev => ({
-        ...prev,
-        [key]: ''
-      }));
-      setQuantityInputs(prev => ({
-        ...prev,
-        [key]: key
-      }));
+      console.log(`🔄 Tentative d'ajout prix: ${key}`);
+      console.log(`📊 État actuel - priceInputs:`, Object.keys(priceInputs));
+      console.log(`📊 État actuel - quantityInputs:`, Object.keys(quantityInputs));
+      
+      // Mettre à jour les états pour l'affichage des nouvelles lignes - SANS LIMITE
+      setPriceInputs(prev => {
+        const newState = {
+          ...prev,
+          [key]: ''
+        };
+        console.log(`📝 Nouveau priceInputs:`, Object.keys(newState));
+        return newState;
+      });
+      
+      setQuantityInputs(prev => {
+        const newState = {
+          ...prev,
+          [key]: key
+        };
+        console.log(`📝 Nouveau quantityInputs:`, Object.keys(newState));
+        return newState;
+      });
+      
       console.log(`✅ Prix ajouté: ${key}`);
     }
   };
@@ -1007,17 +1021,20 @@ export default function ProductsManager() {
                   
                   {/* Raccourcis pour prix courants */}
                   <div className="flex flex-wrap gap-2">
-                                         {['3g', '5g', '10g', '25g', '50g', '100g'].map(quantity => (
-                       <button
-                         key={quantity}
-                         type="button"
-                         onClick={() => addNewPrice(quantity)}
-                         className="bg-blue-600/20 border border-blue-400/30 hover:bg-blue-600/40 text-blue-300 text-xs py-1 px-2 rounded transition-all duration-200"
-                         title={`Ajouter ${quantity}`}
-                       >
-                         + {quantity}
-                       </button>
-                     ))}
+                    {['3g', '5g', '10g', '25g', '50g', '100g', '200g', '500g', '1kg'].map(quantity => (
+                      <button
+                        key={quantity}
+                        type="button"
+                        onClick={() => {
+                          console.log(`🎯 Clic sur bouton: ${quantity}`);
+                          addNewPrice(quantity);
+                        }}
+                        className="bg-blue-600/20 border border-blue-400/30 hover:bg-blue-600/40 text-blue-300 text-xs py-1 px-2 rounded transition-all duration-200"
+                        title={`Ajouter ${quantity}`}
+                      >
+                        + {quantity}
+                      </button>
+                    ))}
                   </div>
                 </div>
                 
@@ -1197,11 +1214,14 @@ export default function ProductsManager() {
                       
                       {/* Raccourcis mobiles */}
                       <div className="flex flex-wrap gap-2">
-                        {['3g', '5g', '10g', '25g', '50g', '100g'].map(quantity => (
+                        {['3g', '5g', '10g', '25g', '50g', '100g', '200g', '500g', '1kg'].map(quantity => (
                           <button
                             key={quantity}
                             type="button"
-                            onClick={() => addNewPrice(quantity)}
+                            onClick={() => {
+                              console.log(`📱 Clic mobile sur: ${quantity}`);
+                              addNewPrice(quantity);
+                            }}
                             className="bg-blue-600/20 border border-blue-400/30 hover:bg-blue-600/40 text-blue-300 text-xs py-1 px-2 rounded transition-all duration-200"
                             title={`Ajouter ${quantity}`}
                           >
