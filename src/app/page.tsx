@@ -7,7 +7,7 @@ import ProductDetail from '../components/ProductDetail';
 import BottomNav from '../components/BottomNav';
 import InfoPageFixed from '../components/InfoPageFixed';
 import ContactPageFixed from '../components/ContactPageFixed';
-import InitButton from '../components/InitButton';
+
 
 // Données statiques des produits
 const sampleProducts: Product[] = [
@@ -191,7 +191,7 @@ export default function HomePage() {
       <Header />
       
       {/* Bouton d'initialisation DB */}
-      <InitButton />
+      
       
       {/* Espacement pour le header fixe */}
       <div className="pt-20">
