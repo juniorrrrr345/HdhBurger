@@ -9,13 +9,13 @@
   box-sizing: border-box;
 }
 
-/* Background global robuste - appliqué plusieurs fois pour éviter les problèmes de zoom */
+/* Background global robuste - appliqué plusieurs fois en mosaïque pour éviter les problèmes de zoom */
 html {
   background-color: black !important;
   background-attachment: fixed;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-size: 50% 50%;
+  background-position: 0% 0%, 50% 0%, 0% 50%, 50% 50%;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
   min-height: 100%;
 }
 
@@ -25,19 +25,19 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: black !important;
   background-attachment: fixed;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-size: 50% 50%;
+  background-position: 0% 0%, 50% 0%, 0% 50%, 50% 50%;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
   min-height: 100vh;
 }
 
-/* Conteneur principal - background en cascade */
+/* Conteneur principal - background en mosaïque */
 .main-container {
   background-color: black;
   background-attachment: fixed;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-size: 50% 50%;
+  background-position: 0% 0%, 50% 0%, 0% 50%, 50% 50%;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
   min-height: 100vh;
   position: relative;
 }
