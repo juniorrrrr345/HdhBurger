@@ -15,45 +15,95 @@ export default function HomePage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState('menu');
   
-  // AFFICHAGE DIRECT - pas de chargement, utilise ce qui est disponible IMMÉDIATEMENT
-  const [products, setProducts] = useState<Product[]>(instantContent.getProducts());
-  const [categories, setCategories] = useState<string[]>(() => {
-    const cached = instantContent.getCategories();
-    return ['Toutes les catégories', ...cached.map((c: { name: string }) => c.name)];
-  });
-  const [farms, setFarms] = useState<string[]>(() => {
-    const cached = instantContent.getFarms();
-    return ['Toutes les farms', ...cached.map((f: { name: string }) => f.name)];
-  });
+  // ÉTAT DE CHARGEMENT pour première visite
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  
+  // AFFICHAGE DIRECT - utilise ce qui est disponible ou charge immédiatement
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>(['Toutes les catégories']);
+  const [farms, setFarms] = useState<string[]>(['Toutes les farms']);
 
-  // Mise à jour en arrière-plan pour synchroniser avec le panel admin
+  // CHARGEMENT IMMÉDIAT dès le premier render
   useEffect(() => {
-    const syncWithAdmin = async () => {
+    const loadDataImmediately = async () => {
       try {
-        await instantContent.refresh();
+        // Essayer d'abord le cache instantané
+        let cachedProducts = instantContent.getProducts();
+        let cachedCategories = instantContent.getCategories();
+        let cachedFarms = instantContent.getFarms();
         
-        const freshProducts = instantContent.getProducts();
-        const freshCategories = instantContent.getCategories();
-        const freshFarms = instantContent.getFarms();
+        // Si pas de données en cache, forcer le chargement API IMMÉDIATEMENT
+        if (cachedProducts.length === 0) {
+          console.log('🔥 Première visite - chargement API immédiat');
+          
+          const [productsRes, categoriesRes, farmsRes] = await Promise.all([
+            fetch('/api/products').catch(() => null),
+            fetch('/api/categories').catch(() => null),
+            fetch('/api/farms').catch(() => null)
+          ]);
+
+          if (productsRes?.ok) {
+            cachedProducts = await productsRes.json();
+            instantContent.updateProducts(cachedProducts);
+          }
+
+          if (categoriesRes?.ok) {
+            cachedCategories = await categoriesRes.json();
+            instantContent.updateCategories(cachedCategories);
+          }
+
+          if (farmsRes?.ok) {
+            cachedFarms = await farmsRes.json();
+            instantContent.updateFarms(cachedFarms);
+          }
+        }
+
+        // Mettre à jour l'état avec les données (cache ou API)
+        setProducts(cachedProducts);
+        setCategories(['Toutes les catégories', ...cachedCategories.map((c: { name: string }) => c.name)]);
+        setFarms(['Toutes les farms', ...cachedFarms.map((f: { name: string }) => f.name)]);
         
-        setProducts(freshProducts);
-        setCategories(['Toutes les catégories', ...freshCategories.map((c: { name: string }) => c.name)]);
-        setFarms(['Toutes les farms', ...freshFarms.map((f: { name: string }) => f.name)]);
+        setIsFirstLoad(false);
         
-        console.log('✅ Synchronisé avec panel admin:', {
-          products: freshProducts.length,
-          categories: freshCategories.length,
-          farms: freshFarms.length
+        console.log('✅ Données chargées:', {
+          products: cachedProducts.length,
+          categories: cachedCategories.length,
+          farms: cachedFarms.length,
+          source: cachedProducts.length > 0 ? 'cache' : 'API directe'
         });
+        
       } catch (error) {
-        console.error('❌ Erreur sync admin:', error);
+        console.error('❌ Erreur chargement immédiat:', error);
+        setIsFirstLoad(false);
       }
     };
 
-    // Synchroniser après 2 secondes pour laisser le temps à l'affichage initial
-    const timer = setTimeout(syncWithAdmin, 2000);
-    return () => clearTimeout(timer);
+    loadDataImmediately();
   }, []);
+
+  // Synchronisation continue en arrière-plan
+  useEffect(() => {
+    if (!isFirstLoad) {
+      const syncInterval = setInterval(async () => {
+        try {
+          await instantContent.refresh();
+          const freshProducts = instantContent.getProducts();
+          const freshCategories = instantContent.getCategories();
+          const freshFarms = instantContent.getFarms();
+          
+          if (freshProducts.length !== products.length) {
+            setProducts(freshProducts);
+            setCategories(['Toutes les catégories', ...freshCategories.map((c: { name: string }) => c.name)]);
+            setFarms(['Toutes les farms', ...freshFarms.map((f: { name: string }) => f.name)]);
+          }
+        } catch (error) {
+          console.error('❌ Erreur sync continue:', error);
+        }
+      }, 30000); // Sync toutes les 30 secondes
+
+      return () => clearInterval(syncInterval);
+    }
+  }, [isFirstLoad, products.length]);
 
   const filteredProducts = products.filter(product => {
     const categoryMatch = selectedCategory === 'Toutes les catégories' || product.category === selectedCategory;
@@ -124,8 +174,18 @@ export default function HomePage() {
               onFarmChange={setSelectedFarm}
             />
 
-            {/* Affichage DIRECT des produits - pas de vérification de chargement */}
-            {products.length === 0 ? (
+            {/* Affichage avec chargement pour première visite */}
+            {isFirstLoad ? (
+              <div className="text-center py-12">
+                <div className="bg-gray-900/80 border border-white/20 rounded-xl p-8 max-w-md mx-auto backdrop-blur-sm">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+                  <h3 className="text-lg font-bold text-white mb-2">Chargement de la boutique...</h3>
+                  <p className="text-gray-400">
+                    Première visite - récupération des produits
+                  </p>
+                </div>
+              </div>
+            ) : products.length === 0 ? (
               <div className="text-center py-12">
                 <div className="bg-gray-900/80 border border-white/20 rounded-xl p-8 max-w-md mx-auto backdrop-blur-sm">
                   <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
