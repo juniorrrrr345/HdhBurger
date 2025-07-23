@@ -5,7 +5,6 @@ interface Category {
   _id?: string;
   name: string;
   description?: string;
-  isActive: boolean;
 }
 
 export default function CategoriesManager() {
@@ -15,8 +14,7 @@ export default function CategoriesManager() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [formData, setFormData] = useState<Partial<Category>>({
     name: '',
-    description: '',
-    isActive: true
+    description: ''
   });
 
   useEffect(() => {
@@ -53,8 +51,7 @@ export default function CategoriesManager() {
     setEditingCategory(null);
     setFormData({
       name: '',
-      description: '',
-      isActive: true
+      description: ''
     });
     setShowModal(true);
   };
