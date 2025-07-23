@@ -51,10 +51,15 @@ export default function InfoPage({ onClose }: InfoPageProps) {
         const response = await fetch('/api/pages/info');
         if (response.ok) {
           const data = await response.json();
-          if (data.content && data.content.trim() !== '') {
+          // Ne remplacer le contenu par défaut que si le contenu de la DB est plus récent 
+          // et ne contient pas d'anciennes références (comme "boutique")
+          if (data.content && 
+              data.content.trim() !== '' && 
+              !data.content.toLowerCase().includes('boutique') &&
+              data.content !== defaultContent) {
             setContent(data.content);
           }
-          // Sinon on garde le contenu par défaut déjà affiché
+          // Sinon on garde le contenu par défaut déjà affiché (plus récent et correct)
         }
       } catch (error) {
         console.log('📱 Mode hors ligne - contenu par défaut affiché');

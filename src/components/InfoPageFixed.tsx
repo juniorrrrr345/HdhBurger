@@ -62,10 +62,15 @@ export default function InfoPageFixed({ onClose, activeTab = 'infos', onTabChang
         const pageResponse = await fetch('/api/pages/info');
         if (pageResponse.ok) {
           const pageData = await pageResponse.json();
-          if (pageData.content && pageData.content.trim() !== '') {
+          // Ne remplacer le contenu par défaut que si le contenu de la DB est plus récent 
+          // et ne contient pas d'anciennes références (comme "boutique")
+          if (pageData.content && 
+              pageData.content.trim() !== '' && 
+              !pageData.content.toLowerCase().includes('boutique') &&
+              pageData.content !== defaultContent) {
             setPageContent(pageData.content);
           }
-          // Sinon on garde le contenu par défaut déjà affiché
+          // Sinon on garde le contenu par défaut déjà affiché (plus récent et correct)
         }
       } catch (error) {
         console.log('📱 Mode hors ligne - contenu par défaut affiché');

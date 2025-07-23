@@ -73,10 +73,15 @@ Notre équipe est disponible 24h/24 via Telegram pour répondre à toutes vos qu
         const pageResponse = await fetch('/api/pages/contact');
         if (pageResponse.ok) {
           const pageData = await pageResponse.json();
-          if (pageData.content && pageData.content.trim() !== '') {
+          // Ne remplacer le contenu par défaut que si le contenu de la DB est plus récent 
+          // et ne contient pas d'anciennes références (comme "boutique")
+          if (pageData.content && 
+              pageData.content.trim() !== '' && 
+              !pageData.content.toLowerCase().includes('boutique') &&
+              pageData.content !== defaultContent) {
             setPageContent(pageData.content);
           }
-          // Sinon on garde le contenu par défaut déjà affiché
+          // Sinon on garde le contenu par défaut déjà affiché (plus récent et correct)
         }
 
         // Charger les liens sociaux en arrière-plan
