@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,35 +20,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Créer le dossier d'upload s'il n'existe pas
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    // Générer un nom de fichier unique
-    const timestamp = Date.now();
-    const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const fileName = `${timestamp}_${originalName}`;
-    const filePath = path.join(uploadDir, fileName);
-
-    // Sauvegarder le fichier
+    // Pour l'instant, on convertit l'image en base64 data URL
+    // Cette solution fonctionne mais n'est pas optimale pour de gros fichiers
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    fs.writeFileSync(filePath, buffer);
+    const base64 = buffer.toString('base64');
+    const dataUrl = `data:${file.type};base64,${base64}`;
 
-    // Retourner l'URL publique
-    const fileUrl = `/uploads/${fileName}`;
+    console.log('✅ Image convertie en base64, taille:', file.size, 'bytes');
 
     return NextResponse.json({ 
-      url: fileUrl,
-      message: 'Fichier uploadé avec succès'
+      url: dataUrl,
+      message: 'Image uploadée avec succès (base64)',
+      size: file.size,
+      type: file.type
     });
 
   } catch (error) {
-    console.error('Erreur lors de l\'upload:', error);
+    console.error('❌ Erreur upload:', error);
     return NextResponse.json(
-      { error: 'Erreur lors de l\'upload du fichier' },
+      { error: 'Erreur lors de l\'upload' },
       { status: 500 }
     );
   }
