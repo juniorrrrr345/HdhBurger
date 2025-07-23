@@ -6,6 +6,7 @@ interface SocialLink {
   name: string;
   url: string;
   icon: string;
+  color: string;
   isActive: boolean;
 }
 
@@ -18,6 +19,7 @@ export default function SocialLinksManager() {
     name: '',
     url: '',
     icon: '',
+    color: '#0088cc',
     isActive: true
   });
 
@@ -52,6 +54,7 @@ export default function SocialLinksManager() {
       name: '',
       url: '',
       icon: '',
+      color: '#0088cc',
       isActive: true
     });
     setShowModal(true);
@@ -59,6 +62,12 @@ export default function SocialLinksManager() {
 
   const handleSave = async () => {
     try {
+      // Validation
+      if (!formData.name?.trim() || !formData.url?.trim() || !formData.icon?.trim()) {
+        alert('Veuillez remplir tous les champs obligatoires');
+        return;
+      }
+
       const url = editingLink ? `/api/social-links/${editingLink._id}` : '/api/social-links';
       const method = editingLink ? 'PUT' : 'POST';
       
@@ -67,14 +76,30 @@ export default function SocialLinksManager() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          color: formData.color || '#0088cc'
+        }),
       });
 
       if (response.ok) {
+        const result = await response.json();
+        
+        // Afficher message de succès
+        const successMsg = document.createElement('div');
+        successMsg.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999] transition-all duration-300';
+        successMsg.textContent = `✅ ${editingLink ? 'Réseau social modifié' : 'Réseau social ajouté'} avec succès!`;
+        document.body.appendChild(successMsg);
+        
+        setTimeout(() => {
+          successMsg.remove();
+        }, 3000);
+        
         setShowModal(false);
         loadSocialLinks();
       } else {
-        alert('Erreur lors de la sauvegarde');
+        const error = await response.json();
+        alert(`Erreur: ${error.error || 'Erreur lors de la sauvegarde'}`);
       }
     } catch (error) {
       console.error('Erreur:', error);
@@ -82,20 +107,38 @@ export default function SocialLinksManager() {
     }
   };
 
-  const handleDelete = async (linkId: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce lien ?')) {
+  const handleDelete = async (linkId: string, linkName: string) => {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer "${linkName}" ?`)) {
       try {
+        // Suppression optimiste - retirer immédiatement de l'interface
+        const originalLinks = [...socialLinks];
+        setSocialLinks(prev => prev.filter(link => link._id !== linkId));
+
         const response = await fetch(`/api/social-links/${linkId}`, {
           method: 'DELETE',
         });
 
         if (response.ok) {
-          loadSocialLinks();
+          // Afficher message de succès
+          const successMsg = document.createElement('div');
+          successMsg.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999] transition-all duration-300';
+          successMsg.textContent = `✅ "${linkName}" supprimé avec succès!`;
+          document.body.appendChild(successMsg);
+          
+          setTimeout(() => {
+            successMsg.remove();
+          }, 3000);
         } else {
-          alert('Erreur lors de la suppression');
+          // Restaurer en cas d'erreur
+          setSocialLinks(originalLinks);
+          const error = await response.json();
+          alert(`Erreur: ${error.error || 'Erreur lors de la suppression'}`);
         }
       } catch (error) {
         console.error('Erreur:', error);
+        // Restaurer en cas d'erreur
+        setSocialLinks(prev => [...prev]);
+        loadSocialLinks();
         alert('Erreur lors de la suppression');
       }
     }
@@ -107,13 +150,33 @@ export default function SocialLinksManager() {
 
   const iconOptions = [
     { value: '📱', label: '📱 Telegram' },
+    { value: '📷', label: '📷 Instagram' },
+    { value: '💬', label: '💬 WhatsApp' },
+    { value: '🎮', label: '🎮 Discord' },
+    { value: '📘', label: '📘 Facebook' },
+    { value: '🐦', label: '🐦 Twitter/X' },
+    { value: '📺', label: '📺 YouTube' },
+    { value: '💼', label: '💼 LinkedIn' },
+    { value: '🎵', label: '🎵 TikTok' },
     { value: '📧', label: '📧 Email' },
     { value: '📞', label: '📞 Téléphone' },
     { value: '🌐', label: '🌐 Site web' },
-    { value: '📲', label: '📲 WhatsApp' },
-    { value: '💬', label: '💬 Chat' },
-    { value: '🔗', label: '🔗 Lien' },
+    { value: '🔗', label: '🔗 Lien personnalisé' },
     { value: '📍', label: '📍 Localisation' },
+    { value: '🎯', label: '🎯 Autre' },
+  ];
+
+  const colorPresets = [
+    { name: 'Telegram', color: '#0088cc' },
+    { name: 'Instagram', color: '#E4405F' },
+    { name: 'WhatsApp', color: '#25D366' },
+    { name: 'Discord', color: '#7289DA' },
+    { name: 'Facebook', color: '#1877F2' },
+    { name: 'Twitter/X', color: '#1DA1F2' },
+    { name: 'YouTube', color: '#FF0000' },
+    { name: 'LinkedIn', color: '#0077B5' },
+    { name: 'TikTok', color: '#FE2C55' },
+    { name: 'Personnalisé', color: '#6B7280' },
   ];
 
   if (loading) {
@@ -138,81 +201,128 @@ export default function SocialLinksManager() {
       </div>
 
       {/* Liste des liens */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {socialLinks.map((link) => (
-          <div key={link._id} className="bg-gray-900 border border-white/20 rounded-xl p-6">
+          <div key={link._id} className="bg-gray-900/50 border border-white/20 rounded-xl p-6 hover:bg-gray-900/70 transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm shadow-lg">
             <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <span className="text-2xl">{link.icon}</span>
-                <div>
-                  <h3 className="font-bold text-white text-lg">{link.name}</h3>
-                  <p className="text-gray-400 text-sm truncate">{link.url}</p>
+              <div className="flex items-center space-x-3 flex-1">
+                <div 
+                  className="flex items-center justify-center w-12 h-12 rounded-lg"
+                  style={{ backgroundColor: link.color + '20', border: `2px solid ${link.color}40` }}
+                >
+                  <span className="text-2xl">{link.icon}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-white text-lg truncate">{link.name}</h3>
+                  <p className="text-gray-400 text-sm truncate" title={link.url}>{link.url}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div 
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: link.color }}
+                    ></div>
+                    <span className="text-gray-500 text-xs">{link.color}</span>
+                  </div>
                 </div>
               </div>
-              <span className={`px-2 py-1 rounded text-xs ${
-                link.isActive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                link.isActive ? 'bg-green-600/20 text-green-400 border border-green-600/40' : 'bg-red-600/20 text-red-400 border border-red-600/40'
               }`}>
-                {link.isActive ? 'Actif' : 'Inactif'}
+                {link.isActive ? '● Actif' : '○ Inactif'}
               </span>
+            </div>
+            
+            {/* Aperçu du lien */}
+            <div className="mb-4 p-3 bg-black/40 rounded-lg border border-white/10">
+              <div className="flex items-center space-x-3 text-white">
+                <span className="text-lg">{link.icon}</span>
+                <span className="font-medium text-sm">{link.name}</span>
+              </div>
             </div>
             
             <div className="flex space-x-2">
               <button
                 onClick={() => handleEdit(link)}
-                className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 px-3 rounded text-sm"
+                className="flex-1 bg-gray-700/50 hover:bg-gray-600/70 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 border border-white/10 hover:border-white/20"
               >
                 ✏️ Modifier
               </button>
               <button
-                onClick={() => handleDelete(link._id!)}
-                className="bg-red-600 hover:bg-red-500 text-white py-2 px-3 rounded text-sm"
+                onClick={() => handleDelete(link._id!, link.name)}
+                className="bg-red-600/20 hover:bg-red-600/40 text-red-400 hover:text-red-300 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 border border-red-600/40 hover:border-red-600/60"
               >
                 🗑️
               </button>
             </div>
           </div>
         ))}
+
+        {/* Carte d'ajout */}
+        <div 
+          onClick={handleAdd}
+          className="bg-gray-900/30 border-2 border-dashed border-white/30 rounded-xl p-6 hover:bg-gray-900/50 hover:border-white/50 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center min-h-[280px] group"
+        >
+          <div className="text-center">
+            <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-white/20 transition-all duration-300">
+              <span className="text-2xl">➕</span>
+            </div>
+            <h3 className="text-white font-medium mb-2">Ajouter un réseau social</h3>
+            <p className="text-gray-400 text-sm">Créez un nouveau lien personnalisé</p>
+          </div>
+        </div>
       </div>
 
       {/* Modal d'édition */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-900 border border-white/20 rounded-xl p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold text-white mb-6">
-              {editingLink ? 'Modifier le lien' : 'Ajouter un lien'}
-            </h2>
+        <div className="fixed inset-0 bg-black/90 flex items-start justify-center p-4 z-[9999] overflow-y-auto lg:items-center">
+          <div className="bg-gray-900 border border-white/20 rounded-xl w-full max-w-lg my-4 backdrop-blur-sm">
+            {/* Header */}
+            <div className="p-6 border-b border-white/20">
+              <h2 className="text-xl font-bold text-white">
+                {editingLink ? '✏️ Modifier le réseau social' : '➕ Ajouter un réseau social'}
+              </h2>
+            </div>
 
-            <div className="space-y-4 mb-6">
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* Nom */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Nom</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Nom du réseau social *
+                </label>
                 <input
                   type="text"
                   value={formData.name || ''}
                   onChange={(e) => updateFormField('name', e.target.value)}
-                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
                   placeholder="Ex: Telegram HashBurger"
                 />
               </div>
 
+              {/* URL */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">URL</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Lien URL *
+                </label>
                 <input
                   type="url"
                   value={formData.url || ''}
                   onChange={(e) => updateFormField('url', e.target.value)}
-                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
                   placeholder="https://t.me/hashburgerchannel"
                 />
               </div>
 
+              {/* Icône */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Icône</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Emoji du réseau *
+                </label>
                 <select
                   value={formData.icon || ''}
                   onChange={(e) => updateFormField('icon', e.target.value)}
-                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
                 >
-                  <option value="">Sélectionner une icône</option>
+                  <option value="">Sélectionner un emoji</option>
                   {iconOptions.map(option => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -221,40 +331,97 @@ export default function SocialLinksManager() {
                 </select>
               </div>
 
+              {/* Couleur */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Statut</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Couleur du thème
+                </label>
+                
+                {/* Couleurs prédéfinies */}
+                <div className="grid grid-cols-5 gap-2 mb-3">
+                  {colorPresets.map((preset) => (
+                    <button
+                      key={preset.name}
+                      onClick={() => updateFormField('color', preset.color)}
+                      className={`w-full h-10 rounded-lg border-2 transition-all duration-200 ${
+                        formData.color === preset.color 
+                          ? 'border-white scale-110' 
+                          : 'border-white/20 hover:border-white/40'
+                      }`}
+                      style={{ backgroundColor: preset.color }}
+                      title={preset.name}
+                    >
+                      {formData.color === preset.color && (
+                        <span className="text-white text-sm">✓</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Sélecteur de couleur personnalisé */}
+                <div className="flex gap-3">
+                  <input
+                    type="color"
+                    value={formData.color || '#0088cc'}
+                    onChange={(e) => updateFormField('color', e.target.value)}
+                    className="w-16 h-10 bg-gray-800 border border-white/20 rounded-lg cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={formData.color || '#0088cc'}
+                    onChange={(e) => updateFormField('color', e.target.value)}
+                    className="flex-1 bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+                    placeholder="#0088cc"
+                  />
+                </div>
+              </div>
+
+              {/* Statut */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Statut
+                </label>
                 <select
                   value={formData.isActive ? 'true' : 'false'}
                   onChange={(e) => updateFormField('isActive', e.target.value === 'true')}
-                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2"
+                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
                 >
-                  <option value="true">Actif</option>
-                  <option value="false">Inactif</option>
+                  <option value="true">✅ Actif (visible sur le site)</option>
+                  <option value="false">❌ Inactif (masqué)</option>
                 </select>
               </div>
+
+              {/* Aperçu en temps réel */}
+              {formData.name && formData.icon && (
+                <div className="bg-black/40 rounded-lg p-4 border border-white/10">
+                  <p className="text-gray-300 text-sm mb-3">Aperçu en temps réel :</p>
+                  
+                  {/* Aperçu style ContactPage */}
+                  <div 
+                    className="flex items-center justify-center p-3 rounded-lg border transition-all duration-300 hover:bg-white/10"
+                    style={{ 
+                      borderColor: (formData.color || '#0088cc') + '40',
+                      backgroundColor: (formData.color || '#0088cc') + '10'
+                    }}
+                  >
+                    <span className="text-lg mr-2">{formData.icon}</span>
+                    <span className="font-medium text-white">{formData.name}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Aperçu */}
-            {formData.name && formData.icon && (
-              <div className="mb-6 p-4 bg-gray-800 rounded-lg">
-                <p className="text-gray-300 text-sm mb-2">Aperçu :</p>
-                <div className="flex items-center space-x-3 text-white">
-                  <span className="text-xl">{formData.icon}</span>
-                  <span className="font-medium">{formData.name}</span>
-                </div>
-              </div>
-            )}
-
-            <div className="flex space-x-4">
+            {/* Footer */}
+            <div className="p-6 border-t border-white/20 flex space-x-4">
               <button
                 onClick={handleSave}
-                className="bg-white hover:bg-gray-100 text-black font-bold py-2 px-4 rounded-lg flex-1"
+                className="bg-white hover:bg-gray-100 text-black font-bold py-3 px-6 rounded-lg flex-1 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                💾 Sauvegarder
+                💾 {editingLink ? 'Sauvegarder' : 'Créer'}
               </button>
               <button
                 onClick={() => setShowModal(false)}
-                className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg"
+                className="bg-gray-700/50 hover:bg-gray-600/70 text-white font-bold py-3 px-6 rounded-lg border border-white/20 hover:border-white/40 transition-all duration-200"
               >
                 ❌ Annuler
               </button>

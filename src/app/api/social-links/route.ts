@@ -15,10 +15,10 @@ export async function GET() {
     // Données par défaut si aucun lien social en BDD
     if (socialLinks.length === 0) {
       const defaultSocialLinks = [
-        { name: 'Telegram', url: 'https://t.me/hashburgerchannel', icon: '📱', color: '#0088cc' },
-        { name: 'Instagram', url: 'https://instagram.com/hashburger', icon: '📷', color: '#E4405F' },
-        { name: 'WhatsApp', url: 'https://wa.me/33123456789', icon: '💬', color: '#25D366' },
-        { name: 'Discord', url: 'https://discord.gg/hashburger', icon: '🎮', color: '#7289DA' }
+        { name: 'Telegram', url: 'https://t.me/hashburgerchannel', icon: '📱', color: '#0088cc', isActive: true },
+        { name: 'Instagram', url: 'https://instagram.com/hashburger', icon: '📷', color: '#E4405F', isActive: true },
+        { name: 'WhatsApp', url: 'https://wa.me/33123456789', icon: '💬', color: '#25D366', isActive: true },
+        { name: 'Discord', url: 'https://discord.gg/hashburger', icon: '🎮', color: '#7289DA', isActive: true }
       ];
       
       await socialLinksCollection.insertMany(defaultSocialLinks);
@@ -31,7 +31,7 @@ export async function GET() {
     
     // Fallback data si erreur DB
     const fallbackSocialLinks = [
-      { name: 'Telegram', url: 'https://t.me/hashburgerchannel', icon: '📱', color: '#0088cc' }
+      { name: 'Telegram', url: 'https://t.me/hashburgerchannel', icon: '📱', color: '#0088cc', isActive: true }
     ];
     
     return NextResponse.json(fallbackSocialLinks);
@@ -43,29 +43,60 @@ export async function POST(request: NextRequest) {
     console.log('🔍 API Social Links - POST Request');
     
     const body = await request.json();
-    const { socialLinks } = body;
     
-    if (!socialLinks || !Array.isArray(socialLinks)) {
-      return NextResponse.json(
-        { error: 'Format de données invalide' },
-        { status: 400 }
-      );
+    // Vérifier si c'est une mise à jour globale ou l'ajout d'un seul
+    if (body.socialLinks && Array.isArray(body.socialLinks)) {
+      // Mise à jour globale (pour rétrocompatibilité)
+      const { socialLinks } = body;
+      
+      const { db } = await connectToDatabase();
+      const socialLinksCollection = db.collection('socialLinks');
+      
+      // Supprimer tous les liens existants et insérer les nouveaux
+      await socialLinksCollection.deleteMany({});
+      await socialLinksCollection.insertMany(socialLinks);
+      
+      console.log('✅ Social Links mis à jour:', socialLinks);
+      
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Réseaux sociaux mis à jour',
+        socialLinks 
+      });
+    } else {
+      // Ajouter un seul réseau social
+      const { name, url, icon, color, isActive } = body;
+      
+      if (!name || !url || !icon) {
+        return NextResponse.json(
+          { error: 'Champs requis manquants (name, url, icon)' },
+          { status: 400 }
+        );
+      }
+      
+      const { db } = await connectToDatabase();
+      const socialLinksCollection = db.collection('socialLinks');
+      
+      const newSocialLink = {
+        name,
+        url,
+        icon,
+        color: color || '#0088cc',
+        isActive: isActive !== undefined ? isActive : true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      const result = await socialLinksCollection.insertOne(newSocialLink);
+      
+      console.log('✅ Nouveau Social Link ajouté:', result.insertedId);
+      
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Réseau social ajouté',
+        socialLink: { ...newSocialLink, _id: result.insertedId }
+      });
     }
-    
-    const { db } = await connectToDatabase();
-    const socialLinksCollection = db.collection('socialLinks');
-    
-    // Supprimer tous les liens existants et insérer les nouveaux
-    await socialLinksCollection.deleteMany({});
-    await socialLinksCollection.insertMany(socialLinks);
-    
-    console.log('✅ Social Links mis à jour:', socialLinks);
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Réseaux sociaux mis à jour',
-      socialLinks 
-    });
   } catch (error) {
     console.error('❌ Erreur API Social Links POST:', error);
     return NextResponse.json(
