@@ -32,6 +32,12 @@ export default function MediaUploader({
     setError('');
 
     try {
+      console.log('🚀 Début upload client:', {
+        name: file.name,
+        type: file.type,
+        size: file.size
+      });
+      
       const formData = new FormData();
       formData.append('file', file);
 
@@ -40,20 +46,24 @@ export default function MediaUploader({
         body: formData,
       });
 
+      console.log('📡 Réponse serveur:', response.status);
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Erreur upload');
+        console.error('❌ Erreur serveur:', errorData);
+        throw new Error(errorData.error || `Erreur HTTP ${response.status}`);
       }
 
       const result = await response.json();
+      console.log('✅ Upload réussi:', result);
       onMediaSelected(result.url, result.type);
       
       // Reset l'input
       event.target.value = '';
       
     } catch (error) {
-      console.error('Erreur upload:', error);
-      setError(error instanceof Error ? error.message : 'Erreur upload');
+      console.error('❌ Erreur upload client:', error);
+      setError(error instanceof Error ? error.message : 'Erreur upload inconnue');
     } finally {
       setUploading(false);
     }
