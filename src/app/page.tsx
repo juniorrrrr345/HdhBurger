@@ -16,19 +16,63 @@ export default function HomePage() {
   const [selectedFarm, setSelectedFarm] = useState('Toutes les farms');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState('menu');
-  // Initialiser avec le cache et forcer le chargement si vide
+  // Forcer le chargement IMMÉDIAT depuis localStorage
   const [products, setProducts] = useState<Product[]>(() => {
+    // Forcer le rechargement du localStorage si pas encore fait
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('instantContentCache');
+        if (stored) {
+          const cacheData = JSON.parse(stored);
+          const cachedProducts = cacheData.products || [];
+          console.log('🔍 Produits chargés DIRECTEMENT localStorage:', cachedProducts.length);
+          return cachedProducts;
+        }
+      } catch (e) {
+        console.log('Pas de cache localStorage disponible');
+      }
+    }
+    
+    // Fallback sur le cache instantané
     const cached = instantContent.getProducts();
-    console.log('🔍 Produits en cache au démarrage:', cached.length);
+    console.log('🔍 Produits fallback cache instantané:', cached.length);
     return cached;
   });
   
   const [categories, setCategories] = useState<string[]>(() => {
+    // Charger directement depuis localStorage
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('instantContentCache');
+        if (stored) {
+          const cacheData = JSON.parse(stored);
+          const cachedCategories = cacheData.categories || [];
+          return ['Toutes les catégories', ...cachedCategories.map((c: { name: string }) => c.name)];
+        }
+      } catch (e) {
+        console.log('Pas de cache catégories localStorage');
+      }
+    }
+    
     const cached = instantContent.getCategories();
     return ['Toutes les catégories', ...cached.map((c: { name: string }) => c.name)];
   });
   
   const [farms, setFarms] = useState<string[]>(() => {
+    // Charger directement depuis localStorage
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('instantContentCache');
+        if (stored) {
+          const cacheData = JSON.parse(stored);
+          const cachedFarms = cacheData.farms || [];
+          return ['Toutes les farms', ...cachedFarms.map((f: { name: string }) => f.name)];
+        }
+      } catch (e) {
+        console.log('Pas de cache farms localStorage');
+      }
+    }
+    
     const cached = instantContent.getFarms();
     return ['Toutes les farms', ...cached.map((f: { name: string }) => f.name)];
   });
@@ -88,64 +132,45 @@ export default function HomePage() {
     }
   };
 
-  // Charger immédiatement depuis cache + API en arrière-plan
+  // Mise à jour en arrière-plan SANS affecter l'affichage initial
   useEffect(() => {
-    async function loadData() {
-      try {
-        // D'abord, forcer le rafraîchissement du cache
-        await instantContent.refresh();
-        
-        // Puis mettre à jour avec les nouvelles données
-        const freshProducts = instantContent.getProducts();
-        const freshCategories = instantContent.getCategories();
-        const freshFarms = instantContent.getFarms();
-        
-        console.log('🔄 Mise à jour depuis cache rafraîchi:', {
-          produits: freshProducts.length,
-          categories: freshCategories.length,
-          farms: freshFarms.length
-        });
-        
-        setProducts(freshProducts);
-        setCategories(['Toutes les catégories', ...freshCategories.map((c: { name: string }) => c.name)]);
-        setFarms(['Toutes les farms', ...freshFarms.map((f: { name: string }) => f.name)]);
-        
-      } catch (error) {
-        console.error('❌ Erreur rafraîchissement cache:', error);
-        
-        // En cas d'erreur, charger directement depuis API
+    // Délai pour éviter de perturber l'affichage initial
+    const timer = setTimeout(() => {
+      async function refreshData() {
         try {
-          console.log('🔄 Fallback: chargement direct API...');
+          console.log('🔄 Rafraîchissement arrière-plan...');
+          await instantContent.refresh();
           
-          const productsRes = await fetch('/api/products');
-          if (productsRes.ok) {
-            const productsData = await productsRes.json();
-            console.log('📦 Produits API direct:', productsData.length);
-            setProducts(productsData);
-            instantContent.updateProducts(productsData);
+          const freshProducts = instantContent.getProducts();
+          const freshCategories = instantContent.getCategories();
+          const freshFarms = instantContent.getFarms();
+          
+          // Mettre à jour seulement si différent pour éviter les re-renders
+          if (freshProducts.length !== products.length) {
+            console.log('📦 Mise à jour produits:', freshProducts.length);
+            setProducts(freshProducts);
           }
           
-          const categoriesRes = await fetch('/api/categories');
-          if (categoriesRes.ok) {
-            const categoriesData = await categoriesRes.json();
-            setCategories(['Toutes les catégories', ...categoriesData.map((c: { name: string }) => c.name)]);
-            instantContent.updateCategories(categoriesData);
+          const newCategoryNames = ['Toutes les catégories', ...freshCategories.map((c: { name: string }) => c.name)];
+          if (newCategoryNames.length !== categories.length) {
+            setCategories(newCategoryNames);
           }
           
-          const farmsRes = await fetch('/api/farms');
-          if (farmsRes.ok) {
-            const farmsData = await farmsRes.json();
-            setFarms(['Toutes les farms', ...farmsData.map((f: { name: string }) => f.name)]);
-            instantContent.updateFarms(farmsData);
+          const newFarmNames = ['Toutes les farms', ...freshFarms.map((f: { name: string }) => f.name)];
+          if (newFarmNames.length !== farms.length) {
+            setFarms(newFarmNames);
           }
-        } catch (apiError) {
-          console.error('❌ Erreur API directe:', apiError);
+          
+        } catch (error) {
+          console.error('❌ Erreur rafraîchissement:', error);
         }
       }
-    }
-
-    loadData();
-  }, []);
+      
+      refreshData();
+    }, 1000); // Délai pour laisser l'affichage initial se faire
+    
+    return () => clearTimeout(timer);
+  }, [products.length, categories.length, farms.length]);
 
   // Filtrer les produits selon les sélections
   const filteredProducts = products.filter(product => {
