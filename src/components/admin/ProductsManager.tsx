@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import MediaUploader from './MediaUploader';
 import CloudinaryUploader from './CloudinaryUploader';
 
@@ -39,6 +39,8 @@ export default function ProductsManager() {
   const [activeTab, setActiveTab] = useState<'infos' | 'media' | 'prix'>('infos');
   // États locaux pour les champs de prix pour éviter la perte de focus
   const [priceInputs, setPriceInputs] = useState<{ [key: string]: string }>({});
+  // Ref pour maintenir le focus
+  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   useEffect(() => {
     loadData();
@@ -304,14 +306,14 @@ export default function ProductsManager() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const updatePrice = (priceKey: string, value: string) => {
-    // Mettre à jour l'état local immédiatement pour éviter la perte de focus
+  const updatePrice = useCallback((priceKey: string, value: string) => {
+    // Mettre à jour l'état local immédiatement
     setPriceInputs(prev => ({
       ...prev,
       [priceKey]: value
     }));
     
-    // Mettre à jour formData avec debounce pour éviter les re-renders constants
+    // Mettre à jour formData sans causer de re-render
     const numericValue = value === '' ? 0 : (parseFloat(value) || 0);
     setFormData(prev => ({
       ...prev,
@@ -320,7 +322,43 @@ export default function ProductsManager() {
         [priceKey]: numericValue
       }
     }));
-  };
+  }, []);
+
+  // Composant de champ de prix isolé pour éviter les re-renders
+  const PriceInput = useCallback(({ priceKey, value }: { priceKey: string; value: number }) => {
+    const localValue = priceInputs[priceKey] !== undefined ? priceInputs[priceKey] : value.toString();
+    
+    const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      const inputElement = e.target;
+      const cursorPosition = inputElement.selectionStart;
+      
+      updatePrice(priceKey, e.target.value);
+      
+      // Restaurer la position du curseur après le changement
+      setTimeout(() => {
+        if (inputElement && cursorPosition !== null) {
+          inputElement.setSelectionRange(cursorPosition, cursorPosition);
+        }
+      }, 0);
+    }, [priceKey]);
+    
+    return (
+      <input
+        ref={(el) => { if (el) inputRefs.current[priceKey] = el; }}
+        type="number"
+        value={localValue}
+        onChange={handleChange}
+        className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
+        placeholder="0"
+        step="0.01"
+        inputMode="decimal"
+        onFocus={(e) => {
+          // Empêcher la sélection automatique du texte sur mobile
+          e.target.setSelectionRange(e.target.value.length, e.target.value.length);
+        }}
+      />
+    );
+  }, [priceInputs, updatePrice]);
 
   const addCustomPrice = () => {
     const customKey = prompt('Entrez la quantité (ex: 1kg, 250g, etc.):');
@@ -852,14 +890,7 @@ export default function ProductsManager() {
                       </div>
                       <div className="flex-1">
                         <label className="block text-xs text-gray-400 mb-1">Prix (€)</label>
-                        <input
-                          type="number"
-                          value={priceInputs[priceKey] || value.toString()}
-                          onChange={(e) => updatePrice(priceKey, e.target.value)}
-                          className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
-                          placeholder="0"
-                          step="0.01"
-                        />
+                        <PriceInput priceKey={priceKey} value={value} />
                       </div>
                       <button
                         type="button"
@@ -1033,14 +1064,7 @@ export default function ProductsManager() {
                             <div className="flex gap-2">
                               <div className="flex-1">
                                 <label className="block text-xs text-gray-400 mb-1">Prix (€)</label>
-                                <input
-                                  type="number"
-                                  value={priceInputs[priceKey] || value.toString()}
-                                  onChange={(e) => updatePrice(priceKey, e.target.value)}
-                                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
-                                  placeholder="0"
-                                  step="0.01"
-                                />
+                                <PriceInput priceKey={priceKey} value={value} />
                               </div>
                               <button
                                 type="button"
