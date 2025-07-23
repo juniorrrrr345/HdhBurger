@@ -309,7 +309,7 @@ export default function ProductsManager() {
   };
 
   const updatePrice = useCallback((priceKey: string, value: string) => {
-    // Mettre à jour l'état local immédiatement - PERMETTRE LES VALEURS VIDES
+    // Mettre à jour l'état local immédiatement - PERMETTRE LES VALEURS COMPLÈTEMENT VIDES
     setPriceInputs(prev => ({
       ...prev,
       [priceKey]: value
@@ -320,8 +320,8 @@ export default function ProductsManager() {
       setFormData(prev => {
         const newPrices = { ...prev.prices };
         if (value === '') {
-          // Garder la clé mais avec valeur 0 pour éviter la suppression de ligne
-          newPrices[priceKey] = 0;
+          // NE PAS METTRE DE VALEUR - garder juste la structure pour l'affichage
+          // La ligne restera visible grâce aux états locaux
         } else {
           const numericValue = parseFloat(value) || 0;
           newPrices[priceKey] = numericValue;
@@ -335,11 +335,11 @@ export default function ProductsManager() {
   }, []);
 
   // Composant de champ de prix isolé pour éviter les re-renders
-  const PriceInput = useCallback(({ priceKey, value }: { priceKey: string; value?: number }) => {
+  const PriceInput = useCallback(({ priceKey, value }: { priceKey: string; value?: number | undefined }) => {
     // Utiliser l'état local s'il existe, sinon la valeur passée, sinon chaîne vide
     const localValue = priceInputs[priceKey] !== undefined 
       ? priceInputs[priceKey] 
-      : (value !== undefined && value !== 0 ? value.toString() : '');
+      : (value !== undefined && value !== null && value !== 0 ? value.toString() : '');
     
     const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       e.preventDefault();
@@ -433,25 +433,26 @@ export default function ProductsManager() {
     );
   }, [quantityInputs]);
 
-  // Fonction pour obtenir tous les prix à afficher (TOUJOURS garder les lignes)
+  // Fonction pour obtenir tous les prix à afficher (TOUJOURS garder les lignes même vides)
   const getAllPriceEntries = () => {
-    const allPrices: { [key: string]: number } = {};
+    const allPrices: { [key: string]: number | undefined } = {};
     
     // Ajouter les prix existants dans formData
     Object.entries(formData.prices || {}).forEach(([key, value]) => {
       allPrices[key] = value;
     });
     
-    // Ajouter TOUS les prix/quantités des états locaux (même complètement vides)
+    // Ajouter TOUS les prix des états locaux (même si complètement vides)
     Object.keys(priceInputs).forEach((key) => {
       if (!(key in allPrices)) {
-        allPrices[key] = 0; // Valeur temporaire pour l'affichage
+        allPrices[key] = undefined; // Pas de valeur, juste présence pour affichage
       }
     });
     
+    // Ajouter TOUTES les quantités des états locaux (même si complètement vides)
     Object.keys(quantityInputs).forEach((key) => {
       if (!(key in allPrices)) {
-        allPrices[key] = 0; // Valeur temporaire pour l'affichage
+        allPrices[key] = undefined; // Pas de valeur, juste présence pour affichage
       }
     });
     
