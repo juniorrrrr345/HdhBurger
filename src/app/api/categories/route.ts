@@ -9,7 +9,18 @@ export async function GET() {
     return NextResponse.json(categories);
   } catch (error) {
     console.error('Error fetching categories:', error);
-    return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 });
+    
+    // Données fictives en cas d'erreur de connexion MongoDB
+    const mockCategories = [
+      { _id: '1', name: '120U ++ 🇲🇦', emoji: '🇲🇦', order: 1, isActive: true },
+      { _id: '2', name: 'FROZEN SIFT ❄️', emoji: '❄️', order: 2, isActive: true },
+      { _id: '3', name: '105U 🇲🇦', emoji: '🇲🇦', order: 3, isActive: true },
+      { _id: '4', name: '90U PREMIUM 🇲🇦', emoji: '🇲🇦', order: 4, isActive: true },
+      { _id: '5', name: 'WEED NL 🇳🇱', emoji: '🇳🇱', order: 5, isActive: true },
+      { _id: '6', name: 'CALI ITALIENNE 🇮🇹', emoji: '🇮🇹', order: 6, isActive: true }
+    ];
+    
+    return NextResponse.json(mockCategories);
   }
 }
 
