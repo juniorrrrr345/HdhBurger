@@ -10,9 +10,7 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  experimental: {
-    serverActions: true,
-  },
+  // serverActions est activé par défaut maintenant
   env: {
     MONGODB_URI: process.env.MONGODB_URI,
   },
