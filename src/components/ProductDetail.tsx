@@ -1,13 +1,79 @@
 'use client';
-import { Product } from './ProductCard';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
-interface ProductDetailProps {
-  product: Product | null;
-  onClose: () => void;
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  category: string;
+  farm: string;
+  image: string;
+  video?: string;
+  prices: {
+    [key: string]: number;
+  };
 }
 
-export default function ProductDetail({ product, onClose }: ProductDetailProps) {
-  if (!product) return null;
+interface ProductDetailProps {
+  productId: string;
+}
+
+export default function ProductDetail({ productId }: ProductDetailProps) {
+  const [product, setProduct] = useState<Product | null>(null);
+  const [telegramLink, setTelegramLink] = useState('https://t.me/hashburgerchannel');
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    loadProduct();
+    loadTelegramLink();
+  }, [productId]);
+
+  const loadProduct = async () => {
+    try {
+      const response = await fetch(`/api/products/${productId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setProduct(data);
+      }
+    } catch (error) {
+      console.error('Erreur chargement produit:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadTelegramLink = async () => {
+    try {
+      const response = await fetch('/api/settings');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.telegramOrderLink) {
+          setTelegramLink(data.telegramOrderLink);
+        }
+      }
+    } catch (error) {
+      console.error('Erreur chargement lien Telegram:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
+        <div className="text-white">Chargement...</div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
+        <div className="text-white">Produit non trouvé</div>
+      </div>
+    );
+  }
 
   // Créer une liste des prix disponibles seulement (filtre les undefined/null/vides)
   const priceList = Object.entries(product.prices || {})
@@ -36,7 +102,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
       {/* Header avec bouton retour */}
       <div className="sticky top-0 bg-black p-4 flex items-center justify-between border-b border-white/20 z-10">
         <button
-          onClick={onClose}
+          onClick={() => router.back()}
           className="text-white hover:text-gray-300 transition-colors"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,7 +178,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
 
         {/* Bouton Telegram */}
         <a
-          href="https://t.me/hashburgerchannel"
+          href={telegramLink}
           target="_blank"
           rel="noopener noreferrer"
           className="block text-center bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
