@@ -14,6 +14,7 @@ const sampleProducts: Product[] = [
     farm: 'REAL FARMZ',
     category: '120U ++ 🇲🇦',
     image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&crop=center',
+    video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
     prices: {
       '5g': 40,
       '10g': 70,
@@ -29,6 +30,7 @@ const sampleProducts: Product[] = [
     farm: 'GREEN HOUSE',
     category: 'FROZEN SIFT ❄️',
     image: 'https://images.unsplash.com/photo-1544966503-7e27b987d116?w=400&h=300&fit=crop&crop=center',
+    video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
     prices: {
       '5g': 45,
       '10g': 80,
@@ -44,6 +46,7 @@ const sampleProducts: Product[] = [
     farm: 'ROYAL SEEDS',
     category: '105U 🇲🇦',
     image: 'https://images.unsplash.com/photo-1536925264286-a5e0d2a46085?w=400&h=300&fit=crop&crop=center',
+    video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
     prices: {
       '5g': 35,
       '10g': 65,
@@ -59,6 +62,7 @@ const sampleProducts: Product[] = [
     farm: 'BLUE DREAM FARM',
     category: '90U PREMIUM 🇲🇦',
     image: 'https://images.unsplash.com/photo-1583423230902-b653abc541eb?w=400&h=300&fit=crop&crop=center',
+    video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
     prices: {
       '5g': 38,
       '10g': 68,
@@ -74,6 +78,7 @@ const sampleProducts: Product[] = [
     farm: 'GOLDEN LEAF',
     category: 'WEED NL 🇳🇱',
     image: 'https://images.unsplash.com/photo-1615332579937-23970a67e2a9?w=400&h=300&fit=crop&crop=center',
+    video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
     prices: {
       '5g': 42,
       '10g': 75,
@@ -89,6 +94,7 @@ const sampleProducts: Product[] = [
     farm: 'REAL FARMZ',
     category: 'CALI ITALIENNE 🇮🇹',
     image: 'https://images.unsplash.com/photo-1581982073427-757e541a0f67?w=400&h=300&fit=crop&crop=center',
+    video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
     prices: {
       '5g': 50,
       '10g': 90,

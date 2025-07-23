@@ -37,15 +37,23 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
       <div className="p-4">
         {/* Vidéo/Image */}
         <div className="relative mb-6">
-          {product.image.includes('.mp4') ? (
-            <video 
-              controls 
-              className="w-full rounded-xl shadow-lg"
-              poster={product.image.replace('.mp4', '-poster.jpg')}
-            >
-              <source src={product.image} type="video/mp4" />
-              Ton navigateur ne supporte pas la lecture vidéo.
-            </video>
+          {product.video ? (
+            <div className="relative overflow-hidden rounded-xl shadow-2xl">
+              <video 
+                controls 
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full rounded-xl transition-transform duration-300 hover:scale-105"
+                poster={product.image}
+              >
+                <source src={product.video} type="video/mp4" />
+                Ton navigateur ne supporte pas la lecture vidéo.
+              </video>
+              {/* Overlay gradient pour un meilleur contraste */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none rounded-xl"></div>
+            </div>
           ) : (
             <img 
               src={product.image}
@@ -55,7 +63,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
           )}
           
           {/* Badge catégorie sur la vidéo */}
-          <div className="absolute top-3 left-3 bg-purple-600 text-white text-xs font-semibold px-3 py-1 rounded-lg shadow-lg">
+          <div className="absolute top-3 left-3 bg-emerald-600 text-white text-xs font-semibold px-3 py-1 rounded-lg shadow-lg">
             {product.category}
           </div>
         </div>
@@ -65,7 +73,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
           <h2 className="text-2xl font-bold mb-2 uppercase tracking-wide text-white">
             {product.name}
           </h2>
-          <p className="text-purple-400 font-medium mb-1">{product.category}</p>
+          <p className="text-emerald-400 font-medium mb-1">{product.category}</p>
           <p className="text-gray-400 uppercase tracking-widest text-sm font-medium mb-3">
             {product.farm}
           </p>
@@ -84,9 +92,9 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
           </h3>
           <div className="space-y-3">
             {priceList.map(({ weight, price }, idx) => (
-              <div key={idx} className="flex justify-between items-center py-2 px-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
+              <div key={idx} className="flex justify-between items-center py-2 px-3 bg-slate-700 rounded-lg hover:bg-slate-600 transition-colors">
                 <span className="font-medium text-white">{weight}</span>
-                <span className="font-bold text-purple-400 text-lg">{price}</span>
+                <span className="font-bold text-emerald-400 text-lg">{price}</span>
               </div>
             ))}
           </div>
