@@ -442,16 +442,16 @@ export default function ProductsManager() {
                     <label className="block text-sm font-medium text-gray-300 mb-2">Image du produit</label>
                     
                     {/* Upload d'image */}
-                    <MediaUploader
-                      onMediaSelected={(url, type) => {
-                        if (type === 'image') {
-                          updateField('image', url);
-                        }
-                      }}
-                      acceptedTypes="image/*"
-                      maxSize={10}
-                      className="mb-3"
-                    />
+                                         <MediaUploader
+                       onMediaSelected={(url, type) => {
+                         if (type === 'image') {
+                           updateField('image', url);
+                         }
+                       }}
+                       acceptedTypes="image/*"
+                       maxSize={5}
+                       className="mb-3"
+                     />
                     
                     {/* Champ URL manuel */}
                     <div className="text-sm text-gray-400 mb-2">Ou entrer une URL manuellement :</div>
@@ -483,16 +483,16 @@ export default function ProductsManager() {
                     <label className="block text-sm font-medium text-gray-300 mb-2">Vidéo du produit (optionnel)</label>
                     
                     {/* Upload de vidéo */}
-                    <MediaUploader
-                      onMediaSelected={(url, type) => {
-                        if (type === 'video') {
-                          updateField('video', url);
-                        }
-                      }}
-                      acceptedTypes="video/*"
-                      maxSize={50}
-                      className="mb-3"
-                    />
+                                         <MediaUploader
+                       onMediaSelected={(url, type) => {
+                         if (type === 'video') {
+                           updateField('video', url);
+                         }
+                       }}
+                       acceptedTypes="video/*"
+                       maxSize={5}
+                       className="mb-3"
+                     />
                     
                     {/* Champ URL manuel */}
                     <div className="text-sm text-gray-400 mb-2">Ou entrer une URL manuellement :</div>

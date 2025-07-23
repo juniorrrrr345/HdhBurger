@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { connectToDatabase } from '@/lib/mongodb-fixed';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🚀 Début upload...');
+    console.log('🚀 Début upload (Vercel compatible)...');
     
     const formData = await request.formData();
     const file = formData.get('file') as File;
@@ -27,63 +28,69 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Limiter la taille (20MB max)
-    const maxSize = 20 * 1024 * 1024; // 20MB
+    // Limiter la taille pour base64 (5MB max pour éviter les problèmes)
+    const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
       console.log('❌ Fichier trop gros:', file.size);
       return NextResponse.json({ 
-        error: `Fichier trop volumineux: ${Math.round(file.size / 1024 / 1024)}MB. Maximum 20MB` 
+        error: `Fichier trop volumineux: ${Math.round(file.size / 1024 / 1024)}MB. Maximum 5MB` 
       }, { status: 400 });
     }
 
-    // Créer le nom de fichier unique
-    const timestamp = Date.now();
-    const extension = path.extname(file.name) || '.jpg';
-    const filename = `product_${timestamp}${extension}`;
+    console.log('🔄 Conversion en base64...');
     
-    console.log('📝 Nom de fichier:', filename);
+    // Convertir en base64
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const base64 = buffer.toString('base64');
+    const dataUrl = `data:${file.type};base64,${base64}`;
     
-    // Créer le dossier uploads s'il n'existe pas
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    console.log('📂 Dossier upload:', uploadDir);
+    console.log('💾 Sauvegarde en base de données...');
     
+    // Sauvegarder en base de données
     try {
-      await mkdir(uploadDir, { recursive: true });
-      console.log('✅ Dossier créé/vérifié');
-    } catch (mkdirError) {
-      console.log('⚠️ Erreur mkdir (normal si existe):', mkdirError);
-    }
-
-    // Sauvegarder le fichier
-    const filepath = path.join(uploadDir, filename);
-    console.log('💾 Chemin complet:', filepath);
-    
-    try {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
+      const { db } = await connectToDatabase();
+      const mediaCollection = db.collection('media');
       
-      await writeFile(filepath, buffer);
-      console.log('✅ Fichier sauvegardé avec succès');
-    } catch (writeError) {
-      console.error('❌ Erreur écriture fichier:', writeError);
-      return NextResponse.json({ 
-        error: 'Erreur lors de la sauvegarde du fichier' 
-      }, { status: 500 });
+      const mediaDoc = {
+        filename: file.name,
+        originalName: file.name,
+        type: file.type.startsWith('image/') ? 'image' : 'video',
+        size: file.size,
+        dataUrl: dataUrl,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      const result = await mediaCollection.insertOne(mediaDoc);
+      console.log('✅ Média sauvegardé en DB:', result.insertedId);
+      
+      // Retourner le data URL directement
+      const response = {
+        url: dataUrl, // On retourne directement le data URL
+        filename: file.name,
+        type: file.type.startsWith('image/') ? 'image' : 'video',
+        size: file.size,
+        id: result.insertedId
+      };
+      
+      console.log('✅ Upload réussi (base64)');
+      return NextResponse.json(response);
+      
+    } catch (dbError) {
+      console.error('❌ Erreur base de données:', dbError);
+      
+      // Même si la DB échoue, on retourne le base64
+      const response = {
+        url: dataUrl,
+        filename: file.name,
+        type: file.type.startsWith('image/') ? 'image' : 'video',
+        size: file.size
+      };
+      
+      console.log('⚠️ Upload réussi (base64 seulement)');
+      return NextResponse.json(response);
     }
-
-    // Retourner l'URL publique
-    const fileUrl = `/uploads/${filename}`;
-    console.log('🌐 URL publique:', fileUrl);
-    
-    const result = {
-      url: fileUrl,
-      filename: filename,
-      type: file.type.startsWith('image/') ? 'image' : 'video',
-      size: file.size
-    };
-    
-    console.log('✅ Upload réussi:', result);
-    return NextResponse.json(result);
 
   } catch (error) {
     console.error('❌ Erreur générale upload:', error);
