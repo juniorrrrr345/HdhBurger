@@ -73,7 +73,7 @@ export default function SettingsManager() {
       console.log('Tentative de sauvegarde avec:', settings);
       
       const response = await fetch('/api/settings', {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
