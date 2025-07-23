@@ -16,14 +16,22 @@ export default function HomePage() {
   const [selectedFarm, setSelectedFarm] = useState('Toutes les farms');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState('menu');
-  // Charger depuis le cache instantané dès le début
-  const cachedProducts = instantContent.getProducts();
-  const cachedCategories = instantContent.getCategories();
-  const cachedFarms = instantContent.getFarms();
+  // Initialiser avec le cache et forcer le chargement si vide
+  const [products, setProducts] = useState<Product[]>(() => {
+    const cached = instantContent.getProducts();
+    console.log('🔍 Produits en cache au démarrage:', cached.length);
+    return cached;
+  });
   
-  const [products, setProducts] = useState<Product[]>(cachedProducts);
-  const [categories, setCategories] = useState<string[]>(['Toutes les catégories', ...cachedCategories.map((c: { name: string }) => c.name)]);
-  const [farms, setFarms] = useState<string[]>(['Toutes les farms', ...cachedFarms.map((f: { name: string }) => f.name)]);
+  const [categories, setCategories] = useState<string[]>(() => {
+    const cached = instantContent.getCategories();
+    return ['Toutes les catégories', ...cached.map((c: { name: string }) => c.name)];
+  });
+  
+  const [farms, setFarms] = useState<string[]>(() => {
+    const cached = instantContent.getFarms();
+    return ['Toutes les farms', ...cached.map((f: { name: string }) => f.name)];
+  });
   const [loading, setLoading] = useState(false);
   // Utiliser EXACTEMENT la même méthode que InfoPageFixed
   const settings = instantContent.getSettings();
@@ -80,47 +88,59 @@ export default function HomePage() {
     }
   };
 
-  // Charger les données depuis l'API - SEULEMENT panel admin
+  // Charger immédiatement depuis cache + API en arrière-plan
   useEffect(() => {
     async function loadData() {
       try {
-        console.log('🚀 Chargement EXCLUSIF depuis panel admin...');
+        // D'abord, forcer le rafraîchissement du cache
+        await instantContent.refresh();
         
-        // Charger SEULEMENT les produits du panel admin et mettre à jour le cache
-        const productsRes = await fetch('/api/products');
-        if (productsRes.ok) {
-          const productsData = await productsRes.json();
-          console.log('📦 Produits panel admin:', productsData.length);
-          setProducts(productsData);
-          // Mettre à jour le cache
-          instantContent.updateProducts(productsData);
-        } else {
-          console.log('⚠️ Aucun produit dans panel admin');
-          setProducts([]);
-          instantContent.updateProducts([]);
-        }
-
-        // Charger les catégories du panel admin
-        const categoriesRes = await fetch('/api/categories');
-        if (categoriesRes.ok) {
-          const categoriesData = await categoriesRes.json();
-          const categoryNames = ['Toutes les catégories', ...categoriesData.map((c: { name: string }) => c.name)];
-          setCategories(categoryNames);
-          instantContent.updateCategories(categoriesData);
-        }
-
-        // Charger les farms du panel admin  
-        const farmsRes = await fetch('/api/farms');
-        if (farmsRes.ok) {
-          const farmsData = await farmsRes.json();
-          const farmNames = ['Toutes les farms', ...farmsData.map((f: { name: string }) => f.name)];
-          setFarms(farmNames);
-          instantContent.updateFarms(farmsData);
-        }
+        // Puis mettre à jour avec les nouvelles données
+        const freshProducts = instantContent.getProducts();
+        const freshCategories = instantContent.getCategories();
+        const freshFarms = instantContent.getFarms();
+        
+        console.log('🔄 Mise à jour depuis cache rafraîchi:', {
+          produits: freshProducts.length,
+          categories: freshCategories.length,
+          farms: freshFarms.length
+        });
+        
+        setProducts(freshProducts);
+        setCategories(['Toutes les catégories', ...freshCategories.map((c: { name: string }) => c.name)]);
+        setFarms(['Toutes les farms', ...freshFarms.map((f: { name: string }) => f.name)]);
+        
       } catch (error) {
-        console.error('❌ Erreur chargement panel admin:', error);
-        // En cas d'erreur, affichage vide - JAMAIS les anciens produits
-        setProducts([]);
+        console.error('❌ Erreur rafraîchissement cache:', error);
+        
+        // En cas d'erreur, charger directement depuis API
+        try {
+          console.log('🔄 Fallback: chargement direct API...');
+          
+          const productsRes = await fetch('/api/products');
+          if (productsRes.ok) {
+            const productsData = await productsRes.json();
+            console.log('📦 Produits API direct:', productsData.length);
+            setProducts(productsData);
+            instantContent.updateProducts(productsData);
+          }
+          
+          const categoriesRes = await fetch('/api/categories');
+          if (categoriesRes.ok) {
+            const categoriesData = await categoriesRes.json();
+            setCategories(['Toutes les catégories', ...categoriesData.map((c: { name: string }) => c.name)]);
+            instantContent.updateCategories(categoriesData);
+          }
+          
+          const farmsRes = await fetch('/api/farms');
+          if (farmsRes.ok) {
+            const farmsData = await farmsRes.json();
+            setFarms(['Toutes les farms', ...farmsData.map((f: { name: string }) => f.name)]);
+            instantContent.updateFarms(farmsData);
+          }
+        } catch (apiError) {
+          console.error('❌ Erreur API directe:', apiError);
+        }
       }
     }
 
