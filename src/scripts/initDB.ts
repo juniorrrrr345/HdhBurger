@@ -1,4 +1,4 @@
-import connectDB from '../lib/mongodb';
+import connectDB from '../lib/mongodb-fixed';
 import Product from '../models/Product';
 import Category from '../models/Category';
 import Farm from '../models/Farm';

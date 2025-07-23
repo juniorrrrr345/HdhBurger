@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import connectDB from '@/lib/mongodb-fixed';
 import initializeDatabase from '@/scripts/initDB';
 
 export async function GET() {

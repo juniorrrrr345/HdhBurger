@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 // URI MongoDB Atlas correcte - directement dans le code
-const MONGODB_URI = 'mongodb+srv://Junior:Junior50@hshburgeer.59w7g4q.mongodb.net/hashburger?retryWrites=true&w=majority&appName=HshBurgeer';
+const MONGODB_URI = 'mongodb+srv://Junior:Junior50@hshburgeer.59w7g4q.mongodb.net/?retryWrites=true&w=majority&appName=HshBurgeer';
 
 interface MongooseCache {
   conn: typeof mongoose | null;
