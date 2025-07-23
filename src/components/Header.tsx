@@ -76,11 +76,13 @@ export default function Header() {
       )}
       
       {/* Bandeau blanc promotionnel - réduit */}
-      <div className="bg-white text-black py-1 px-4 text-center">
-        <p className="text-black text-xs font-bold tracking-wide">
-          {settings.bannerText}
-        </p>
-      </div>
+      {settings.bannerText && settings.bannerText.trim() && (
+        <div className="bg-white text-black py-1 px-4 text-center">
+          <p className="text-black text-xs font-bold tracking-wide">
+            {settings.bannerText}
+          </p>
+        </div>
+      )}
       
       {/* Logo HashBurger - réduit */}
       <div className="bg-black py-2 px-4 text-center border-b border-white/20">

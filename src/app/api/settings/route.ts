@@ -12,6 +12,7 @@ export async function GET() {
     
     // Si aucun paramètre n'existe, créer les valeurs par défaut
     if (!settings) {
+      console.log('📦 Aucun settings trouvé, création des défauts');
       const defaultSettings = {
         shopTitle: 'HashBurger',
         shopSubtitle: 'Premium Concentrés',
@@ -29,7 +30,13 @@ export async function GET() {
       settings = defaultSettings;
     }
     
-    console.log('✅ Settings chargés:', settings);
+    console.log('✅ Settings récupérés de DB:', {
+      backgroundImage: settings.backgroundImage,
+      backgroundOpacity: settings.backgroundOpacity,
+      backgroundBlur: settings.backgroundBlur,
+      hasBackgroundImage: !!settings.backgroundImage
+    });
+    
     return NextResponse.json(settings);
   } catch (error) {
     console.error('❌ Erreur API Settings GET:', error);
@@ -46,6 +53,7 @@ export async function GET() {
       address: 'Bordeaux, France'
     };
     
+    console.log('⚠️ Utilisation fallback settings');
     return NextResponse.json(fallbackSettings);
   }
 }
@@ -58,7 +66,12 @@ async function updateSettings(request: Request) {
     const settingsCollection = db.collection('settings');
     
     const data = await request.json();
-    console.log('📝 Données reçues:', data);
+    console.log('📝 Données reçues pour sauvegarde:', {
+      backgroundImage: data.backgroundImage,
+      backgroundOpacity: data.backgroundOpacity,
+      backgroundBlur: data.backgroundBlur,
+      hasBackgroundImage: !!data.backgroundImage
+    });
     
     // Ajouter la date de mise à jour
     data.updatedAt = new Date();
@@ -70,10 +83,15 @@ async function updateSettings(request: Request) {
       { upsert: true } // Créer si n'existe pas
     );
     
-    console.log('✅ Paramètres sauvegardés:', result);
+    console.log('✅ Paramètres sauvegardés en DB:', result);
     
-    // Récupérer les paramètres mis à jour
+    // Récupérer les paramètres mis à jour pour vérification
     const updatedSettings = await settingsCollection.findOne({});
+    console.log('🔍 Vérification après sauvegarde:', {
+      backgroundImage: updatedSettings?.backgroundImage,
+      backgroundOpacity: updatedSettings?.backgroundOpacity,
+      backgroundBlur: updatedSettings?.backgroundBlur
+    });
     
     return NextResponse.json(updatedSettings);
   } catch (error) {

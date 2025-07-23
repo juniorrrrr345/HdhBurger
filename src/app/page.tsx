@@ -127,17 +127,33 @@ export default function HomePage() {
   // Fonction pour recharger les settings uniquement
   const reloadSettings = async () => {
     try {
+      console.log('🔄 Rechargement settings depuis page principale...');
       const settingsRes = await fetch('/api/settings');
       if (settingsRes.ok) {
         const settingsData = await settingsRes.json();
+        console.log('📥 Settings reçus dans page principale:', {
+          backgroundImage: settingsData.backgroundImage,
+          backgroundOpacity: settingsData.backgroundOpacity,
+          backgroundBlur: settingsData.backgroundBlur,
+          hasBackgroundImage: !!settingsData.backgroundImage
+        });
+        
         setBackgroundSettings({
           backgroundImage: settingsData.backgroundImage || '',
           backgroundOpacity: settingsData.backgroundOpacity || 20,
           backgroundBlur: settingsData.backgroundBlur || 5
         });
+        
+        console.log('✅ Background settings mis à jour dans state:', {
+          backgroundImage: settingsData.backgroundImage || '',
+          backgroundOpacity: settingsData.backgroundOpacity || 20,
+          backgroundBlur: settingsData.backgroundBlur || 5
+        });
+      } else {
+        console.error('❌ Erreur response settings:', settingsRes.status);
       }
     } catch (error) {
-      console.error('Erreur rechargement settings:', error);
+      console.error('❌ Erreur rechargement settings:', error);
     }
   };
 
