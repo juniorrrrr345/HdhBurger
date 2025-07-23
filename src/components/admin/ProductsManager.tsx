@@ -43,6 +43,7 @@ export default function ProductsManager() {
   const [quantityInputs, setQuantityInputs] = useState<{ [key: string]: string }>({});
   // Ref pour maintenir le focus
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+  const [refreshCounter, setRefreshCounter] = useState(0);
 
   useEffect(() => {
     loadData();
@@ -443,6 +444,10 @@ export default function ProductsManager() {
   const getAllPriceEntries = () => {
     const allPrices: { [key: string]: number | undefined } = {};
     
+    console.log('🔍 getAllPriceEntries - formData.prices:', formData.prices);
+    console.log('🔍 getAllPriceEntries - priceInputs:', priceInputs);
+    console.log('🔍 getAllPriceEntries - quantityInputs:', quantityInputs);
+    
     // Ajouter les prix existants dans formData
     Object.entries(formData.prices || {}).forEach(([key, value]) => {
       allPrices[key] = value;
@@ -462,7 +467,9 @@ export default function ProductsManager() {
       }
     });
     
-    return Object.entries(allPrices);
+    const result = Object.entries(allPrices);
+    console.log('🔍 getAllPriceEntries résultat:', result);
+    return result;
   };
 
   // Fonction utilitaire pour ajouter un nouveau prix - AUCUNE LIMITE
@@ -492,7 +499,11 @@ export default function ProductsManager() {
         return newState;
       });
       
+      // Forcer un refresh pour que les lignes apparaissent
+      setRefreshCounter(prev => prev + 1);
+      
       console.log(`✅ Prix ajouté: ${key}`);
+      console.log(`🔄 Refresh forcé:`, refreshCounter + 1);
     }
   };
 
