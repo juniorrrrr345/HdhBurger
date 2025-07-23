@@ -36,6 +36,7 @@ export default function ProductsManager() {
     description: '',
     isActive: true
   });
+  const [activeTab, setActiveTab] = useState<'infos' | 'media' | 'prix'>('infos');
 
   useEffect(() => {
     loadData();
@@ -104,6 +105,7 @@ export default function ProductsManager() {
       ...product,
       prices: { ...product.prices }
     });
+    setActiveTab('infos'); // Reset tab to infos
     setShowModal(true);
   };
 
@@ -123,6 +125,7 @@ export default function ProductsManager() {
       description: '',
       isActive: true
     });
+    setActiveTab('infos'); // Reset tab to infos
     setShowModal(true);
   };
 
@@ -237,30 +240,52 @@ export default function ProductsManager() {
   const handleDelete = async (productId: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) return;
 
+    // Supprimer immédiatement de l'interface pour une meilleure UX
+    setProducts(prev => prev.filter(p => p._id !== productId));
+
+    // Afficher un message de succès immédiatement
+    const successMsg = document.createElement('div');
+    successMsg.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999] transition-all duration-300';
+    successMsg.textContent = '✅ Produit supprimé avec succès!';
+    document.body.appendChild(successMsg);
+    
+    setTimeout(() => {
+      successMsg.remove();
+    }, 3000);
+
     try {
+      // Envoyer la requête de suppression en arrière-plan
       const response = await fetch(`/api/products/${productId}`, {
         method: 'DELETE',
       });
 
-      if (response.ok) {
-        // Afficher un message de succès
-        const successMsg = document.createElement('div');
-        successMsg.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999] transition-all duration-300';
-        successMsg.textContent = '✅ Produit supprimé avec succès!';
-        document.body.appendChild(successMsg);
+      if (!response.ok) {
+        // Si erreur, restaurer le produit et afficher l'erreur
+        console.error('Erreur suppression serveur:', response.status);
+        loadData(); // Recharger pour restaurer l'état correct
+        
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'fixed top-4 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999]';
+        errorMsg.textContent = '❌ Erreur lors de la suppression - restauration...';
+        document.body.appendChild(errorMsg);
         
         setTimeout(() => {
-          successMsg.remove();
+          errorMsg.remove();
         }, 3000);
-        
-        // Recharger automatiquement les données
-        loadData();
-      } else {
-        alert('Erreur lors de la suppression');
       }
     } catch (error) {
-      console.error('Erreur:', error);
-      alert('Erreur lors de la suppression');
+      // Si erreur réseau, restaurer le produit
+      console.error('Erreur réseau suppression:', error);
+      loadData(); // Recharger pour restaurer l'état correct
+      
+      const errorMsg = document.createElement('div');
+      errorMsg.className = 'fixed top-4 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999]';
+      errorMsg.textContent = '❌ Erreur réseau - restauration...';
+      document.body.appendChild(errorMsg);
+      
+      setTimeout(() => {
+        errorMsg.remove();
+      }, 3000);
     }
   };
 
@@ -377,7 +402,72 @@ export default function ProductsManager() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <>
+        {/* Version mobile - Liste verticale */}
+        <div className="block lg:hidden space-y-3">
+          {products.map((product) => (
+            <div key={product._id} className="bg-gray-900/50 border border-white/20 rounded-xl overflow-hidden shadow-lg backdrop-blur-sm">
+              <div className="flex items-center p-3 space-x-3">
+                {/* Image compacte */}
+                <div className="relative w-16 h-16 flex-shrink-0">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                  <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full text-xs flex items-center justify-center ${
+                    product.isActive ? 'bg-green-600' : 'bg-red-600'
+                  }`}>
+                    {product.isActive ? '✓' : '✗'}
+                  </div>
+                </div>
+                
+                {/* Infos principales */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-white text-sm truncate uppercase tracking-wide">
+                    {product.name}
+                  </h3>
+                  <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">
+                    {product.farm} • {product.category}
+                  </p>
+                  
+                  {/* Prix compacts */}
+                  <div className="flex flex-wrap gap-1">
+                    {Object.entries(product.prices).slice(0, 3).map(([key, value]) => (
+                      <span key={key} className="bg-white/10 text-white text-xs px-2 py-1 rounded">
+                        {key}: {value}€
+                      </span>
+                    ))}
+                    {Object.keys(product.prices).length > 3 && (
+                      <span className="text-gray-500 text-xs">+{Object.keys(product.prices).length - 3}</span>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Boutons d'action compacts */}
+                <div className="flex flex-col gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => handleEdit(product)}
+                    className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition-all duration-200 border border-white/10"
+                    title="Modifier"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    onClick={() => product._id && handleDelete(product._id)}
+                    className="bg-red-900/20 border border-red-400/20 hover:bg-red-900/40 text-red-400 p-2 rounded-lg transition-all duration-200"
+                    title="Supprimer"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Version desktop - Grille */}
+        <div className="hidden lg:grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
           {products.map((product) => (
           <div key={product._id} className="bg-gray-900/50 border border-white/20 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm">
             <div className="relative h-32">
@@ -444,22 +534,66 @@ export default function ProductsManager() {
           </div>
         ))}
         </div>
+        </>
       )}
 
       {/* Modal d'édition */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/90 flex items-start justify-center p-2 sm:p-4 z-[9999] overflow-y-auto lg:items-center">
-          <div className="bg-gray-900 border border-white/20 rounded-xl w-full max-w-4xl my-2 lg:my-4 backdrop-blur-sm max-h-[98vh] lg:max-h-[95vh] flex flex-col">
-            {/* Header fixe */}
-            <div className="p-4 sm:p-6 border-b border-white/20 flex-shrink-0">
-              <h2 className="text-xl font-bold text-white">
+        <div className="fixed inset-0 bg-black/90 flex items-start justify-center p-0 sm:p-4 z-[9999] overflow-y-auto lg:items-center">
+          <div className="bg-gray-900 border-0 sm:border border-white/20 rounded-none sm:rounded-xl w-full max-w-4xl my-0 lg:my-4 backdrop-blur-sm min-h-[100vh] sm:min-h-0 sm:max-h-[95vh] flex flex-col">
+            {/* Header fixe avec bouton fermer mobile */}
+            <div className="p-3 sm:p-6 border-b border-white/20 flex-shrink-0 flex items-center justify-between">
+              <h2 className="text-lg sm:text-xl font-bold text-white">
                 {editingProduct ? '✏️ Modifier le produit' : '➕ Ajouter un produit'}
               </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="sm:hidden bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all duration-300"
+              >
+                ✕
+              </button>
             </div>
 
             {/* Contenu scrollable */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-6">
+              {/* Navigation par onglets sur mobile */}
+              <div className="sm:hidden mb-4">
+                <div className="flex border-b border-white/20">
+                  <button
+                    onClick={() => setActiveTab('infos')}
+                    className={`flex-1 py-2 px-3 text-sm font-medium transition-colors ${
+                      activeTab === 'infos' 
+                        ? 'text-white border-b-2 border-white' 
+                        : 'text-gray-400'
+                    }`}
+                  >
+                    📝 Infos
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('media')}
+                    className={`flex-1 py-2 px-3 text-sm font-medium transition-colors ${
+                      activeTab === 'media' 
+                        ? 'text-white border-b-2 border-white' 
+                        : 'text-gray-400'
+                    }`}
+                  >
+                    🖼️ Média
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('prix')}
+                    className={`flex-1 py-2 px-3 text-sm font-medium transition-colors ${
+                      activeTab === 'prix' 
+                        ? 'text-white border-b-2 border-white' 
+                        : 'text-gray-400'
+                    }`}
+                  >
+                    💰 Prix
+                  </button>
+                </div>
+              </div>
+
+              {/* Vue desktop - colonnes */}
+              <div className="hidden sm:grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               {/* Informations de base */}
               <div className="space-y-4">
                 <h3 className="text-lg font-bold text-white">Informations de base</h3>
@@ -701,7 +835,191 @@ export default function ProductsManager() {
                   ))}
                 </div>
               </div>
-            </div>
+              </div>
+
+              {/* Vue mobile - onglets */}
+              <div className="sm:hidden space-y-4">
+                {/* Onglet Infos */}
+                {activeTab === 'infos' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Nom du produit</label>
+                      <input
+                        type="text"
+                        value={formData.name || ''}
+                        onChange={(e) => updateField('name', e.target.value)}
+                        className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
+                        placeholder="COOKIES GELATO"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Catégorie</label>
+                      <select
+                        value={formData.category || ''}
+                        onChange={(e) => updateField('category', e.target.value)}
+                        className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
+                      >
+                        <option value="">Sélectionner une catégorie</option>
+                        {categories.map((category) => (
+                          <option key={category} value={category}>{category}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Farm</label>
+                      <select
+                        value={formData.farm || ''}
+                        onChange={(e) => updateField('farm', e.target.value)}
+                        className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
+                      >
+                        <option value="">Sélectionner une farm</option>
+                        {farms.map((farm) => (
+                          <option key={farm} value={farm}>{farm}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                      <textarea
+                        value={formData.description || ''}
+                        onChange={(e) => updateField('description', e.target.value)}
+                        className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50 h-20"
+                        placeholder="Description du produit..."
+                      />
+                    </div>
+
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="isActiveMobile"
+                        checked={formData.isActive || false}
+                        onChange={(e) => updateField('isActive', e.target.checked)}
+                        className="mr-2"
+                      />
+                      <label htmlFor="isActiveMobile" className="text-sm text-gray-300">Produit actif</label>
+                    </div>
+                  </div>
+                )}
+
+                {/* Onglet Média */}
+                {activeTab === 'media' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Image du produit</label>
+                      <CloudinaryUploader
+                        onMediaSelected={(url, type) => {
+                          if (type === 'image') {
+                            updateField('image', url);
+                          }
+                        }}
+                        acceptedTypes="image/*"
+                        className="mb-3"
+                      />
+                      <input
+                        type="text"
+                        value={formData.image || ''}
+                        onChange={(e) => updateField('image', e.target.value)}
+                        className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
+                        placeholder="URL de l'image..."
+                      />
+                      {formData.image && (
+                        <img 
+                          src={formData.image} 
+                          alt="Aperçu" 
+                          className="w-32 h-20 object-cover rounded border border-white/20 mt-2"
+                        />
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Vidéo (optionnel)</label>
+                      <CloudinaryUploader
+                        onMediaSelected={(url, type) => {
+                          if (type === 'video') {
+                            updateField('video', url);
+                          }
+                        }}
+                        acceptedTypes="video/*"
+                        className="mb-3"
+                      />
+                      <input
+                        type="text"
+                        value={formData.video || ''}
+                        onChange={(e) => updateField('video', e.target.value)}
+                        className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white/50"
+                        placeholder="URL de la vidéo..."
+                      />
+                      {formData.video && (
+                        <video 
+                          src={formData.video} 
+                          className="w-32 h-20 object-cover rounded border border-white/20 mt-2"
+                          controls
+                          muted
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Onglet Prix */}
+                {activeTab === 'prix' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-bold text-white">Prix</h3>
+                      <button
+                        type="button"
+                        onClick={addCustomPrice}
+                        className="bg-white/10 border border-white/20 hover:bg-white/20 text-white text-sm py-2 px-4 rounded-lg transition-all duration-200"
+                      >
+                        ➕ Ajouter
+                      </button>
+                    </div>
+                    
+                    <div className="space-y-3 max-h-80 overflow-y-auto">
+                      {Object.entries(formData.prices || {}).map(([priceKey, value]) => (
+                        <div key={priceKey} className="bg-gray-800/50 border border-white/10 rounded-lg p-3">
+                          <div className="space-y-2">
+                            <div>
+                              <label className="block text-xs text-gray-400 mb-1">Quantité</label>
+                              <input
+                                type="text"
+                                value={priceKey}
+                                onChange={(e) => handlePriceKeyChange(priceKey, e.target.value)}
+                                className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
+                                placeholder="3g, 5G, 10g..."
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <div className="flex-1">
+                                <label className="block text-xs text-gray-400 mb-1">Prix (€)</label>
+                                <input
+                                  type="number"
+                                  value={value}
+                                  onChange={(e) => updatePrice(priceKey, parseFloat(e.target.value) || 0)}
+                                  className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
+                                  placeholder="0"
+                                  step="0.01"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => removePrice(priceKey)}
+                                className="bg-red-900/20 border border-red-400/20 hover:bg-red-900/40 text-red-400 p-2 rounded-lg transition-colors mt-5"
+                                title="Supprimer"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Boutons fixes en bas - optimisés mobile */}
