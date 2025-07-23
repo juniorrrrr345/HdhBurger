@@ -348,11 +348,12 @@ export default function ProductsManager() {
   const PriceInput = useCallback(({ priceKey, value }: { priceKey: string; value?: number | undefined }) => {
     return (
       <input
+        key={`price-${priceKey}`} // Clé unique pour chaque champ
         ref={(el) => { if (el) inputRefs.current[priceKey] = el; }}
         type="number"
-        defaultValue={priceInputs[priceKey] || (value !== undefined && value !== null && value !== 0 ? value.toString() : '')}
+        defaultValue={value !== undefined && value !== null && value !== 0 ? value.toString() : ''}
         onChange={(e) => {
-          // Juste sauvegarder la valeur sans re-render
+          // Stocker sans re-render pour garder le clavier
           priceInputs[priceKey] = e.target.value;
         }}
         className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
@@ -368,10 +369,11 @@ export default function ProductsManager() {
   const QuantityInput = useCallback(({ priceKey }: { priceKey: string }) => {
     return (
       <input
+        key={`quantity-${priceKey}`} // Clé unique pour chaque champ
         type="text"
-        defaultValue={quantityInputs[priceKey] || priceKey}
+        defaultValue={priceKey}
         onChange={(e) => {
-          // Juste sauvegarder la valeur sans re-render
+          // Stocker sans re-render pour garder le clavier
           quantityInputs[priceKey] = e.target.value;
         }}
         className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
