@@ -75,13 +75,8 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                 className="w-full rounded-xl shadow-lg object-cover max-h-80"
               />
             </div>
-          )}
-          
-          {/* Badge catégorie sur la vidéo */}
-          <div className="absolute top-3 left-3 bg-white text-black text-xs font-bold px-3 py-1 rounded-lg shadow-lg">
-            {product.category}
+                      )}
           </div>
-        </div>
 
         {/* Infos produit */}
         <div className="mb-6">
