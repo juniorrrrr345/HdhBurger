@@ -9,12 +9,20 @@ interface ProductDetailProps {
 export default function ProductDetail({ product, onClose }: ProductDetailProps) {
   if (!product) return null;
 
-  // Créer une liste des prix disponibles seulement (filtre les undefined/null)
+  // Créer une liste des prix disponibles seulement (filtre les undefined/null/vides)
   const priceList = Object.entries(product.prices || {})
-    .filter(([, price]) => price !== undefined && price !== null && price !== 0)
+    .filter(([, price]) => {
+      // Filtre plus strict pour éliminer toutes les valeurs invalides
+      return price !== undefined && 
+             price !== null && 
+             price !== 0 && 
+             price !== '' && 
+             !isNaN(Number(price)) && 
+             Number(price) > 0;
+    })
     .map(([weight, price]) => ({
       weight,
-      price: `${price}€`
+      price: `${Number(price)}€`
     }))
     .sort((a, b) => {
       // Tri par ordre numérique des poids

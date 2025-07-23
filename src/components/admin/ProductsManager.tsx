@@ -117,6 +117,23 @@ export default function ProductsManager() {
     }
 
     try {
+      // Nettoyer les prix avant sauvegarde - enlever les valeurs undefined/null/0
+      const cleanedPrices: { [key: string]: number } = {};
+      
+      if (formData.prices) {
+        Object.entries(formData.prices).forEach(([key, value]) => {
+          const numValue = Number(value);
+          if (!isNaN(numValue) && numValue > 0) {
+            cleanedPrices[key] = numValue;
+          }
+        });
+      }
+
+      const cleanedFormData = {
+        ...formData,
+        prices: cleanedPrices
+      };
+
       const url = editingProduct ? `/api/products/${editingProduct._id}` : '/api/products';
       const method = editingProduct ? 'PUT' : 'POST';
       
@@ -125,7 +142,7 @@ export default function ProductsManager() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(cleanedFormData),
       });
 
       if (response.ok) {
@@ -204,6 +221,27 @@ export default function ProductsManager() {
       delete newPrices[priceKey];
       return { ...prev, prices: newPrices };
     });
+  };
+
+  const cleanAllPrices = async () => {
+    if (confirm('Voulez-vous nettoyer tous les prix undefined/invalides dans la base de données ?')) {
+      try {
+        const response = await fetch('/api/products/clean-prices', {
+          method: 'POST'
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          alert(`✅ ${result.message}`);
+          loadData(); // Recharger les données
+        } else {
+          alert('❌ Erreur lors du nettoyage');
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+        alert('❌ Erreur lors du nettoyage');
+      }
+    }
   };
 
   if (loading) {
