@@ -114,10 +114,10 @@ export default function HomePage() {
   const [selectedFarm, setSelectedFarm] = useState('Toutes les farms');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState('menu');
-  const [products, setProducts] = useState<Product[]>(sampleProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>(['Toutes les catégories']);
   const [farms, setFarms] = useState<string[]>(['Toutes les farms']);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Charger les données depuis l'API
   useEffect(() => {
@@ -129,6 +129,9 @@ export default function HomePage() {
         if (productsRes.ok) {
           const productsData = await productsRes.json();
           setProducts(productsData.length > 0 ? productsData : sampleProducts);
+        } else {
+          // En cas d'erreur API, utiliser les données statiques
+          setProducts(sampleProducts);
         }
 
         // Charger les catégories
@@ -149,6 +152,7 @@ export default function HomePage() {
       } catch (error) {
         console.error('Erreur lors du chargement:', error);
         // Utiliser les données statiques en cas d'erreur
+        setProducts(sampleProducts);
       }
       setLoading(false);
     }
@@ -185,13 +189,23 @@ export default function HomePage() {
     return <ContactPageFixed onClose={() => setActiveTab('menu')} activeTab={activeTab} onTabChange={handleTabChange} />;
   }
 
+  // Écran de chargement
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
+          <h1 className="text-2xl font-black text-white tracking-wider mb-2">HashBurger</h1>
+          <p className="text-gray-400 text-sm">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black">
       {/* Header fixe */}
       <Header />
-      
-      {/* Bouton d'initialisation DB */}
-      
       
       {/* Espacement pour le header fixe */}
       <div className="pt-20">
