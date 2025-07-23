@@ -165,12 +165,12 @@ export default function HomePage() {
       }
     }
     
-    console.log('⚠️ Aucun background trouvé - utilisation gradient');
-    // Dernier fallback - un joli gradient au lieu de noir
+    console.log('⚠️ Aucun background trouvé - utilisation background HashBurger par défaut');
+    // Dernier fallback - background HashBurger par défaut
     return {
-      backgroundImage: 'linear-gradient(135deg, #0f172a, #1e293b, #334155)',
-      backgroundOpacity: 100,
-      backgroundBlur: 0
+      backgroundImage: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=1920&h=1080&fit=crop&crop=center',
+      backgroundOpacity: 20,
+      backgroundBlur: 5
     };
   };
 
@@ -180,8 +180,7 @@ export default function HomePage() {
   useEffect(() => {
     const loadBackgroundImmediately = async () => {
       try {
-        // Si on n'a pas encore de vraie image, forcer le chargement depuis l'API
-        if (!backgroundSettings.backgroundImage || backgroundSettings.backgroundImage.startsWith('linear-gradient')) {
+        // Toujours forcer le chargement depuis l'API pour avoir le vrai background de la boutique
           console.log('🚀 Chargement forcé background depuis API...');
           const response = await fetch('/api/settings');
           if (response.ok) {
@@ -342,11 +341,7 @@ export default function HomePage() {
             <div 
               className="absolute inset-0 rounded-full bg-cover bg-center"
               style={{
-                background: backgroundSettings.backgroundImage.startsWith('linear-gradient') 
-                  ? backgroundSettings.backgroundImage
-                  : backgroundSettings.backgroundImage 
-                    ? `url(${backgroundSettings.backgroundImage})`
-                    : 'linear-gradient(135deg, #1f2937, #374151)',
+                backgroundImage: `url(${backgroundSettings.backgroundImage})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}
