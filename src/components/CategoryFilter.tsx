@@ -39,7 +39,7 @@ export default function CategoryFilter({
   }, []);
 
   return (
-    <div className="flex gap-3 p-4 bg-black/20 backdrop-blur-sm border-b border-white/10">
+    <div className="flex flex-col sm:flex-row gap-3 p-3 sm:p-4 bg-black/20 backdrop-blur-sm border-b border-white/10 relative z-50">
       {/* Dropdown Catégories */}
       <div className="relative flex-1" ref={categoryRef}>
         <button
@@ -53,7 +53,7 @@ export default function CategoryFilter({
         </button>
         
         {showCategories && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-black/30 backdrop-blur-md rounded-lg shadow-xl z-[9999] border border-white/40 shadow-2xl">
+          <div className="absolute top-full left-0 right-0 mt-1 bg-black/30 backdrop-blur-md rounded-lg shadow-xl z-[999] border border-white/40 shadow-2xl">
             {categories.map((category) => (
               <button
                 key={category}
@@ -83,7 +83,7 @@ export default function CategoryFilter({
         </button>
         
         {showFarms && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-black/30 backdrop-blur-md rounded-lg shadow-xl z-[9999] border border-white/40 shadow-2xl">
+          <div className="absolute top-full left-0 right-0 mt-1 bg-black/30 backdrop-blur-md rounded-lg shadow-xl z-[999] border border-white/40 shadow-2xl">
             {farms.map((farm) => (
               <button
                 key={farm}
