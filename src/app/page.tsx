@@ -133,7 +133,7 @@ export default function HomePage() {
     backgroundImage: `url(${settings.backgroundImage})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    backgroundAttachment: 'fixed',
+    backgroundAttachment: 'local', // Changé pour mobile
     backgroundRepeat: 'no-repeat'
   } : { backgroundColor: 'black' };
 
@@ -150,12 +150,12 @@ export default function HomePage() {
   } : {};
 
   return (
-    <div className="min-h-screen" style={backgroundStyle}>
+    <div className="min-h-screen min-h-dvh prevent-horizontal-scroll" style={backgroundStyle}>
       {/* Overlay */}
       {settings?.backgroundImage && <div style={overlayStyle}></div>}
       
       {/* Contenu principal */}
-      <div className="relative z-10">
+      <div className="relative z-10 content-layer">
         <Header />
         
         {selectedProduct ? (
@@ -164,7 +164,7 @@ export default function HomePage() {
             onClose={() => setSelectedProduct(null)} 
           />
         ) : (
-          <main className="pt-20 pb-20 px-4">
+          <main className="pt-16 sm:pt-20 pb-20 sm:pb-24 px-3 sm:px-4 lg:px-6 xl:px-8 max-w-7xl mx-auto">
             <CategoryFilter
               categories={categories}
               farms={farms}
@@ -176,42 +176,43 @@ export default function HomePage() {
 
             {/* Affichage avec chargement pour première visite */}
             {isFirstLoad ? (
-              <div className="fixed inset-0 bg-black flex items-center justify-center z-[9999] overflow-hidden">
+              <div className="fixed inset-0 bg-black flex items-center justify-center z-[9999] overflow-hidden safe-area-padding">
                 <div className="text-center px-4 w-full max-w-2xl">
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white animate-pulse leading-tight">
+                  <h1 className="text-responsive-xl sm:text-responsive-2xl md:text-responsive-3xl font-bold text-white animate-pulse leading-tight">
                     Bienvenu(e)s sur Notre Mini App 📲
                   </h1>
                 </div>
               </div>
             ) : products.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="bg-gray-900/80 border border-white/20 rounded-xl p-8 max-w-md mx-auto backdrop-blur-sm">
-                  <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="text-center py-8 sm:py-12">
+                <div className="bg-gray-900/80 border border-white/20 rounded-xl p-6 sm:p-8 max-w-md mx-auto backdrop-blur-sm">
+                  <svg className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2M4 13h2m0 0V9a2 2 0 012-2h2m0 0V6a2 2 0 012-2h2.586a1 1 0 01.707.293l2.414 2.414A1 1 0 0016 7.414V9a2 2 0 012 2v2m0 0v2a2 2 0 01-2 2h-2m0 0H9a2 2 0 01-2-2v-2m0 0V9a2 2 0 012-2h2" />
                   </svg>
-                  <h3 className="text-lg font-bold text-white mb-2">Aucun produit disponible</h3>
-                  <p className="text-gray-400 mb-4">
+                  <h3 className="text-responsive-lg font-bold text-white mb-2">Aucun produit disponible</h3>
+                  <p className="text-gray-400 mb-4 text-responsive-sm">
                     Ajoutez des produits depuis le panel admin pour qu'ils apparaissent ici.
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-xs sm:text-sm text-gray-500">
                     Panel Admin → Produits → Ajouter un produit
                   </p>
                 </div>
               </div>
             ) : filteredProducts.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="bg-gray-900/80 border border-white/20 rounded-xl p-8 max-w-md mx-auto backdrop-blur-sm">
-                  <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="text-center py-8 sm:py-12">
+                <div className="bg-gray-900/80 border border-white/20 rounded-xl p-6 sm:p-8 max-w-md mx-auto backdrop-blur-sm">
+                  <svg className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                  <h3 className="text-lg font-bold text-white mb-2">Aucun produit trouvé</h3>
-                  <p className="text-gray-400">
+                  <h3 className="text-responsive-lg font-bold text-white mb-2">Aucun produit trouvé</h3>
+                  <p className="text-gray-400 text-responsive-sm">
                     Aucun produit ne correspond aux filtres sélectionnés.
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-4">
+              /* Grid responsive intelligent */
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-5 xl:gap-6">
                 {filteredProducts.map((product) => (
                   <ProductCard
                     key={product.id}

@@ -43,7 +43,7 @@ export default function Header() {
   }, []);
 
   const getTitleClass = () => {
-    const baseClass = "text-xl font-black tracking-wider transition-all duration-300";
+    const baseClass = "text-responsive-lg sm:text-responsive-xl md:text-responsive-2xl font-black tracking-wider transition-all duration-300 text-center line-height-tight";
     
     switch (settings.titleStyle) {
       case 'gradient':
@@ -59,40 +59,40 @@ export default function Header() {
       case 'bounce':
         return `${baseClass} text-white animate-bounce`;
       case 'graffiti':
-        return `graffiti-text text-2xl font-normal`;
+        return `graffiti-text text-responsive-lg sm:text-responsive-xl md:text-responsive-2xl font-normal`;
       default:
         return `${baseClass} text-white`;
     }
   };
 
   return (
-    <header className="fixed top-0 w-full z-40 bg-black/95 backdrop-blur-sm">
+    <header className="fixed top-0 w-full z-40 bg-black/95 backdrop-blur-sm safe-area-padding">
       {/* Texte défilant si configuré */}
       {settings.scrollingText && settings.scrollingText.trim() && (
         <div className="bg-black/80 backdrop-blur-sm text-white py-1 overflow-hidden relative border-b border-white/10">
           <div className="animate-marquee whitespace-nowrap inline-block">
-            <span className="text-xs font-bold tracking-wide px-4 text-white">
+            <span className="text-responsive-xs font-bold tracking-wide px-4 text-white">
               {settings.scrollingText} • {settings.scrollingText} • {settings.scrollingText}
             </span>
           </div>
         </div>
       )}
       
-      {/* Bandeau blanc promotionnel - réduit */}
+      {/* Bandeau blanc promotionnel - responsive */}
       {settings.bannerText && settings.bannerText.trim() && (
-        <div className="bg-white text-black py-1 px-4 text-center">
-          <p className="text-black text-xs font-bold tracking-wide">
+        <div className="bg-white text-black py-1 sm:py-2 px-3 sm:px-4 text-center">
+          <p className="text-black text-responsive-xs font-bold tracking-wide break-words">
             {settings.bannerText}
           </p>
         </div>
       )}
       
-      {/* Logo HashBurger - réduit */}
-      <div className="bg-black py-2 px-4 text-center border-b border-white/20">
+      {/* Logo HashBurger - responsive */}
+      <div className="bg-black py-2 sm:py-3 px-3 sm:px-4 text-center border-b border-white/20">
         <h1 className={getTitleClass()}>
           {settings.shopTitle}
         </h1>
-        <p className="text-gray-400 text-xs uppercase tracking-[0.2em] font-medium">
+        <p className="text-gray-400 text-responsive-xs uppercase tracking-[0.2em] font-medium mt-1 break-words">
           {settings.shopSubtitle}
         </p>
       </div>
