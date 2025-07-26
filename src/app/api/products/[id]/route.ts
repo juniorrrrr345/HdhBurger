@@ -147,15 +147,38 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     const productsCollection = db.collection('products');
     
     const { ObjectId } = require('mongodb');
-    const result = await productsCollection.findOneAndDelete({ _id: new ObjectId(params.id) });
+    
+    // Vérifier la validité de l'ID avant de continuer
+    if (!ObjectId.isValid(params.id)) {
+      console.log('❌ ID invalide pour suppression:', params.id);
+      return NextResponse.json({ error: 'ID produit invalide' }, { status: 400 });
+    }
+    
+    const objectId = new ObjectId(params.id);
+    console.log('🔍 ObjectId créé pour suppression:', objectId);
+    
+    // D'abord vérifier si le produit existe
+    const existingProduct = await productsCollection.findOne({ _id: objectId });
+    console.log('🔍 Produit existant trouvé:', existingProduct ? 'OUI' : 'NON');
+    
+    if (!existingProduct) {
+      console.log('❌ Produit inexistant avec ID:', params.id);
+      // Lister quelques produits pour debug
+      const allProducts = await productsCollection.find({}).limit(3).toArray();
+      console.log('📋 Exemples produits en base:', allProducts.map(p => ({ id: p._id, name: p.name })));
+      return NextResponse.json({ error: 'Produit non trouvé en base de données' }, { status: 404 });
+    }
+    
+    console.log('✅ Produit existe, tentative suppression...');
+    const result = await productsCollection.findOneAndDelete({ _id: objectId });
 
     if (!result.value) {
-      console.log('❌ Produit non trouvé pour suppression:', params.id);
-      return NextResponse.json({ error: 'Produit non trouvé' }, { status: 404 });
+      console.log('❌ Échec de suppression pour ID:', params.id);
+      return NextResponse.json({ error: 'Échec de la suppression - produit peut-être déjà supprimé' }, { status: 404 });
     }
 
-    console.log('✅ Produit supprimé:', result.value);
-    return NextResponse.json({ message: 'Produit supprimé avec succès' });
+    console.log('✅ Produit supprimé avec succès:', result.value.name);
+    return NextResponse.json({ message: 'Produit supprimé avec succès', productName: result.value.name });
   } catch (error) {
     console.error('❌ Erreur lors de la suppression:', error);
     return NextResponse.json({ 

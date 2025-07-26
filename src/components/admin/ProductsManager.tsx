@@ -107,6 +107,7 @@ export default function ProductsManager() {
   };
 
   const handleEdit = (product: Product) => {
+    console.log('✏️ Édition du produit:', product.name, 'Prix:', product.prices);
     setEditingProduct(product);
     setFormData({
       ...product,
@@ -115,14 +116,23 @@ export default function ProductsManager() {
     // Synchroniser les états locaux des prix
     const priceStrings: { [key: string]: string } = {};
     const quantityStrings: { [key: string]: string } = {};
+    
+    // Traiter tous les prix existants, même ceux avec des valeurs null/undefined
     Object.entries(product.prices || {}).forEach(([key, value]) => {
-      priceStrings[key] = value.toString();
+      priceStrings[key] = (value !== null && value !== undefined && value !== 0) ? value.toString() : '';
       quantityStrings[key] = key; // La quantité est la clé
     });
+    
+    console.log('💰 Prix initialisés:', priceStrings);
+    console.log('📏 Quantités initialisées:', quantityStrings);
+    
     setPriceInputs(priceStrings);
     setQuantityInputs(quantityStrings);
     setActiveTab('infos'); // Reset tab to infos
     setShowModal(true);
+    
+    // Forcer un refresh pour que les données apparaissent
+    setRefreshCounter(prev => prev + 1);
   };
 
   const handleAdd = () => {
@@ -331,52 +341,65 @@ export default function ProductsManager() {
   const handleDelete = async (productId: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) return;
 
-    // Supprimer immédiatement de l'interface pour une meilleure UX
-    setProducts(prev => prev.filter(p => p._id !== productId));
-
-    // Afficher un message de succès immédiatement
-    const successMsg = document.createElement('div');
-    successMsg.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999] transition-all duration-300';
-    successMsg.textContent = '✅ Produit supprimé avec succès!';
-    document.body.appendChild(successMsg);
-    
-    setTimeout(() => {
-      successMsg.remove();
-    }, 3000);
+    console.log('🗑️ Tentative de suppression du produit:', productId);
 
     try {
-      // Envoyer la requête de suppression en arrière-plan
+      // Afficher un loader pendant la suppression
+      const loadingMsg = document.createElement('div');
+      loadingMsg.className = 'fixed top-4 right-4 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999] transition-all duration-300';
+      loadingMsg.textContent = '⏳ Suppression en cours...';
+      document.body.appendChild(loadingMsg);
+
+      // Envoyer la requête de suppression AVANT de mettre à jour l'interface
       const response = await fetch(`/api/products/${productId}`, {
         method: 'DELETE',
       });
 
-      if (!response.ok) {
-        // Si erreur, restaurer le produit et afficher l'erreur
-        console.error('Erreur suppression serveur:', response.status);
-        loadData(); // Recharger pour restaurer l'état correct
+      // Supprimer le message de chargement
+      loadingMsg.remove();
+
+      if (response.ok) {
+        // Suppression réussie - mettre à jour l'interface
+        setProducts(prev => prev.filter(p => p._id !== productId));
+        
+        const successMsg = document.createElement('div');
+        successMsg.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999] transition-all duration-300';
+        successMsg.textContent = '✅ Produit supprimé avec succès!';
+        document.body.appendChild(successMsg);
+        
+        setTimeout(() => {
+          successMsg.remove();
+        }, 3000);
+
+        console.log('✅ Produit supprimé avec succès:', productId);
+      } else {
+        // Erreur côté serveur
+        const errorData = await response.json().catch(() => ({ error: 'Erreur inconnue' }));
+        console.error('❌ Erreur suppression serveur:', response.status, errorData);
         
         const errorMsg = document.createElement('div');
         errorMsg.className = 'fixed top-4 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999]';
-        errorMsg.textContent = '❌ Erreur lors de la suppression - restauration...';
+        errorMsg.textContent = `❌ Erreur: ${errorData.error || 'Impossible de supprimer le produit'}`;
         document.body.appendChild(errorMsg);
         
         setTimeout(() => {
           errorMsg.remove();
-        }, 3000);
+        }, 5000);
+
+        // Recharger les données pour s'assurer de la cohérence
+        await loadData();
       }
     } catch (error) {
-      // Si erreur réseau, restaurer le produit
-      console.error('Erreur réseau suppression:', error);
-      loadData(); // Recharger pour restaurer l'état correct
+      console.error('❌ Erreur lors de la suppression:', error);
       
       const errorMsg = document.createElement('div');
       errorMsg.className = 'fixed top-4 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999]';
-      errorMsg.textContent = '❌ Erreur réseau - restauration...';
+      errorMsg.textContent = '❌ Erreur de connexion lors de la suppression';
       document.body.appendChild(errorMsg);
       
       setTimeout(() => {
         errorMsg.remove();
-      }, 3000);
+      }, 5000);
     }
   };
 
@@ -448,7 +471,7 @@ export default function ProductsManager() {
     console.log('🔍 getAllPriceEntries - priceInputs:', priceInputs);
     console.log('🔍 getAllPriceEntries - quantityInputs:', quantityInputs);
     
-    // Ajouter les prix existants dans formData
+    // Ajouter les prix existants dans formData (même les valeurs null/undefined)
     Object.entries(formData.prices || {}).forEach(([key, value]) => {
       allPrices[key] = value;
     });
@@ -466,9 +489,15 @@ export default function ProductsManager() {
         allPrices[key] = undefined; // Pas de valeur, juste présence pour affichage
       }
     });
+
+    // Si aucun prix, ajouter au moins une ligne par défaut
+    if (Object.keys(allPrices).length === 0) {
+      console.log('⚠️ Aucun prix trouvé, ajout d\'une ligne par défaut');
+      allPrices['3g'] = undefined;
+    }
     
     const result = Object.entries(allPrices);
-    console.log('🔍 getAllPriceEntries résultat:', result);
+    console.log('🔍 getAllPriceEntries résultat final:', result);
     return result;
   };
 
@@ -615,6 +644,28 @@ export default function ProductsManager() {
         </div>
       </div>
 
+      {/* Alerte pour les prix problématiques */}
+      {products.some(p => Object.values(p.prices || {}).some(price => !price || isNaN(Number(price)) || Number(price) <= 0)) && (
+        <div className="bg-red-900/20 border border-red-400/20 rounded-xl p-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="text-red-400 text-xl">⚠️</div>
+            <div>
+              <h3 className="text-red-400 font-bold">Problème détecté avec les prix</h3>
+              <p className="text-red-300 text-sm">
+                Certains produits ont des prix invalides (null, undefined, 0 ou non-numériques). 
+                Utilisez le bouton "🧹 Nettoyer les prix" pour résoudre automatiquement ces problèmes.
+              </p>
+            </div>
+            <button
+              onClick={cleanAllPrices}
+              className="bg-red-600/20 border border-red-400/30 hover:bg-red-600/30 text-red-300 font-bold py-2 px-4 rounded-lg transition-all duration-200 whitespace-nowrap"
+            >
+              🧹 Nettoyer maintenant
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Grid de produits - Plus compact */}
       {products.length === 0 ? (
         <div className="bg-gray-900/50 border border-white/20 rounded-xl p-8 text-center">
@@ -661,14 +712,21 @@ export default function ProductsManager() {
                     {product.farm} • {product.category}
                   </p>
                   
+                  {/* Debug temporaire pour voir les prix problématiques */}
+                  {product.name.toLowerCase().includes('cocaine') && (
+                    <div className="text-xs text-yellow-300 bg-yellow-900/20 p-1 rounded mb-1">
+                      DEBUG COCAINE: {JSON.stringify(product.prices)}
+                    </div>
+                  )}
+                  
                   {/* Prix compacts */}
                   <div className="flex flex-wrap gap-1">
-                    {Object.entries(product.prices).slice(0, 3).map(([key, value]) => (
+                    {Object.entries(product.prices || {}).slice(0, 3).map(([key, value]) => (
                       <span key={key} className="bg-white/10 text-white text-xs px-2 py-1 rounded">
                         {key}: {value}€
                       </span>
                     ))}
-                    {Object.keys(product.prices).length > 3 && (
+                    {Object.keys(product.prices || {}).length > 3 && (
                       <span className="text-gray-500 text-xs">+{Object.keys(product.prices).length - 3}</span>
                     )}
                   </div>
