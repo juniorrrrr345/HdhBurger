@@ -712,12 +712,7 @@ export default function ProductsManager() {
                     {product.farm} • {product.category}
                   </p>
                   
-                  {/* Debug temporaire pour voir les prix problématiques */}
-                  {product.name.toLowerCase().includes('cocaine') && (
-                    <div className="text-xs text-yellow-300 bg-yellow-900/20 p-1 rounded mb-1">
-                      DEBUG COCAINE: {JSON.stringify(product.prices)}
-                    </div>
-                  )}
+
                   
                   {/* Prix compacts */}
                   <div className="flex flex-wrap gap-1">
